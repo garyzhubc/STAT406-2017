@@ -12,12 +12,14 @@ Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 
 ## Lecture Learning Objectives
 1. Lecture 1
+
 	By the end of the lecture, students are expected to be able to: 
 	- Distinguish between supervised and unsupervised learning problems
 	- Explain the different objectives and achievable goals in each case
 	- Describe the K-means and K-medoids algorithms and explain their differences
 	- Explain why these algorithms may have initialization problems. 
-1. Lecture 2
+
+3. Lecture 2
 
 ## Prerequisites
 * STAT306 (preferred) or CPSC340 (acceptable)
