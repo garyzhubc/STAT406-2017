@@ -1,0 +1,127 @@
+---
+title: "STAT406 - Lecture 1 notes"
+author: "Matias Salibian-Barrera"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lecture slides 
+
+The lecture slides are [here](STAT406-17-lecture-1.pdf). 
+
+## Predictions using a linear model
+
+In this document we will explore (rather superficially)
+the difficulty in estimating the forecasting 
+properties of a (linear) predictor. We will
+use the air-pollution data sets--a training
+set and a test set. 
+
+If you are interested, this is  how these sets were 
+constructed:
+```{r construct, fig.width=5, fig.height=5, echo=TRUE}
+x <- read.csv('rutgers-lib-30861_CSV-1.csv')
+set.seed(123)
+ii <- sample(rep(1:4, each=15))
+# training set `pollution-train.dat`
+x.tr <- x[ii != 2, ]
+# test set `pollution-test.dat`
+x.te <- x[ii == 2, ]
+# write.csv(x.tr, file='pollution-train.dat', row.names=FALSE, quote=FALSE)
+# write.csv(x.te, file='pollution-test.dat', row.names=FALSE, quote=FALSE)
+```
+We will read the data from the file `pollution-train.dat`
+available [here](pollution-train.dat), and check 
+that it was read properly:
+```{r readtrain}
+x.tr <- read.table('pollution-train.dat', header=TRUE, sep=',')
+# sanity check
+head(x.tr)
+```
+We now fit a 
+a linear regression model with all available
+predictors and look at the estimated parameters:
+```{r full}
+full <- lm(MORT ~ . , data=x.tr)
+# look at the estimated coefficients
+summary(full)
+```
+In addition, display a few diagnostic plots
+where everything looks fine
+```{r diag, fig.width=5, fig.height=5, echo=TRUE}
+plot(full, which=1)
+plot(full, which=2)
+```
+
+The objective is to compare the quality of this model's
+predictions with those of a simpler (smaller) linear
+model, one using only 5 predictors (how these were
+selected is not important for this illustrative 
+example, but will be *critical* later in the course). 
+We now fit this reduced model and look at the
+estimated parameters and diagnostic plots
+```{r reduced, fig.width=5, fig.height=5, echo=TRUE}
+reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
+summary(reduced)
+plot(reduced, which=1)
+plot(reduced, which=2)
+```
+
+The linear model with 5 predictors isn't as good as the full one, 
+but it is not terrible either. 
+
+As you already now, the larger model will **always** yield
+a better fit to the data in terms of 
+residual sum of squares (you should be able to formally
+prove this):
+```{r gofs}
+sum( resid(reduced)^2 )
+sum( resid(full)^2 )
+```
+
+Which model produces better predictions? In general one is 
+interested in predicting future observations, i.e. data
+that was not available when the model / predictor was 
+fit or trained. Hence, we will compare the predictions
+of these two linear models on the test set:
+```{r pred1}
+x.te <- read.table('pollution-test.dat', header=TRUE, sep=',')
+head(x.te)
+```
+We now compute the predicted values for the test set
+with the full and reduced models
+```{r pred2}
+x.te$pr.full <- predict(full, newdata=x.te)  
+x.te$pr.reduced <- predict(reduced, newdata=x.te)  
+```
+and compute the mean squared prediction error:
+```{r mspe}
+with(x.te, mean( (MORT - pr.full)^2 ))
+with(x.te, mean( (MORT - pr.reduced)^2 ))
+```
+Note that the reduced model (that did not fit the data
+as well as the full model) nevertheless produced
+better predictions on the test set. 
+
+This is not an artifact of the training/test partition
+we used, as this simple experiment shows, which you 
+should probably repeat more times (but with 
+different pseudo-random number generating seeds)
+```{r cvexperiment}
+# repeat with different partitions
+x <- read.csv('rutgers-lib-30861_CSV-1.csv')
+set.seed(456)
+ii <- sample(rep(1:4, each=15))
+x.tr <- x[ii != 2, ]
+x.te <- x[ii == 2, ]
+full <- lm(MORT ~ . , data=x.tr)
+reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
+x.te$pr.full <- predict(full, newdata=x.te)
+x.te$pr.reduced <- predict(reduced, newdata=x.te)
+with(x.te, mean( (MORT - pr.full)^2 ))
+with(x.te, mean( (MORT - pr.reduced)^2 ))
+```
