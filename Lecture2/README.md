@@ -11,7 +11,7 @@ The lecture slides are [here](STAT406-17-lecture-2.pdf).
 Predictions using a linear model
 --------------------------------
 
-Here we continue studying the problem of estimating the prediction power of different models. We consider a *full* and a *reduced* model, and we assume that the reduced model was not selected using the training data.
+Here we continue looking at the problem of estimating the prediction power of different models. As in the previous lecture, we consider a **full** and a **reduced** model, and we assume that the **reduced** model was not selected using the training data. We load the training set and fit both models:
 
 ``` r
 x.tr <- read.table('../Lecture1/pollution-train.dat', header=TRUE, sep=',')
@@ -19,7 +19,7 @@ full <- lm(MORT ~ . , data=x.tr)
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
 ```
 
-Although the full model fits the data better than the reduced one, its predictions on the test set are better:
+Although the **full** model fits the data better than the reduced one (see Lecture 1), its predictions on the test set are better:
 
 ``` r
 x.te <- read.table('../Lecture1/pollution-test.dat', header=TRUE, sep=',')
@@ -36,9 +36,9 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1401.571
 
-In the last class, we also saw that this result is not an artifact of the specific training / test split of the data.
+In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data--the **reduced** model generally produced better predictions, regardless of the specific training / test split we used.
 
-Another procedure to estimate the prediction power of a model or method is called *leave-one-out CV*.
+A different procedure to estimate the prediction power of a model or method is called *leave-one-out CV*. One advantage of using this method is that the model we fit can use a larger training set. We discussed the procedure in class. Here we apply it to estimate the mean squared prediction error of the **full** and **reduced** models.
 
 ``` r
 x <- read.csv('../Lecture1/rutgers-lib-30861_CSV-1.csv')
