@@ -27,12 +27,11 @@ Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 ## Reference books
 * **[JWHT13]**: James, G., Witten, D., Hastie, T. and Tibshirani, R. 
 An Introduction to Statistical Learning. 2013. Springer-Verlag New York 
-	- [Book page](http://www-bcf.usc.edu/~gareth/ISL/), [Book PDF](http://www-bcf.usc.edu/~gareth/ISL/ISLR%20Sixth%20Printing.pdf)
+	- [Book page](http://www-bcf.usc.edu/~gareth/ISL/), [Book PDF](http://www-bcf.usc.edu/~gareth/ISL/ISLR%20Seventh%20Printing.pdf)
 	
 * **[HTF09]**: Hastie, T., Tibshirani, R. and Friedman, J. 
 The Elements of Statistical Learning. 2009. Second Edition. Springer-Verlag New York
-	- [Book page](http://statweb.stanford.edu/~tibs/ElemStatLearn), [Book PDF](http://statweb.stanford.edu/~tibs/ElemStatLearn/printings/ESLII_print10.pdf)
-
+	- [Book page](http://web.stanford.edu/~hastie/ElemStatLearn), [Book PDF](https://web.stanford.edu/~hastie/ElemStatLearn/download.html)
 
 
 ## Reading and other resources
