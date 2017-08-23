@@ -1,7 +1,7 @@
 STAT406 - Lecture 2 notes
 ================
 Matias Salibian-Barrera
-2017-08-22
+2017-08-23
 
 Lecture slides
 --------------
@@ -61,13 +61,13 @@ mean( (x$MORT - pr.reduced)^2 )
 
     ## [1] 1848.375
 
-Yet another method (computationally less costly) is *K-fold CV*:
+Leave-one-out cross-validation can be computationally very demanding (or even unfeasible) when the sample size is large and training the predictor is relatively costly. One solution is called **K-fold CV**. We split the data into **K** folds, train the predictor on the data without a fold, and use it to predict the responses in the removed fold. We cycle through the folds, and use the average of the squared prediction errors as an estimate of the mean squared prediction error. The following script does **5-fold CV** for the `full` and `reduced` linear models on the pollution dataset.
 
 ``` r
 n <- nrow(x)
 k <- 5
 pr.full <- pr.reduced <- rep(0, n)
-# This is bad, bad coding!
+# Create labels for the "folds"
 inds <- (1:n) %% k + 1 
 # shuffle the rows of x, this is bad coding!
 set.seed(123)
@@ -92,3 +92,11 @@ mean( (xs$MORT - pr.reduced)^2 )
 ```
 
     ## [1] 1854.591
+
+This method is clearly faster than leave-one-out CV, but the results may depend on the specific fold partition, and on the number **K** of folds used.
+
+-   One way to obtain more stable mean squared prediction errors using K-fold CV is to repeat the above procedure many times, and compare the distribution of the mean squared prediction errors for each estimator.
+
+-   A computationally simpler (albeit possibly less precise) way to account for the K-fold variability is to run K-fold CV once and use the sample standard error of the **K** *smaller* mean squared prediction errors to construct a rough *confidence interval* around the overall mean squared prediction error estimate (that is the average of the mean squared prediction errors over the K folds).
+
+-   The dependency of this MSPE on **K** is more involved. We will discuss it later.
