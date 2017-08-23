@@ -46,3 +46,60 @@ boxplot(mspe1, mspe2, names=c('Full', 'Reduced'),
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
+## What happens if the model is chosen using the training data?
+
+Use forward stepwise (with AIC) on this synthetic data
+```{r fallacy}
+library(MASS)
+dat <- read.table('fallacy.dat', header=TRUE, sep=',')
+n <- nrow(dat)
+p <- ncol(dat)
+null <- lm(Y~1, data=dat)
+full <- lm(Y~., data=dat) # needed for stepwise
+step.lm <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
+```
+
+We now attempt to use CV to compare the MSPE of the 
+*null* model (which we know is true) and the
+one based on stepwise:
+```{r wrong}
+ii <- (1:n) %% 5 + 1
+set.seed(17)
+N <- 10
+mspe.n <- mspe.st <- rep(0, N)
+for(i in 1:N) {
+  ii <- sample(ii)
+  pr.n <- pr.st <- rep(0, n)
+  for(j in 1:5) {
+    tmp.st <- update(step.lm, data=dat[ii != j, ])
+    pr.st[ ii == j ] <- predict(tmp.st, newdata=dat[ii == j, ])
+    pr.n[ ii == j ] <- with(dat[ii != j, ], mean(Y)) #mean((dat$Y)[ii != j])
+  }
+  mspe.st[i] <- with(dat, mean( (Y - pr.st)^2 ))
+  mspe.n[i] <- with(dat, mean( (Y - pr.n)^2 ))
+}
+boxplot(mspe.st, mspe.n, names=c('Stepwise', 'NULL'), col=c('gray60', 'hotpink'), main='Wrong')
+summary(mspe.st)
+summary(mspe.n)
+```
+
+**Something is wrong! **
+
+
+
+
+
+
+## Correlated covariates
+
+Variables that are significant in a smaller model,
+"dissappear" in a larger one
+```{r signif}
+# Correlated covariates
+x <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
+reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x)
+full <- lm(MORT ~ ., data=x)
+# significant variables in "reduced" dissappear in "full"
+round( summary(reduced)$coef, 3)
+round( summary(full)$coef[ names(coef(reduced)), ], 3)
+```
