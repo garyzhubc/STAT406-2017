@@ -1,7 +1,7 @@
 STAT406 - Lecture 1 notes
 ================
 Matias Salibian-Barrera
-2017-08-22
+2017-08-29
 
 Lecture slides
 --------------
@@ -210,6 +210,8 @@ Note that the reduced model (that did not fit the data as well as the full model
 
 This is not an artifact of the training/test partition we used, as this simple experiment shows, which you should probably repeat more times (but with different pseudo-random number generating seeds)
 
+First, read the whole data and create a new training / test split.
+
 ``` r
 # repeat with different partitions
 x <- read.csv('rutgers-lib-30861_CSV-1.csv')
@@ -217,8 +219,18 @@ set.seed(456)
 ii <- sample(rep(1:4, each=15))
 x.tr <- x[ii != 2, ]
 x.te <- x[ii == 2, ]
+```
+
+In the above code chunk, `x.tr` is the training set and `x.te` is the test set. Now, fit the full and reduced models on this new training set:
+
+``` r
 full <- lm(MORT ~ . , data=x.tr)
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
+```
+
+Finally, estimate the mean squared prediction error of these models with their squared prediction error on the test set:
+
+``` r
 x.te$pr.full <- predict(full, newdata=x.te)
 x.te$pr.reduced <- predict(reduced, newdata=x.te)
 with(x.te, mean( (MORT - pr.full)^2 ))
@@ -231,3 +243,5 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 ```
 
     ## [1] 1642.169
+
+Note that the estimated mean squared prediction error of the reduced model is again considerably smaller than that of the full model (that always fits the training set better than the reduced one).
