@@ -1,7 +1,7 @@
 STAT406 - Lecture 1 notes
 ================
 Matias Salibian-Barrera
-2017-08-29
+2017-09-03
 
 Lecture slides
 --------------
@@ -11,23 +11,24 @@ The lecture slides are [here](STAT406-17-lecture-1.pdf).
 Predictions using a linear model
 --------------------------------
 
-In this document we will explore (rather superficially) the difficulty in estimating the forecasting properties of a (linear) predictor. We will use the air-pollution data sets--a training set and a test set.
+In this document we will explore (rather superficially) some difficulties found when trying to estimate the forecasting properties (e.g. the mean squared prediction error) of a (linear) predictor. We will use the air-pollution data set, which has been split into a training set and a test set.
 
-If you are interested, this is how these sets were constructed:
+If you are interested in how these sets were constructed, I ran the following script (you do not need to do this, as I am providing both of them to you, but you can if you want to):
 
 ``` r
 x <- read.csv('rutgers-lib-30861_CSV-1.csv')
 set.seed(123)
 ii <- sample(rep(1:4, each=15))
-# training set `pollution-train.dat`
+# this is the training set `pollution-train.dat`
 x.tr <- x[ii != 2, ]
-# test set `pollution-test.dat`
+# this is the test set `pollution-test.dat`
 x.te <- x[ii == 2, ]
+# then I saved them to disk:
 # write.csv(x.tr, file='pollution-train.dat', row.names=FALSE, quote=FALSE)
 # write.csv(x.te, file='pollution-test.dat', row.names=FALSE, quote=FALSE)
 ```
 
-We will read the data from the file `pollution-train.dat` available [here](pollution-train.dat), and check that it was read properly:
+We now read the **training** data set from the file `pollution-train.dat`, which is available [here](pollution-train.dat), and check that it was read properly:
 
 ``` r
 x.tr <- read.table('pollution-train.dat', header=TRUE, sep=',')
@@ -50,11 +51,22 @@ head(x.tr)
     ## 5    56  899.529
     ## 6    61 1001.902
 
-We now fit a a linear regression model with all available predictors and look at the estimated parameters:
+The response variable is `MORT`. Our first step is to fit a linear regression model with all available predictors and look at a few diagnostic plots where everything looks fine:
 
 ``` r
 full <- lm(MORT ~ . , data=x.tr)
-# look at the estimated coefficients
+plot(full, which=1)
+```
+
+![](README_files/figure-markdown_github/full-1.png)
+
+``` r
+plot(full, which=2)
+```
+
+![](README_files/figure-markdown_github/full-2.png) We also take a look at the estimated coeficients:
+
+``` r
 summary(full)
 ```
 
@@ -91,21 +103,10 @@ summary(full)
     ## Multiple R-squared:  0.8603, Adjusted R-squared:  0.788 
     ## F-statistic:  11.9 on 15 and 29 DF,  p-value: 1.328e-08
 
-In addition, display a few diagnostic plots where everything looks fine
+In the rest of this note we will
+compare the quality of this model's predictions with those of a simpler (smaller) linear model with only 5 predictors. For this illustrative example, we will not worry about how these 5 explanatory variables were selected, however, this will play a **critical** role later in the course).
 
-``` r
-plot(full, which=1)
-```
-
-![](README_files/figure-markdown_github/diag-1.png)
-
-``` r
-plot(full, which=2)
-```
-
-![](README_files/figure-markdown_github/diag-2.png)
-
-The objective is to compare the quality of this model's predictions with those of a simpler (smaller) linear model, one using only 5 predictors (how these were selected is not important for this illustrative example, but will be *critical* later in the course). We now fit this reduced model and look at the estimated parameters and diagnostic plots
+We now fit this **reduced** model and look at the estimated parameters and diagnostic plots
 
 ``` r
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
@@ -147,9 +148,8 @@ plot(reduced, which=2)
 
 ![](README_files/figure-markdown_github/reduced-2.png)
 
-The linear model with 5 predictors isn't as good as the full one, but it is not terrible either.
-
-As you already now, the larger model will **always** yield a better fit to the data in terms of residual sum of squares (you should be able to formally prove this):
+Although the reduced linear model (with 5 predictors) does not seem to provide a fit
+as good as the one we get with full model, it is still acceptable.
 
 ``` r
 sum( resid(reduced)^2 )
@@ -163,7 +163,9 @@ sum( resid(full)^2 )
 
     ## [1] 25898.8
 
-Which model produces better predictions? In general one is interested in predicting future observations, i.e. data that was not available when the model / predictor was fit or trained. Hence, we will compare the predictions of these two linear models on the test set:
+This observation should be obvious to you, since, as you already now, a model will **always** yield a better fit to the data in terms of residual sum of squares than any of its submodels (i.e. any model using a subset of the explanatory variables). I expect you to be able to formally prove the last satement.
+
+Our question of interest here is: \``Which model produces better predictions?'' In many cases one is  interested in predicting future observations, i.e.  predicting the response variable for data that was not available when the model / predictor was  *fit* or *trained*. As we discussed in class, a reasonably fair comparison can be obtined by  comparing the mean squared predictions of these two linear models on the test set, which we read into`R\` as follows:
 
 ``` r
 x.te <- read.table('pollution-test.dat', header=TRUE, sep=',')
@@ -185,14 +187,14 @@ head(x.te)
     ## 5    60  985.950
     ## 6    61  871.338
 
-We now compute the predicted values for the test set with the full and reduced models
+Now compute the predicted values for the test set with both the **full** and **reduced** models:
 
 ``` r
 x.te$pr.full <- predict(full, newdata=x.te)  
 x.te$pr.reduced <- predict(reduced, newdata=x.te)  
 ```
 
-and compute the mean squared prediction error:
+and compute the corresponding mean squared prediction errors:
 
 ``` r
 with(x.te, mean( (MORT - pr.full)^2 ))
@@ -206,11 +208,11 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1401.571
 
-Note that the reduced model (that did not fit the data as well as the full model) nevertheless produced better predictions on the test set.
+Note that the reduced model (that did not fit the data as well as the full model) nevertheless produced better predictions (smaller mean squared prediction errors) on the test set.
 
-This is not an artifact of the training/test partition we used, as this simple experiment shows, which you should probably repeat more times (but with different pseudo-random number generating seeds)
+At this point you should use your critical / skeptical hat and wonder if this did not happen *by chance*, i.e. if this may be just an artifact of the specific training/test partition we used. The following simple experiment shows that this is not the case. It would be a **very good exercise** for you to repeat it many times (100, say) to verify my claim.
 
-First, read the whole data and create a new training / test split.
+First, read the whole data and create a new training / test random split.
 
 ``` r
 # repeat with different partitions
@@ -221,7 +223,7 @@ x.tr <- x[ii != 2, ]
 x.te <- x[ii == 2, ]
 ```
 
-In the above code chunk, `x.tr` is the training set and `x.te` is the test set. Now, fit the full and reduced models on this new training set:
+In the above code chunk, I used `x.tr` to denote the training set and `x.te` for the test set. Now, fit the full and reduced models on this new training set:
 
 ``` r
 full <- lm(MORT ~ . , data=x.tr)
@@ -244,4 +246,4 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1642.169
 
-Note that the estimated mean squared prediction error of the reduced model is again considerably smaller than that of the full model (that always fits the training set better than the reduced one).
+Note that the estimated mean squared prediction error of the reduced model is again considerably smaller than that of the full model (even though the latter always fits the training set better than the reduced one).
