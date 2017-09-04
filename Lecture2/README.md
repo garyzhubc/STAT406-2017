@@ -1,7 +1,7 @@
 STAT406 - Lecture 2 notes
 ================
 Matias Salibian-Barrera
-2017-08-23
+2017-09-04
 
 Lecture slides
 --------------
@@ -11,7 +11,13 @@ The lecture slides are [here](STAT406-17-lecture-2.pdf).
 Predictions using a linear model
 --------------------------------
 
-Here we continue looking at the problem of estimating the prediction power of different models. As in the previous lecture, we consider a **full** and a **reduced** model, and we assume that the **reduced** model was not selected using the training data. We load the training set and fit both models:
+In these notes we continue looking at the problem of comparing different models based on their prediction properties. As in the previous lecture, we consider a **full** and a **reduced** model, and we assume that the variables included in the **reduced** model were not selected using the training data.
+
+### Estimating MSPE with a test set
+
+One way to estimate the mean squared prediction error of a model or predictor is to use it on a test set (where the responses are known, but that was not used when training the predcitor or estimating the model), and the comparing the predictions with the actual responses.
+
+First, we load the training set and fit both models:
 
 ``` r
 x.tr <- read.table('../Lecture1/pollution-train.dat', header=TRUE, sep=',')
@@ -36,9 +42,11 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1401.571
 
-In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data--the **reduced** model generally produced better predictions, regardless of the specific training / test split we used.
+In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data. The **reduced** model generally produces better predictions, regardless of the specific training / test split we use. We can verify this repeating the procedure many times (50, say) and looking at the estimated mean squared prediction errors obtained each time for each model. ![](README_files/figure-markdown_github/testrain-1.png)
 
-A different procedure to estimate the prediction power of a model or method is called *leave-one-out CV*. One advantage of using this method is that the model we fit can use a larger training set. We discussed the procedure in class. Here we apply it to estimate the mean squared prediction error of the **full** and **reduced** models.
+### Leave-one-out cross-validation
+
+A different procedure to estimate the prediction power of a model or method is called **leave-one-out CV**. One advantage of using this method is that the model we fit can use a larger training set. We discussed the procedure in class. Here we apply it to estimate the mean squared prediction error of the **full** and **reduced** models. Again, we assume that the reduced model was chosen independently from the training set.
 
 ``` r
 x <- read.csv('../Lecture1/rutgers-lib-30861_CSV-1.csv')
@@ -60,6 +68,8 @@ mean( (x$MORT - pr.reduced)^2 )
 ```
 
     ## [1] 1848.375
+
+### K-fold cross-validation
 
 Leave-one-out cross-validation can be computationally very demanding (or even unfeasible) when the sample size is large and training the predictor is relatively costly. One solution is called **K-fold CV**. We split the data into **K** folds, train the predictor on the data without a fold, and use it to predict the responses in the removed fold. We cycle through the folds, and use the average of the squared prediction errors as an estimate of the mean squared prediction error. The following script does **5-fold CV** for the `full` and `reduced` linear models on the pollution dataset.
 

@@ -15,11 +15,22 @@ The lecture slides are [here](STAT406-17-lecture-2.pdf).
 
 ## Predictions using a linear model
 
-Here we continue looking at the problem of estimating the
-prediction power of different models. As in the previous lecture, we consider 
+In these notes we continue looking at the problem of 
+comparing different models based on their 
+prediction properties. As in the previous lecture, we consider 
 a **full** and a **reduced** model, and we assume that the
-**reduced** model was not selected using the training data. 
-We load the training set and fit both models:
+variables included in the **reduced** model were not selected using the training data. 
+
+
+### Estimating MSPE with a test set
+
+One way to estimate the mean squared prediction error of a 
+model or predictor is to use it on a test set (where the
+responses are known, but that was not used when training the
+predcitor or estimating the model), and the comparing the
+predictions with the actual responses. 
+
+First, we load the training set and fit both models:
 ```{r read}
 x.tr <- read.table('../Lecture1/pollution-train.dat', header=TRUE, sep=',')
 full <- lm(MORT ~ . , data=x.tr)
@@ -36,19 +47,47 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 ```
 In Lecture 1 we also saw that 
 this is not just an artifact of the specific
-training / test split of the data--the **reduced**
-model generally produced better predictions, 
+training / test split of the data. The **reduced**
+model generally produces better predictions, 
 regardless of the specific training / test
-split we used. 
+split we use. We can verify this repeating 
+the procedure many times (50, say) and looking
+at the estimated mean squared prediction errors
+obtained each time for each model. 
+```{r testrain, fig.width=5, fig.height=5, echo=FALSE}
+x <- read.csv('../Lecture1/rutgers-lib-30861_CSV-1.csv')
+set.seed(123)
+Nsplits <- 50
+mspe.full <- mspe.red <- vector('numeric', Nsplits)
+for(j in 1:Nsplits) {
+  g <- sample(rep(1:4, each=15))
+  a.tr <- x[g != 2, ]
+  a.te <- x[g == 2, ]
+  full <- lm(MORT ~ . , data=a.tr)
+  reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=a.tr)
+  a.te$pr.full <- predict(full, newdata=a.te)
+  a.te$pr.reduced <- predict(reduced, newdata=a.te)
+  mspe.full[j] <- with(a.te, mean( (MORT - pr.full)^2 ))
+  mspe.red[j] <- with(a.te, mean( (MORT - pr.reduced)^2 ))
+}
+boxplot(mspe.full, mspe.red, names=c('Full', 'Reduced'), 
+        col=c('gray80', 'tomato3'), 
+        main='Air Pollution - 100 training/test splits', ylim=c(0, 6000))
+mtext(expression(hat(MSPE)), side=2, line=2.5)
+```
+
+
+### Leave-one-out cross-validation
 
 A different procedure to estimate the prediction power
-of a model or method is called *leave-one-out CV*. 
+of a model or method is called **leave-one-out CV**. 
 One advantage of using this method is that 
 the model we fit can use a larger training set.
 We discussed the procedure in class. Here
 we apply it to estimate the mean squared
 prediction error of the **full** and **reduced**
-models.
+models. Again, we assume that the reduced model 
+was chosen independently from the training set.
 ```{r loocv}
 x <- read.csv('../Lecture1/rutgers-lib-30861_CSV-1.csv')
 n <- nrow(x)
@@ -62,6 +101,8 @@ for(i in 1:n) {
 mean( (x$MORT - pr.full)^2 )
 mean( (x$MORT - pr.reduced)^2 )
 ```
+
+### K-fold cross-validation
 
 Leave-one-out cross-validation can be computationally 
 very demanding (or even unfeasible) when the sample size
