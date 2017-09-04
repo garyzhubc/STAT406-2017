@@ -11,7 +11,7 @@ The lecture slides are [here](STAT406-17-lecture-2.pdf).
 Predictions using a linear model
 --------------------------------
 
-In these notes we continue looking at the problem of comparing different models based on their prediction properties. As in the previous lecture, we consider a **full** and a **reduced** model, and we assume that the variables included in the **reduced** model were not selected using the training data.
+In these notes we continue looking at the problem of comparing different models based on their prediction properties. As in the previous lecture, we consider a **full** and a **reduced** model, and in all that follows we assume that the variables included in the **reduced** model were not selected using the training data.
 
 ### Estimating MSPE with a test set
 
@@ -71,7 +71,7 @@ mean( (x$MORT - pr.reduced)^2 )
 
 ### K-fold cross-validation
 
-Leave-one-out cross-validation can be computationally very demanding (or even unfeasible) when the sample size is large and training the predictor is relatively costly. One solution is called **K-fold CV**. We split the data into **K** folds, train the predictor on the data without a fold, and use it to predict the responses in the removed fold. We cycle through the folds, and use the average of the squared prediction errors as an estimate of the mean squared prediction error. The following script does **5-fold CV** for the `full` and `reduced` linear models on the pollution dataset.
+Leave-one-out cross-validation can be computationally very demanding (or even unfeasible) when the sample size is large and training the predictor is relatively costly. One solution is called **K-fold CV**. We split the data into **K** folds, train the predictor on the data without a fold, and use it to predict the responses in the removed fold. We cycle through the folds, and use the average of the squared prediction errors as an estimate of the mean squared prediction error. The following script does **5-fold CV** for the `full` and `reduced` linear models on the pollution dataset, once again assuming that the reduced model was originally chosen without using the data.
 
 ``` r
 n <- nrow(x)

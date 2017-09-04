@@ -18,7 +18,7 @@ The lecture slides are [here](STAT406-17-lecture-2.pdf).
 In these notes we continue looking at the problem of 
 comparing different models based on their 
 prediction properties. As in the previous lecture, we consider 
-a **full** and a **reduced** model, and we assume that the
+a **full** and a **reduced** model, and in all that follows we assume that the
 variables included in the **reduced** model were not selected using the training data. 
 
 
@@ -115,7 +115,8 @@ use the average of the squared prediction errors as
 an estimate of the mean squared prediction error.
 The following script does **5-fold CV** for the 
 `full` and `reduced` linear models on the
-pollution dataset.
+pollution dataset, once again assuming that the reduced model 
+was originally chosen without using the data.
 ```{r kfold, fig.width=5, fig.height=5, echo=TRUE}
 n <- nrow(x)
 k <- 5
