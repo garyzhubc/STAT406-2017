@@ -14,10 +14,10 @@ Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 1. Lecture 1
 
 	By the end of the lecture, students are expected to be able to: 
-	- Distinguish between supervised and unsupervised learning problems
-	- Explain the different objectives and achievable goals in each case
-	- Describe the K-means and K-medoids algorithms and explain their differences
-	- Explain why these algorithms may have initialization problems. 
+	- Distinguish between 
+	- Explain the different
+	- Describe the algorithms and explain their differences
+	- Explain why these algorithms  
 
 3. Lecture 2
 
