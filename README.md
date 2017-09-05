@@ -1,8 +1,3 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
 # STAT406 - "Elements of Statistical Learning"
 
 Repository for STAT406 @ UBC - "Elements of Statistical Learning"
