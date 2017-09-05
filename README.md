@@ -39,14 +39,14 @@ This is a list of strongly recommended **pre-class** reading. [JWHT13] and [HTF0
 ## Reference books
 * **[JWHT13]**: James, G., Witten, D., Hastie, T. and Tibshirani, R. 
 An Introduction to Statistical Learning. 2013. Springer-Verlag New York 
- - [Book page](http://www-bcf.usc.edu/~gareth/ISL/), [Book PDF](http://www-bcf.usc.edu/~gareth/ISL/ISLR%20Seventh%20Printing.pdf)
+  - [Book page](http://www-bcf.usc.edu/~gareth/ISL/), [Book PDF](http://www-bcf.usc.edu/~gareth/ISL/ISLR%20Seventh%20Printing.pdf)
 	
 * **[HTF09]**: Hastie, T., Tibshirani, R. and Friedman, J. 
 The Elements of Statistical Learning. 2009. Second Edition. Springer-Verlag New York
- - [Book page](http://web.stanford.edu/~hastie/ElemStatLearn), [Book PDF](https://web.stanford.edu/~hastie/ElemStatLearn/download.html)
+  - [Book page](http://web.stanford.edu/~hastie/ElemStatLearn), [Book PDF](https://web.stanford.edu/~hastie/ElemStatLearn/download.html)
 	
 * **[MASS]**: Venables, W.N. and Ripley, B.D. 
 Modern Applied Statistics with S. 2002. Fourth edition, Springer, New York.
- - [Book page](https://www.stats.ox.ac.uk/pub/MASS4/), [Publisher page](http://link.springer.com/book/10.1007%2F978-0-387-21706-2)
+  - [Book page](https://www.stats.ox.ac.uk/pub/MASS4/), [Publisher page](http://link.springer.com/book/10.1007%2F978-0-387-21706-2)
 
 
