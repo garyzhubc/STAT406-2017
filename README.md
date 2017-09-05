@@ -42,6 +42,6 @@ The Elements of Statistical Learning. 2009. Second Edition. Springer-Verlag New 
 	
 * **[MASS]**: Venables, W.N. and Ripley, B.D. 
 Modern Applied Statistics with S. 2002. Fourth edition, Springer, New York.
-[Book](http://link.springer.com/book/10.1007%2F978-0-387-21706-2)
+  - [Book page](https://www.stats.ox.ac.uk/pub/MASS4/), [Publisher page](http://link.springer.com/book/10.1007%2F978-0-387-21706-2)
 
 
