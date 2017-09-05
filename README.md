@@ -12,7 +12,8 @@ This is a list of strongly recommended **pre-class** reading.
 * Week 1: Sections 2.1, 2.1.1, 2.1.2, 2.1.3, 2.2, 2.2.1 from [JWHT13], 2.4 and 2.6 
 	from [HTF09]
 
-# ## Course Learning Objectives
+<!-- 
+## Course Learning Objectives
 # 
 # ## Lecture Learning Objectives
 # 1. Lecture 1
@@ -24,6 +25,7 @@ This is a list of strongly recommended **pre-class** reading.
 # 	- Explain why these algorithms  
 # 
 # 3. Lecture 2
+-->
 
 ## Prerequisites
 * STAT306 (preferred) or CPSC340 (acceptable)
