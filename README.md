@@ -6,12 +6,13 @@ Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 
 ## Weekly reading and other resources
 
-This is a list of strongly recommended **pre-class** reading.  
-[JWHT13] and [HTF09] indicate reference books (see below). 
+This is a list of strongly recommended **pre-class** reading. [JWHT13] and [HTF09] indicate reference books (see below). 
 
 * Week 1: Sections 2.1, 2.1.1, 2.1.2, 2.1.3, 2.2, 2.2.1 from [JWHT13], 2.4 and 2.6 
-	from [HTF09]
-
+	from [HTF09].
+* Week 2: Sections 5.1, 5.1.1, 5.1.2, 5.1.3 from [JWHT13]. Additionally: 7.1, 7.2, 7.3, 7.10 from [HTF09].
+* Week 3: TBA.
+ 
 <!-- 
 ## Course Learning Objectives
 # 
