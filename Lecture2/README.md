@@ -105,7 +105,39 @@ mean( (xs$MORT - pr.reduced)^2 )
 
 This method is clearly faster than leave-one-out CV, but the results may depend on the specific fold partition, and on the number **K** of folds used.
 
--   One way to obtain more stable mean squared prediction errors using K-fold CV is to repeat the above procedure many times, and compare the distribution of the mean squared prediction errors for each estimator.
+-   One way to obtain more stable mean squared prediction errors using K-fold CV is to repeat the above procedure many times, and compare the distribution of the mean squared prediction errors for each estimator. First, fit the **full** and **reduced** models using the whole data set as training:
+
+``` r
+m.f <- lm(MORT ~ . , data=x)
+m.r <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x)
+```
+
+We will use 50 runs of 5-fold CV comparing the **full** and **reduced** models. Again, here we assume that the reduced model was not obtained using the training data.
+
+``` r
+N <- 50
+mspe1 <- mspe2 <- vector('double', N)
+ii <- (1:(n <- nrow(x))) %% 5 + 1
+set.seed(327)
+for(i in 1:N) {
+  ii <- sample(ii)
+  pr.f <- pr.r <- vector('double', n)
+  for(j in 1:5) {
+    pr.f[ ii == j ] <- predict(update(m.f, data=x[ii != j, ]), newdata=x[ii==j,])
+    pr.r[ ii == j ] <- predict(update(m.r, data=x[ii != j, ]), newdata=x[ii==j,])
+  }
+  mspe1[i] <- with(x, mean( (MORT - pr.f)^2 ))
+  mspe2[i] <- with(x, mean( (MORT - pr.r)^2 ))
+}  
+boxplot(mspe1, mspe2, names=c('Full', 'Reduced'), 
+        col=c('gray80', 'tomato3'), 
+        main='Air Pollution - 50 runs 5-fold CV', ylim=c(0, 5000))
+mtext(expression(hat(MSPE)), side=2, line=2.5)
+```
+
+![](README_files/figure-markdown_github/cv10runs-1.png)
+
+Note that the estimated mean squared prediction error of the **reduced** model has a smaller mean / median than that of the **full** one. This tells us that the conclusion we reached favouring the reduced model (in terms of its prediction mean squared error) does not depend on a particular choice of folds. In other words, this provides more evidence to conclude that the reduced model will produce better predictions than the full one.
 
 -   A computationally simpler (albeit possibly less precise) way to account for the K-fold variability is to run K-fold CV once and use the sample standard error of the **K** *smaller* mean squared prediction errors to construct a rough *confidence interval* around the overall mean squared prediction error estimate (that is the average of the mean squared prediction errors over the K folds).
 
