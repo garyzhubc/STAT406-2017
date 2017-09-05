@@ -5,21 +5,25 @@ Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 ## Tentative Weekly Schedule
 
 ## Weekly reading and other resources
-- Week 1:
-	* Section X from JWHT13, Y from HTF09
 
-## Course Learning Objectives
+This is a list of strongly recommended **pre-class** reading.  
+[JWHT13] and [HTF09] indicate reference books (see below). 
 
-## Lecture Learning Objectives
-1. Lecture 1
+* Week 1: Sections 2.1, 2.1.1, 2.1.2, 2.1.3, 2.2, 2.2.1 from [JWHT13], 2.4 and 2.6 
+	from [HTF09]
 
-	By the end of the lecture, students are expected to be able to: 
-	- Distinguish between 
-	- Explain the different
-	- Describe the algorithms and explain their differences
-	- Explain why these algorithms  
-
-3. Lecture 2
+# ## Course Learning Objectives
+# 
+# ## Lecture Learning Objectives
+# 1. Lecture 1
+# 
+# 	By the end of the lecture, students are expected to be able to: 
+# 	- Distinguish between 
+# 	- Explain the different
+# 	- Describe the algorithms and explain their differences
+# 	- Explain why these algorithms  
+# 
+# 3. Lecture 2
 
 ## Prerequisites
 * STAT306 (preferred) or CPSC340 (acceptable)
