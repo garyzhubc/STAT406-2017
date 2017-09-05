@@ -2,11 +2,11 @@
 
 Repository for STAT406 @ UBC - "Elements of Statistical Learning"
 
+## Tentative Weekly Schedule
 
-
-## Schedule
-
-## Labs
+## Weekly reading and other resources
+- Week 1:
+	* Section X from JWHT13, Y from HTF09
 
 ## Course Learning Objectives
 
@@ -37,8 +37,4 @@ The Elements of Statistical Learning. 2009. Second Edition. Springer-Verlag New 
 Modern Applied Statistics with S. 2002. Fourth edition, Springer, New York.
 [Book](http://link.springer.com/book/10.1007%2F978-0-387-21706-2)
 
-
-## Reading and other resources
-- Week 1:
-	* Section X from JWHT13, Y from HTF09
 
