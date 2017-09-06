@@ -59,22 +59,16 @@ full <- lm(MORT ~ . , data=x.tr)
 plot(full, which=1)
 plot(full, which=2)
 ```
+
 We also take a look at the estimated coeficients: 
 ```{r diag, fig.width=5, fig.height=5, echo=TRUE}
 summary(full)
 ```
 
-In the rest of this note we will  
-compare the quality of this model's
-predictions with those of a simpler (smaller) linear
-model with only 5 predictors. 
-For this illustrative example, we will not
-worry about how these 5 explanatory variables were
-selected, however, this 
-will play a **critical** role later in the course). 
+In the rest of this note we will compare the quality of this model's predictions with those of a simpler (smaller) linear model with only 5 predictors. For this illustrative example, we will not
+worry about how these 5 explanatory variables were selected, however, this will play a **critical** role later in the course).
 
-We now fit this **reduced** model and look at the
-estimated parameters and diagnostic plots
+We now fit this **reduced** model and look at the estimated parameters and diagnostic plots
 ```{r reduced, fig.width=5, fig.height=5, echo=TRUE}
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x.tr)
 summary(reduced)
@@ -99,7 +93,7 @@ variables). I expect you to be able to formally
 prove the last satement. 
 
 Our question of interest here is:
-``Which model produces better predictions?'' In many cases one is 
+"Which model produces better predictions?" In many cases one is 
 interested in predicting future observations, i.e. 
 predicting the response variable for data
 that was not available when the model / predictor was 
@@ -129,7 +123,7 @@ as well as the full model) nevertheless produced
 better predictions (smaller mean squared prediction
 errors) on the test set. 
 
-At this point you should use your critical / skeptical 
+At this point you should put on your critical / skeptical 
 hat and wonder if this did not happen *by chance*, i.e.
 if this may be just 
 an artifact of the specific training/test partition

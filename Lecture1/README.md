@@ -1,7 +1,7 @@
 STAT406 - Lecture 1 notes
 ================
 Matias Salibian-Barrera
-2017-09-03
+2017-09-06
 
 Lecture slides
 --------------
@@ -64,7 +64,9 @@ plot(full, which=1)
 plot(full, which=2)
 ```
 
-![](README_files/figure-markdown_github/full-2.png) We also take a look at the estimated coeficients:
+![](README_files/figure-markdown_github/full-2.png)
+
+We also take a look at the estimated coeficients:
 
 ``` r
 summary(full)
@@ -103,8 +105,7 @@ summary(full)
     ## Multiple R-squared:  0.8603, Adjusted R-squared:  0.788 
     ## F-statistic:  11.9 on 15 and 29 DF,  p-value: 1.328e-08
 
-In the rest of this note we will
-compare the quality of this model's predictions with those of a simpler (smaller) linear model with only 5 predictors. For this illustrative example, we will not worry about how these 5 explanatory variables were selected, however, this will play a **critical** role later in the course).
+In the rest of this note we will compare the quality of this model's predictions with those of a simpler (smaller) linear model with only 5 predictors. For this illustrative example, we will not worry about how these 5 explanatory variables were selected, however, this will play a **critical** role later in the course).
 
 We now fit this **reduced** model and look at the estimated parameters and diagnostic plots
 
@@ -165,7 +166,7 @@ sum( resid(full)^2 )
 
 This observation should be obvious to you, since, as you already now, a model will **always** yield a better fit to the data in terms of residual sum of squares than any of its submodels (i.e. any model using a subset of the explanatory variables). I expect you to be able to formally prove the last satement.
 
-Our question of interest here is: \``Which model produces better predictions?'' In many cases one is  interested in predicting future observations, i.e.  predicting the response variable for data that was not available when the model / predictor was  *fit* or *trained*. As we discussed in class, a reasonably fair comparison can be obtined by  comparing the mean squared predictions of these two linear models on the test set, which we read into`R\` as follows:
+Our question of interest here is: "Which model produces better predictions?" In many cases one is interested in predicting future observations, i.e. predicting the response variable for data that was not available when the model / predictor was *fit* or *trained*. As we discussed in class, a reasonably fair comparison can be obtined by comparing the mean squared predictions of these two linear models on the test set, which we read into `R` as follows:
 
 ``` r
 x.te <- read.table('pollution-test.dat', header=TRUE, sep=',')
@@ -210,7 +211,7 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
 Note that the reduced model (that did not fit the data as well as the full model) nevertheless produced better predictions (smaller mean squared prediction errors) on the test set.
 
-At this point you should use your critical / skeptical hat and wonder if this did not happen *by chance*, i.e. if this may be just an artifact of the specific training/test partition we used. The following simple experiment shows that this is not the case. It would be a **very good exercise** for you to repeat it many times (100, say) to verify my claim.
+At this point you should put on your critical / skeptical hat and wonder if this did not happen *by chance*, i.e. if this may be just an artifact of the specific training/test partition we used. The following simple experiment shows that this is not the case. It would be a **very good exercise** for you to repeat it many times (100, say) to verify my claim.
 
 First, read the whole data and create a new training / test random split.
 
