@@ -6,7 +6,7 @@ Matias Salibian-Barrera
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-1.pdf).
+The lecture slides are [here](STAT406-17-lecture-1-preliminary.pdf).
 
 Predictions using a linear model
 --------------------------------
