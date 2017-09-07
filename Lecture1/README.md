@@ -1,12 +1,12 @@
 STAT406 - Lecture 1 notes
 ================
 Matias Salibian-Barrera
-2017-09-06
+2017-09-07
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-1-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-1.pdf).
 
 Predictions using a linear model
 --------------------------------
