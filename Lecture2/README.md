@@ -1,12 +1,12 @@
 STAT406 - Lecture 2 notes
 ================
 Matias Salibian-Barrera
-2017-09-04
+2017-09-10
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-2.pdf).
+The lecture slides are [here](STAT406-17-lecture-2-preliminary.pdf).
 
 Predictions using a linear model
 --------------------------------
@@ -42,7 +42,7 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1401.571
 
-In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data. The **reduced** model generally produces better predictions, regardless of the specific training / test split we use. We can verify this repeating the procedure many times (50, say) and looking at the estimated mean squared prediction errors obtained each time for each model. ![](README_files/figure-markdown_github/testrain-1.png)
+In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data. The **reduced** model generally produces better predictions, regardless of the specific training / test split we use. We can verify this repeating the procedure many times (50, say) and looking at the estimated mean squared prediction errors obtained each time for each model. ![](README_files/figure-markdown_github-ascii_identifiers/testrain-1.png)
 
 ### Leave-one-out cross-validation
 
@@ -135,7 +135,7 @@ boxplot(mspe1, mspe2, names=c('Full', 'Reduced'),
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
-![](README_files/figure-markdown_github/cv10runs-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/cv10runs-1.png)
 
 Note that the estimated mean squared prediction error of the **reduced** model has a smaller mean / median than that of the **full** one. This tells us that the conclusion we reached favouring the reduced model (in terms of its prediction mean squared error) does not depend on a particular choice of folds. In other words, this provides more evidence to conclude that the reduced model will produce better predictions than the full one.
 
