@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-3.pdf).
+The lecture slides are [here](STAT406-17-lecture-3-preliminary.pdf).
 
 ## Cross-validation when the model is chosen using the data
 
@@ -61,21 +61,62 @@ summary(mspe.st)
 summary(mspe.n)
 ```
 
-* **Something is wrong!** Why? 
+* **Something is wrong!** What? Why? 
 * What would you change above to obtain reliable estimates for the MSPE of the 
 model selected with the stepwise approach? 
 
 
 ## Correlated covariates
 
-Variables that are significant in a smaller model,
-"dissappear" in a larger one
+Technological advances in recent decades have resulted in data 
+being collected in a fundamentally different way from the way 
+it was when "classical" statistical methods were proposed. 
+Specifically, it is not at all uncommon to have data sets with
+an abundance of potentially useful explanatory variables. 
+Sometimes the investigators are not sure which of them can be 
+expected to be useful or meaningful. In many applications one
+finds data with many more variables than cases. 
+
+A consequence of this "wide net" data collection strategy is 
+that many of the explanatory variables may be correlated with
+each other. In what follows we will illustrate some of the
+problems that this can cause both when training and interpreting
+models, and also with the resulting predictions.
+
+### Significant variables "dissappear"
+
+Consider the air pollution data set, and the fit to the 
+**reduced** linear regression model used previously in class:
 ```{r signif}
 # Correlated covariates
 x <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x)
-full <- lm(MORT ~ ., data=x)
-# significant variables in "reduced" dissappear in "full"
 round( summary(reduced)$coef, 3)
+```
+Note that all coefficients seem to be significant based on
+the individual tests of hypothesis (with `POOR` and 
+`HOUS` maybe only marginally so). In this sense all 5
+explanatory varibles in this model appear to be relevant.
+
+Now, we fit the **full** model, that is, we include
+all available explanatory variables in the data set:
+```{r signif2}
+full <- lm(MORT ~ ., data=x)
+round( summary(full)$coef, 3)
+```
+Now we have many more parameters to estimate, and while two of
+them appear to be significantly different from zero (`NONW`
+and `PREC`), all the others seem to be redundant. 
+In particular, note that the p-values for the individual
+test of hypotheses for 4 out of the 5  
+regression coefficients for the variables of the **reduced**
+model have now become not significant.
+```{r signif3}
 round( summary(full)$coef[ names(coef(reduced)), ], 3)
 ```
+
+* Why does this happen? 
+* Where can we "see it" in the math? 
+* What can we do? 
+* Higher variance of the estimators is reflected in loss of prediction accuracy (check the math!)
+
