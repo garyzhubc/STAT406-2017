@@ -1,0 +1,21 @@
+---
+title: "STAT406 - Lecture 4 notes"
+author: "Matias Salibian-Barrera"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lecture slides
+
+The lecture slides are [here](STAT406-17-lecture-4-preliminary.pdf).
+
+* Estimating MSPE with CV when the model was built using the data
+* "Direct" comparison of models -- AIC
+* Shrinkage methods / Ridge regression to manage correlated explanatory variables
+    - Selecting the amount of shrinkage
+
+
