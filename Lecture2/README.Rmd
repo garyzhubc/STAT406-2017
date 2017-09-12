@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-2-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-2.pdf).
 
 ## Predictions using a linear model
 
@@ -54,6 +54,7 @@ split we use. We can verify this repeating
 the procedure many times (50, say) and looking
 at the estimated mean squared prediction errors
 obtained each time for each model. 
+
 ```{r testrain, fig.width=5, fig.height=5, echo=FALSE}
 x <- read.csv('../Lecture1/rutgers-lib-30861_CSV-1.csv')
 set.seed(123)

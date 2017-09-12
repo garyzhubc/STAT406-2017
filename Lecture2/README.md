@@ -1,12 +1,12 @@
 STAT406 - Lecture 2 notes
 ================
 Matias Salibian-Barrera
-2017-09-10
+2017-09-12
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-2-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-2.pdf).
 
 Predictions using a linear model
 --------------------------------
@@ -42,7 +42,9 @@ with(x.te, mean( (MORT - pr.reduced)^2 ))
 
     ## [1] 1401.571
 
-In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data. The **reduced** model generally produces better predictions, regardless of the specific training / test split we use. We can verify this repeating the procedure many times (50, say) and looking at the estimated mean squared prediction errors obtained each time for each model. ![](README_files/figure-markdown_github-ascii_identifiers/testrain-1.png)
+In Lecture 1 we also saw that this is not just an artifact of the specific training / test split of the data. The **reduced** model generally produces better predictions, regardless of the specific training / test split we use. We can verify this repeating the procedure many times (50, say) and looking at the estimated mean squared prediction errors obtained each time for each model.
+
+![](README_files/figure-markdown_github-ascii_identifiers/testrain-1.png)
 
 ### Leave-one-out cross-validation
 
