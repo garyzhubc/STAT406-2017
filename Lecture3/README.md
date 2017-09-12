@@ -1,7 +1,7 @@
 STAT406 - Lecture 3 notes
 ================
 Matias Salibian-Barrera
-2017-09-10
+2017-09-11
 
 Lecture slides
 --------------
@@ -138,7 +138,14 @@ round( summary(full)$coef[ names(coef(reduced)), ], 3)
     ## HOUS          -0.651      1.768  -0.368    0.714
     ## NONW           4.460      1.327   3.360    0.002
 
--   Why does this happen?
--   Where can we "see it" in the math?
--   What can we do?
--   Higher variance of the estimators is reflected in loss of prediction accuracy (check the math!)
+### Why does this happen?
+
+Recall that the covariance matrix of the least squares estimator involves the inverse of (X'X), where X' denotes the transpose of the n x p matrix X (that contains each vector of explanatory variables as a row). It is easy to see that if two columns of X are linearly dependent, then X'X will be rank deficient. When two columns of X are "close" to being linearly dependent (e.g. their linear corrleation is high), then the matrix X'X will be ill-conditioned, and its inverse will have very large entries. This means that the estimated standard errors of the least squares estimator will be unduly large, resulting in non-significant test of hypotheses for each parameter separately, even if the global test for all of them simultaneously is highly significant.
+
+### Why is this a problem if we are interested in prediction?
+
+Although in many applications one is interested in interpreting the parameters of the model, even if one is only trying to fit / train a model to do predictions, highly variable parameter estimators will typically result in a noticeable loss of prediction accuracy. This can be easily seen from the bias / variance factorization of the mean squared prediction error (MSPE) mentioned in class. Hence, better predictions can be obtained if one uses less-variable parameter estimators.
+
+### What can we do?
+
+A commonly used strategy is to remove some explanatory variables from the model, leaving only non-redundant covariates. However, this is easier said than done. You have seen some strategies in other courses (stepwise variable selection, etc.) In coming weeks we will investigate other methods to deal with this problem.
