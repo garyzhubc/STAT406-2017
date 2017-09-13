@@ -1,7 +1,7 @@
 STAT406 - Lecture 3 notes
 ================
 Matias Salibian-Barrera
-2017-09-11
+2017-09-12
 
 Lecture slides
 --------------
@@ -29,7 +29,7 @@ full <- lm(Y~., data=dat) # needed for stepwise
 step.lm <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
 ```
 
-Without thinking, we use CV to compare the MSPE of the **null** model (which we know is "true") and the one we obtained using forward stepwise:
+Without thinking too much, we use 5-fold CV (ten runs) to compare the MSPE of the **null** model (which we know is "true") and the one we obtained using forward stepwise:
 
 ``` r
 n <- nrow(dat)
