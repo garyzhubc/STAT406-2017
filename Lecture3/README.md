@@ -6,7 +6,8 @@ Matias Salibian-Barrera
 Lecture slides
 --------------
 
-A preliminary version of the lecture slides are [here](STAT406-17-lecture-3-preliminary.pdf).
+-   A preliminary version of the lecture slides is [here](STAT406-17-lecture-3-preliminary.pdf).
+-   The activity hand-out is [here](lecture3-activity.pdf).
 
 Cross-validation when the model is chosen using the data
 --------------------------------------------------------
