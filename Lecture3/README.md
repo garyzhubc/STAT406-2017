@@ -1,12 +1,12 @@
 STAT406 - Lecture 3 notes
 ================
 Matias Salibian-Barrera
-2017-09-12
+2017-09-13
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-3-preliminary.pdf).
+A preliminary version of the lecture slides are [here](STAT406-17-lecture-3-preliminary.pdf).
 
 Cross-validation when the model is chosen using the data
 --------------------------------------------------------
