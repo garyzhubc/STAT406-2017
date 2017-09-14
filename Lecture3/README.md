@@ -1,12 +1,12 @@
 STAT406 - Lecture 3 notes
 ================
 Matias Salibian-Barrera
-2017-09-13
+2017-09-14
 
 Lecture slides
 --------------
 
--   A preliminary version of the lecture slides is [here](STAT406-17-lecture-3-preliminary.pdf).
+-   A preliminary version of the lecture slides is [here](STAT406-17-lecture-3.pdf).
 -   The activity hand-out is [here](lecture3-activity.pdf).
 
 Cross-validation when the model is chosen using the data
@@ -71,82 +71,70 @@ summary(mspe.n)
 -   **Something is wrong!** What? Why?
 -   What would you change above to obtain reliable estimates for the MSPE of the model selected with the stepwise approach?
 
-Correlated covariates
----------------------
-
-Technological advances in recent decades have resulted in data being collected in a fundamentally different way from the way it was when "classical" statistical methods were proposed. Specifically, it is not at all uncommon to have data sets with an abundance of potentially useful explanatory variables. Sometimes the investigators are not sure which of them can be expected to be useful or meaningful. In many applications one finds data with many more variables than cases.
-
-A consequence of this "wide net" data collection strategy is that many of the explanatory variables may be correlated with each other. In what follows we will illustrate some of the problems that this can cause both when training and interpreting models, and also with the resulting predictions.
-
-### Significant variables "dissappear"
-
-Consider the air pollution data set, and the fit to the **reduced** linear regression model used previously in class:
-
-``` r
-# Correlated covariates
-x <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
-reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x)
-round( summary(reduced)$coef, 3)
-```
-
-    ##             Estimate Std. Error t value Pr(>|t|)
-    ## (Intercept) 1172.831    143.241   8.188    0.000
-    ## POOR          -4.065      2.238  -1.817    0.075
-    ## HC            -1.480      0.333  -4.447    0.000
-    ## NOX            2.846      0.652   4.369    0.000
-    ## HOUS          -2.911      1.533  -1.899    0.063
-    ## NONW           4.470      0.846   5.283    0.000
-
-Note that all coefficients seem to be significant based on the individual tests of hypothesis (with `POOR` and `HOUS` maybe only marginally so). In this sense all 5 explanatory varibles in this model appear to be relevant.
-
-Now, we fit the **full** model, that is, we include all available explanatory variables in the data set:
-
-``` r
-full <- lm(MORT ~ ., data=x)
-round( summary(full)$coef, 3)
-```
-
-    ##             Estimate Std. Error t value Pr(>|t|)
-    ## (Intercept) 1763.981    437.327   4.034    0.000
-    ## PREC           1.905      0.924   2.063    0.045
-    ## JANT          -1.938      1.108  -1.748    0.087
-    ## JULT          -3.100      1.902  -1.630    0.110
-    ## OVR65         -9.065      8.486  -1.068    0.291
-    ## POPN        -106.826     69.780  -1.531    0.133
-    ## EDUC         -17.157     11.860  -1.447    0.155
-    ## HOUS          -0.651      1.768  -0.368    0.714
-    ## DENS           0.004      0.004   0.894    0.376
-    ## NONW           4.460      1.327   3.360    0.002
-    ## WWDRK         -0.187      1.662  -0.113    0.911
-    ## POOR          -0.168      3.227  -0.052    0.959
-    ## HC            -0.672      0.491  -1.369    0.178
-    ## NOX            1.340      1.006   1.333    0.190
-    ## SO.            0.086      0.148   0.585    0.562
-    ## HUMID          0.107      1.169   0.091    0.928
-
-Now we have many more parameters to estimate, and while two of them appear to be significantly different from zero (`NONW` and `PREC`), all the others seem to be redundant. In particular, note that the p-values for the individual test of hypotheses for 4 out of the 5
-regression coefficients for the variables of the **reduced** model have now become not significant.
-
-``` r
-round( summary(full)$coef[ names(coef(reduced)), ], 3)
-```
-
-    ##             Estimate Std. Error t value Pr(>|t|)
-    ## (Intercept) 1763.981    437.327   4.034    0.000
-    ## POOR          -0.168      3.227  -0.052    0.959
-    ## HC            -0.672      0.491  -1.369    0.178
-    ## NOX            1.340      1.006   1.333    0.190
-    ## HOUS          -0.651      1.768  -0.368    0.714
-    ## NONW           4.460      1.327   3.360    0.002
-
-### Why does this happen?
-
-Recall that the covariance matrix of the least squares estimator involves the inverse of (X'X), where X' denotes the transpose of the n x p matrix X (that contains each vector of explanatory variables as a row). It is easy to see that if two columns of X are linearly dependent, then X'X will be rank deficient. When two columns of X are "close" to being linearly dependent (e.g. their linear corrleation is high), then the matrix X'X will be ill-conditioned, and its inverse will have very large entries. This means that the estimated standard errors of the least squares estimator will be unduly large, resulting in non-significant test of hypotheses for each parameter separately, even if the global test for all of them simultaneously is highly significant.
-
-### Why is this a problem if we are interested in prediction?
-
-Although in many applications one is interested in interpreting the parameters of the model, even if one is only trying to fit / train a model to do predictions, highly variable parameter estimators will typically result in a noticeable loss of prediction accuracy. This can be easily seen from the bias / variance factorization of the mean squared prediction error (MSPE) mentioned in class. Hence, better predictions can be obtained if one uses less-variable parameter estimators.
-
-### What can we do?
-
-A commonly used strategy is to remove some explanatory variables from the model, leaving only non-redundant covariates. However, this is easier said than done. You have seen some strategies in other courses (stepwise variable selection, etc.) In coming weeks we will investigate other methods to deal with this problem.
+<!-- ## Correlated covariates -->
+<!-- Technological advances in recent decades have resulted in data  -->
+<!-- being collected in a fundamentally different way from the way  -->
+<!-- it was when "classical" statistical methods were proposed.  -->
+<!-- Specifically, it is not at all uncommon to have data sets with -->
+<!-- an abundance of potentially useful explanatory variables.  -->
+<!-- Sometimes the investigators are not sure which of them can be  -->
+<!-- expected to be useful or meaningful. In many applications one -->
+<!-- finds data with many more variables than cases.  -->
+<!-- A consequence of this "wide net" data collection strategy is  -->
+<!-- that many of the explanatory variables may be correlated with -->
+<!-- each other. In what follows we will illustrate some of the -->
+<!-- problems that this can cause both when training and interpreting -->
+<!-- models, and also with the resulting predictions. -->
+<!-- ### Significant variables "dissappear" -->
+<!-- Consider the air pollution data set, and the fit to the  -->
+<!-- **reduced** linear regression model used previously in class: -->
+<!-- ```{r signif} -->
+<!-- # Correlated covariates -->
+<!-- x <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',') -->
+<!-- reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x) -->
+<!-- round( summary(reduced)$coef, 3) -->
+<!-- ``` -->
+<!-- Note that all coefficients seem to be significant based on -->
+<!-- the individual tests of hypothesis (with `POOR` and  -->
+<!-- `HOUS` maybe only marginally so). In this sense all 5 -->
+<!-- explanatory varibles in this model appear to be relevant. -->
+<!-- Now, we fit the **full** model, that is, we include -->
+<!-- all available explanatory variables in the data set: -->
+<!-- ```{r signif2} -->
+<!-- full <- lm(MORT ~ ., data=x) -->
+<!-- round( summary(full)$coef, 3) -->
+<!-- ``` -->
+<!-- Now we have many more parameters to estimate, and while two of -->
+<!-- them appear to be significantly different from zero (`NONW` -->
+<!-- and `PREC`), all the others seem to be redundant.  -->
+<!-- In particular, note that the p-values for the individual -->
+<!-- test of hypotheses for 4 out of the 5   -->
+<!-- regression coefficients for the variables of the **reduced** -->
+<!-- model have now become not significant. -->
+<!-- ```{r signif3} -->
+<!-- round( summary(full)$coef[ names(coef(reduced)), ], 3) -->
+<!-- ``` -->
+<!-- ### Why does this happen?  -->
+<!-- Recall that the covariance matrix of the least squares estimator involves the -->
+<!-- inverse of (X'X), where X' denotes the transpose of the n x p matrix X (that -->
+<!-- contains each vector of explanatory variables as a row). It is easy to see  -->
+<!-- that if two columns of X are linearly dependent, then X'X will be rank deficient.  -->
+<!-- When two columns of X are "close" to being linearly dependent (e.g. their -->
+<!-- linear corrleation is high), then the matrix X'X will be ill-conditioned, and -->
+<!-- its inverse will have very large entries. This means that the estimated  -->
+<!-- standard errors of the least squares estimator will be unduly large, resulting -->
+<!-- in non-significant test of hypotheses for each parameter separately, even if -->
+<!-- the global test for all of them simultaneously is highly significant. -->
+<!-- ### Why is this a problem if we are interested in prediction? -->
+<!-- Although in many applications one is interested in interpreting the parameters -->
+<!-- of the model, even if one is only trying to fit / train a model to do -->
+<!-- predictions, highly variable parameter estimators will typically result in -->
+<!-- a noticeable loss of prediction accuracy. This can be easily seen from the  -->
+<!-- bias / variance factorization of the mean squared prediction error (MSPE)  -->
+<!-- mentioned in class. Hence, better predictions can be obtained if one -->
+<!-- uses less-variable parameter estimators.  -->
+<!-- ### What can we do? -->
+<!-- A commonly used strategy is to remove some explanatory variables from the -->
+<!-- model, leaving only non-redundant covariates. However, this is easier said than -->
+<!-- done. You have seen some strategies in other courses (stepwise variable selection, etc.) -->
+<!-- In coming weeks we will investigate other methods to deal with this problem. -->
