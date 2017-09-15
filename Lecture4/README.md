@@ -118,7 +118,7 @@ One intuitively sensible quantity that can be used to compare models is a distan
 1.  a distance / metric (or at least a "quasimetric") between models; and
 2.  a way of estimating this distance when the "true" model is unknown.
 
-AIC provides an unbiased estimator of the Kullback-Leibler divergence between the estimated model and the "true" one.
+AIC provides an unbiased estimator of the Kullback-Leibler divergence between the estimated model and the "true" one. See the lecture slides for more details.
 
 Shrinkage methods / Ridge regression
 ------------------------------------

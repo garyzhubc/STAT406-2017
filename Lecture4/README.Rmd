@@ -145,7 +145,8 @@ a. a distance / metric (or at least a "quasimetric") between models; and
 a. a way of estimating this distance when the "true" model is unknown.
 
 AIC provides an unbiased estimator of the Kullback-Leibler divergence 
-between the estimated model and the "true" one. 
+between the estimated model and the "true" one. See the lecture slides
+for more details. 
 
 ## Shrinkage methods / Ridge regression 
 
