@@ -15,7 +15,7 @@ This is a list of strongly recommended **pre-class** reading. [JWHT13] and [HTF0
 * Week 4: (Ridge regression, LASSO, Elastic Net) 6.2 (complete) from [JWHT13], 3.4, 3.8, 3.8.1, 3.8.2 from [HTF09]
 * Week 5: (Elastic Net, Smoothers (Local regression, Splines)) 7.1, 7.3, 7.4, 7.5, 7.6 from [JWHT13]
 * Week 6: (Curse of dimensionality, Regression Trees) 8.1, 8.1.1, 8.1.3, 8.1.4 from [JWHT13]
-
+* Week 7: (Bagging, Classification, LDA, Logistic Regression) 8.2, 8.2.1, 4.1, 4.2 from [JWHT13]
 
  
 <!-- 
