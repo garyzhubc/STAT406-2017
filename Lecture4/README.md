@@ -29,7 +29,6 @@ A consequence of this "wide net" data collection strategy is that many of the ex
 Consider the air pollution data set we used earlier, and the **reduced** linear regression model discussed in class:
 
 ``` r
-# Correlated covariates
 x <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
 reduced <- lm(MORT ~ POOR + HC + NOX + HOUS + NONW, data=x)
 round( summary(reduced)$coef, 3)
@@ -211,16 +210,11 @@ for(i in 1:N) {
   mspe.st[i] <- mean( (airp$MORT - pr.st)^2 )
   mspe.f[i] <- mean( (airp$MORT - pr.f)^2 )
 }
-# pdf('MSPE-full-stepwise-16.pdf', bg='transparent')
 boxplot(mspe.st, mspe.f, names=c('Stepwise', 'Full'),
         col=c('gray60', 'hotpink'), ylab='MSPE')
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/mspe.air-1.png)
-
-``` r
-# dev.off()
-```
 
 We can also use the package `leaps` to run a more thorough search among all possible subsets. We do this with the air pollution data:
 
