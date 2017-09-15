@@ -16,13 +16,13 @@ We learned last week that one needs to be careful when using cross-validation (i
 Correlated covariates
 ---------------------
 
-Technological advances in recent decades have resulted in data being collected in a fundamentally different way from the way it was when "classical" statistical methods were proposed. Specifically, it is not at all uncommon to have data sets with an abundance of potentially useful explanatory variables. Sometimes the investigators are not sure which of them can be expected to be useful or meaningful. In many applications one finds data with many more variables than cases.
+Technological advances in recent decades have resulted in data being collected in a fundamentally different manner from the way it was done when most "classical" statistical methods were developed (early to mid 1900's). Specifically, it is now not at all uncommon to have data sets with an abundance of potentially useful explanatory variables (for example with more variables than observations). Sometimes the investigators are not sure which of the collected variables can be expected to be useful or meaningful.
 
 A consequence of this "wide net" data collection strategy is that many of the explanatory variables may be correlated with each other. In what follows we will illustrate some of the problems that this can cause both when training and interpreting models, and also with the resulting predictions.
 
-### Significant variables "dissappear"
+### Variables that were important may suddenly "dissappear"
 
-Consider the air pollution data set, and the fit to the **reduced** linear regression model used previously in class:
+Consider the air pollution data set we used earlier, and the **reduced** linear regression model discussed in class:
 
 ``` r
 # Correlated covariates
@@ -66,7 +66,7 @@ round( summary(full)$coef, 3)
     ## SO.            0.086      0.148   0.585    0.562
     ## HUMID          0.107      1.169   0.091    0.928
 
-Now we have many more parameters to estimate, and while two of them appear to be significantly different from zero (`NONW` and `PREC`), all the others seem to be redundant. In particular, note that the p-values for the individual test of hypotheses for 4 out of the 5 regression coefficients for the variables of the **reduced** model have now become not significant.
+In the **full** model there are many more parameters that need to be estimated, and while two of them appear to be significantly different from zero (`NONW` and `PREC`), all the others appear to be redundant. In particular, note that the p-values for the individual test of hypotheses for 4 out of the 5 regression coefficients for the variables of the **reduced** model have now become not significant.
 
 ``` r
 round( summary(full)$coef[ names(coef(reduced)), ], 3)
@@ -80,6 +80,8 @@ round( summary(full)$coef[ names(coef(reduced)), ], 3)
     ## HOUS          -0.651      1.768  -0.368    0.714
     ## NONW           4.460      1.327   3.360    0.002
 
+In other words, the coeffficients of explanatory variables that appeared to be relevant in one model may turn to be "not significant" when other variables are included. This could pose some challenges for interpreting the estimated parameters of the models.
+
 ### Why does this happen?
 
 Recall that the covariance matrix of the least squares estimator involves the inverse of (X'X), where X' denotes the transpose of the n x p matrix X (that contains each vector of explanatory variables as a row). It is easy to see that if two columns of X are linearly dependent, then X'X will be rank deficient. When two columns of X are "close" to being linearly dependent (e.g. their linear corrleation is high), then the matrix X'X will be ill-conditioned, and its inverse will have very large entries. This means that the estimated standard errors of the least squares estimator will be unduly large, resulting in non-significant test of hypotheses for each parameter separately, even if the global test for all of them simultaneously is highly significant.
@@ -90,12 +92,25 @@ Although in many applications one is interested in interpreting the parameters o
 
 ### What can we do?
 
-A commonly used strategy is to remove some explanatory variables from the model, leaving only non-redundant covariates. However, this is easier said than done. You have seen some strategies in other courses (stepwise variable selection, etc.) In coming weeks we will investigate other methods to deal with this problem.
+A commonly used strategy is to remove some explanatory variables from the model, leaving only non-redundant covariates. However, this is easier said than done. You will have seen some strategies in previous Statistics courses (e.g. stepwise variable selection). In coming weeks we will investigate other methods to deal with this problem.
 
-"Direct" comparison of models -- AIC
+Comparing models -- General strategy
 ------------------------------------
 
-A different approach to comparing competing models is to assess how "close" they are from the actual stochastic process generating the data (here "stochastic process" refers to the random mechanism that generated the data). In order to do this one needs:
+Suppose we have a set of competing models from which we want to choose the "best" one. In order to properly define our problem we need the following:
+
+-   a list of models to be considered;
+-   a numerical measure to compare any two models in our list;
+-   a strategy (algorithm, criterion) to navigate the set of models; and
+-   a criterion to stop the search.
+
+For example, in stepwise methods the models under consideration in each step are those that differ from the current model only by one coefficient (variable). The numerical measure used to compare models could be AIC, or Mallow's Cp, etc. The strategy is to only consider submodels with one fewer variable than the current one, and we stop if none of these "p-1" submodels is better than the current one, or we reached an empty model.
+
+Comparing models -- What is AIC?
+--------------------------------
+
+One intuitively sensible quantity that can be used to compare models is a distance measuring how "close" the distributions implied by these models
+are from the actual stochastic process generating the data (here "stochastic process" refers to the random mechanism that generated the observations). In order to do this weneed:
 
 1.  a distance / metric (or at least a "quasimetric") between models; and
 2.  a way of estimating this distance when the "true" model is unknown.
@@ -105,6 +120,6 @@ AIC provides an unbiased estimator of the Kullback-Leibler divergence between th
 Shrinkage methods / Ridge regression
 ------------------------------------
 
-To manage correlated explanatory variables...
+Stepwise methods are highly variable, and thus their predictions may not be very accurate (high MSPE). A different way to manage correlated explanatory variables (to "reduce" their presence in the model without removing them) is...
 
 ### Selecting the amount of shrinkage
