@@ -10,12 +10,18 @@ This is a list of strongly recommended **pre-class** reading. [JWHT13] and [HTF0
 
 * Week 1 (L1): Sections 2.1, 2.1.1, 2.1.2, 2.1.3, 2.2, 2.2.1 from [JWHT13], 2.4 and 2.6 
 	from [HTF09].
-* Week 2 (L2/3): (GoF vs Prediction error, Cross Validation) 5.1, 5.1.1, 5.1.2, 5.1.3 from [JWHT13]. Additionally: 7.1, 7.2, 7.3, 7.10 from [HTF09].
-* Week 3 (L4/5): (Correlated predictors, Feature selection, AIC) 6.1, 6.1.1, 6.1.2, 6.1.3, 6.2 and 6.2.1 from [JWHT13]. Additionally: 7.4, 7.5 from [HTF09].
-* Week 4 (L6/7): (Ridge regression, LASSO, Elastic Net) 6.2 (complete) from [JWHT13], 3.4, 3.8, 3.8.1, 3.8.2 from [HTF09]
-* Week 5 (L8/9): (Elastic Net, Smoothers (Local regression, Splines)) 7.1, 7.3, 7.4, 7.5, 7.6 from [JWHT13]
-* Week 6 (L10/11): (Curse of dimensionality, Regression Trees) 8.1, 8.1.1, 8.1.3, 8.1.4 from [JWHT13]
-* Week 7 (L12/13): (Bagging, Classification, LDA, Logistic Regression) 8.2, 8.2.1, 4.1, 4.2 from [JWHT13]
+* Week 2 (L2/3): Goodness of Fit vs Prediction error, Cross Validation
+	* 5.1, 5.1.1, 5.1.2, 5.1.3 from [JWHT13]. Additionally: 7.1, 7.2, 7.3, 7.10 from [HTF09].
+* Week 3 (L4/5): Correlated predictors, Feature selection, AIC
+	* 6.1, 6.1.1, 6.1.2, 6.1.3, 6.2 and 6.2.1 from [JWHT13]. Additionally: 7.4, 7.5 from [HTF09].
+* Week 4 (L6/7): Ridge regression, LASSO, Elastic Net
+	* 6.2 (complete) from [JWHT13], 3.4, 3.8, 3.8.1, 3.8.2 from [HTF09]
+* Week 5 (L8/9): Elastic Net, Smoothers (Local regression, Splines) 
+	* 7.1, 7.3, 7.4, 7.5, 7.6 from [JWHT13]
+* Week 6 (L10/11): Curse of dimensionality, Regression Trees
+	* 8.1, 8.1.1, 8.1.3, 8.1.4 from [JWHT13]
+* Week 7 (L12/13): Bagging, Classification, LDA, Logistic Regression
+	* 8.2, 8.2.1, 4.1, 4.2 from [JWHT13]
 
  
 <!-- 
