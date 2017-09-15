@@ -1,7 +1,7 @@
 STAT406 - Lecture 4 notes
 ================
 Matias Salibian-Barrera
-2017-09-14
+2017-09-15
 
 Lecture slides
 --------------
@@ -11,7 +11,11 @@ The lecture slides are [here](STAT406-17-lecture-4-preliminary.pdf).
 Estimating MSPE with CV when the model was built using the data
 ---------------------------------------------------------------
 
-We learned last week that one needs to be careful when using cross-validation (in any of its flavours--leave one out, K-fold, etc.) In particular, one needs to repeat (in every fold) **everything** that was done with the training set (selecting variables, looking at pairwise correlations, AIC values, etc.)
+Last week we learned that one needs to be careful when using cross-validation (in any of its flavours--leave one out, K-fold, etc.) Misuse of cross-validation is, unfortunately, not unusual. For [one example](https://doi.org/10.1073/pnas.102102699) see:
+
+> Ambroise, C. and McLachlan, G.J. (2002). Selection bias in gene extraction on the basis of microarray gene-expression data, PNAS, 2002, 99 (10), 6562-6566. DOI: 10.1073/pnas.102102699
+
+In particular, for every fold one needs to repeat **everything** that was done with the training set (selecting variables, looking at pairwise correlations, AIC values, etc.)
 
 Correlated covariates
 ---------------------
@@ -88,7 +92,7 @@ Recall that the covariance matrix of the least squares estimator involves the in
 
 ### Why is this a problem if we are interested in prediction?
 
-Although in many applications one is interested in interpreting the parameters of the model, even if one is only trying to fit / train a model to do predictions, highly variable parameter estimators will typically result in a noticeable loss of prediction accuracy. This can be easily seen from the bias / variance factorization of the mean squared prediction error (MSPE) mentioned in class. Hence, better predictions can be obtained if one uses less-variable parameter estimators.
+Although in many applications one is interested in interpreting the parameters of the model, even if one is only trying to fit / train a model to do predictions, highly variable parameter estimators will typically result in a noticeable loss of prediction accuracy. This can be easily seen from the bias / variance factorization of the mean squared prediction error (MSPE) mentioned in class. Hence, better predictions can be obtained if one uses less-variable parameter (or regression function) estimators.
 
 ### What can we do?
 
@@ -104,13 +108,12 @@ Suppose we have a set of competing models from which we want to choose the "best
 -   a strategy (algorithm, criterion) to navigate the set of models; and
 -   a criterion to stop the search.
 
-For example, in stepwise methods the models under consideration in each step are those that differ from the current model only by one coefficient (variable). The numerical measure used to compare models could be AIC, or Mallow's Cp, etc. The strategy is to only consider submodels with one fewer variable than the current one, and we stop if none of these "p-1" submodels is better than the current one, or we reached an empty model.
+For example, in stepwise methods the models under consideration in each step are those that differ from the current model only by one coefficient (variable). The numerical measure used to compare models could be AIC, or Mallow's Cp, etc. The strategy is to only consider submodels with one fewer variable than the current one, and we stop if either none of these "p-1" submodels is better than the current one, or we reach an empty model.
 
 Comparing models -- What is AIC?
 --------------------------------
 
-One intuitively sensible quantity that can be used to compare models is a distance measuring how "close" the distributions implied by these models
-are from the actual stochastic process generating the data (here "stochastic process" refers to the random mechanism that generated the observations). In order to do this weneed:
+One intuitively sensible quantity that can be used to compare models is a distance measuring how "close" the distributions implied by these models are from the actual stochastic process generating the data (here "stochastic process" refers to the random mechanism that generated the observations). In order to do this we need:
 
 1.  a distance / metric (or at least a "quasimetric") between models; and
 2.  a way of estimating this distance when the "true" model is unknown.
