@@ -24,12 +24,13 @@ set
 dat <- read.table('fallacy.dat', header=TRUE, sep=',')
 ```
 This is the same data used in class. In this example
-we know what is the "true" model, and thus we also know
-what is the "optimal" predictor we should 
-train using this data. 
-
-However, we now decide to build a good
-linear model using forward stepwise (AIC-based):
+we know what the "true" model is, and thus we also know
+what the "optimal" predictor is. 
+However, let us ignore this knowledge, and build a 
+linear model instead. 
+Given how many variables are available, we use
+forward stepwise (AIC-based) to select a good subset of
+them to include in our linear model:
 ```{r fallacy}
 library(MASS)
 p <- ncol(dat)
@@ -37,7 +38,7 @@ null <- lm(Y~1, data=dat)
 full <- lm(Y~., data=dat) # needed for stepwise
 step.lm <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
 ```
-Without thinking too much, we use 5-fold CV (ten runs) 
+Without thinking too much, we use 50 runs of 5-fold CV (ten runs) 
 to compare the MSPE of the 
 **null** model (which we know is "true") and the
 one we obtained using forward stepwise:
@@ -45,7 +46,7 @@ one we obtained using forward stepwise:
 n <- nrow(dat)
 ii <- (1:n) %% 5 + 1
 set.seed(17)
-N <- 10
+N <- 50
 mspe.n <- mspe.st <- rep(0, N)
 for(i in 1:N) {
   ii <- sample(ii)

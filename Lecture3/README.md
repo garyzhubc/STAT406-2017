@@ -1,7 +1,7 @@
 STAT406 - Lecture 3 notes
 ================
 Matias Salibian-Barrera
-2017-09-14
+2017-09-15
 
 Lecture slides
 --------------
@@ -18,9 +18,7 @@ In this document we study how to perform cross-validation when the model was sel
 dat <- read.table('fallacy.dat', header=TRUE, sep=',')
 ```
 
-This is the same data used in class. In this example we know what is the "true" model, and thus we also know what is the "optimal" predictor we should train using this data.
-
-However, we now decide to build a good linear model using forward stepwise (AIC-based):
+This is the same data used in class. In this example we know what the "true" model is, and thus we also know what the "optimal" predictor is. However, let us ignore this knowledge, and build a linear model instead. Given how many variables are available, we use forward stepwise (AIC-based) to select a good subset of them to include in our linear model:
 
 ``` r
 library(MASS)
@@ -30,13 +28,13 @@ full <- lm(Y~., data=dat) # needed for stepwise
 step.lm <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
 ```
 
-Without thinking too much, we use 5-fold CV (ten runs) to compare the MSPE of the **null** model (which we know is "true") and the one we obtained using forward stepwise:
+Without thinking too much, we use 50 runs of 5-fold CV (ten runs) to compare the MSPE of the **null** model (which we know is "true") and the one we obtained using forward stepwise:
 
 ``` r
 n <- nrow(dat)
 ii <- (1:n) %% 5 + 1
 set.seed(17)
-N <- 10
+N <- 50
 mspe.n <- mspe.st <- rep(0, N)
 for(i in 1:N) {
   ii <- sample(ii)
@@ -59,14 +57,14 @@ summary(mspe.st)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##  0.6533  0.6557  0.6600  0.6675  0.6700  0.7015
+    ##  0.5988  0.6528  0.6643  0.6745  0.7033  0.7682
 
 ``` r
 summary(mspe.n)
 ```
 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-    ##   1.047   1.052   1.058   1.058   1.061   1.079
+    ##   1.043   1.049   1.055   1.057   1.061   1.087
 
 -   **Something is wrong!** What? Why?
 -   What would you change above to obtain reliable estimates for the MSPE of the model selected with the stepwise approach?
