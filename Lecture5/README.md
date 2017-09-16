@@ -1,7 +1,7 @@
 STAT406 - Lecture 5 notes
 ================
 Matias Salibian-Barrera
-2017-09-15
+2017-09-16
 
 Lecture slides
 --------------
@@ -11,7 +11,35 @@ The lecture slides are [here](STAT406-17-lecture-5-preliminary.pdf).
 Ridge regression
 ----------------
 
-We use Ridge Regression with the air pollution data to obtain a more stable predictor.
+Variable selection methods like stepwise can be highly variable. To illustrate this issue consider the following simple experiment. As in the previous lecture, we apply stepwise on 5 randomly selected folds of the data, and look at the models selected in each of them.
+
+``` r
+airp <- read.table('../lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
+library(MASS)
+k <- 5
+n <- nrow(airp)
+set.seed(123456)
+ii <- sample( (1:n) %% k + 1 )
+for(j in 1:k) {
+  x0 <- airp[ii != j, ]
+  null0 <- lm(MORT ~ 1, data=x0)
+  full0 <- lm(MORT ~ ., data=x0) # needed for stepwise
+  step.lm0 <- stepAIC(null0, scope=list(lower=null0, upper=full0), trace=FALSE)
+  print(formula(step.lm0)[[3]])
+}
+```
+
+    ## NONW + JANT + EDUC + SO. + PREC + JULT
+    ## NONW + PREC + SO. + DENS + HOUS + WWDRK
+    ## NONW + EDUC + SO. + PREC + JANT + JULT
+    ## NONW + JANT + SO. + PREC + DENS + JULT
+    ## NONW + EDUC + SO. + JANT + HUMID + POPN
+
+Although many variables appear in more than one model, only `NONW` and `SO.` are in all of them, and `JANT` and `PREC` in 4 out of the 5. There are also several that appear in only one model (`HOUS`, `WWDRK` and `POPN`). <!-- `EDUC` 3 --> <!-- `JULT` in 3,  --> <!-- `DENS` in 2 --> <!-- and  --> This variability may in turn impact (negatively) the accuracy of the resulting predictions.
+
+A different approach to dealing with potentially correlated explanatory variables (with the goal of obtaining less variable / more accurate predictions) is to "regularize" the parameter estimates. In other words we modify the optimization problem that defines the parameter estimators (in the case of linear regression fits we tweak the least squares problem) to limit their size (in fact restricting them to be in a bounded and possibly small subset of the parameter space).
+
+The first proposal for a regularized / penalized estimator for linear regression models is Ridge Regression. We will use the function `glmnet` in package `glmnet` to compute the Ridge Regression estimator. Note that this function implements a larger family of regularized estimators, and in order to obtain a Ridge Regression estimator we need to set the argument `alpha = 0` of `glmnet()`. <!-- We use Ridge Regression with the air pollution data to obtain a --> <!-- more stable predictor. --> We also specify a range of possible values of the penalty coefficient (below we use a grid of 50 values between exp(-3) and exp(10)).
 
 ``` r
 airp <- read.table('../lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
@@ -23,10 +51,15 @@ xm <- as.matrix(airp[, -16])
 lambdas <- exp( seq(-3, 10, length=50))
 a <- glmnet(x=xm, y=y, lambda=rev(lambdas),
             family='gaussian', alpha=0)
+```
+
+The returned object contains the estimated regression coefficients for each possible value of the regularization parameter. We can look at them using the `plot` method for objects of class `glmnet` as follows:
+
+``` r
 plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(-20, 20))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/ridge.air1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/ridge.plot-1.png)
 
 5-fold CV
 
@@ -78,6 +111,13 @@ xm.svd <- svd(xm) #  scale(xm, scale=FALSE))
 ```
 
     ## [1] 13.15941
+
+``` r
+xm.svd <- svd(scale(xm, scale=FALSE))
+(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
+```
+
+    ## [1] 13.05737
 
 Compare the MSPE of the different models
 
