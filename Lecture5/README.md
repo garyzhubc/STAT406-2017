@@ -61,7 +61,9 @@ plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(-20,
 
 ![](README_files/figure-markdown_github-ascii_identifiers/ridge.plot-1.png)
 
-5-fold CV
+### Selecting the level of regularization
+
+Different values of the penalization parameter will typically yield estimators with varying predictive accuracies. To select a good level of regularization we estimate the MSPE of the estimator resulting from each value of the penalization parameter. One way to do this is to run K-fold cross validation for each value of the penalty. The `glmnet` package provides a built-in function to do this, and a `plot` method to display the results:
 
 ``` r
 # run 5-fold CV
@@ -72,17 +74,13 @@ plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/ridge.cv-1.png)
 
-5-fold CV again
+In the above plot the red dots are the estimated MSPE's for each value of the penalty, and the vertical lines mark plus/minus one (estimated) standard deviations (for each of those estimated MSPE's). The `plot` method will also mark the optimal value of the regularization parameter, and also the largest one for which the estimated MSPE is within 1-SD of the optimal. The latter is meant to provide a more regularized estimator with estimated MSPE within the error-margin of our estimated minimum.
 
-``` r
-set.seed(23)
-tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, family='gaussian')
-plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
-```
+Note, however, that the above "analysis" is random (because of the intrinsic randomness of K-fold CV). If we run it again, we will most likely get different results. In many cases, however, the results will be qualitatively similar. If we run 5-fold CV again for this data get the following plot:
 
 ![](README_files/figure-markdown_github-ascii_identifiers/ridge.cv2-1.png)
 
-What is the optimal lambda?. Average over several runs?
+Note that both plots are similar, but not equal. It would be a good idea to repeat this a few times and explore how much variability is involved. If one were interested in selecting one value of the penalization parameter that was more stable than that obtained from a single 5-fold CV run, one could run it several times and take the average of the estimated optimal values. For example:
 
 ``` r
 set.seed(123)
@@ -102,7 +100,9 @@ log(op.la)
 
     ## [1] 2.340994
 
-Effective degrees of freedom
+This value is reasonably close to the ones we saw in the plots above.
+
+#### Effective degrees of freedom
 
 ``` r
 # compute EDF
@@ -119,7 +119,10 @@ xm.svd <- svd(scale(xm, scale=FALSE))
 
     ## [1] 13.05737
 
-Compare the MSPE of the different models
+Comparing predictions
+---------------------
+
+We now run a cross-validation experiment to compare the MSPE of 3 models: the **full** model, the one selected by **stepwise** and the **ridge regression** one.
 
 ``` r
 library(MASS)
@@ -153,3 +156,9 @@ mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/ridge.mspe-1.png)
+
+#### A more stable Ridge Regression?
+
+Here we try to obtain a ridge regression estimator with more stable predictions by using the average optimal penalty value using 20 runs. The improvement does not appear to be substantial.
+
+![](README_files/figure-markdown_github-ascii_identifiers/stableridge.mspe-1.png)

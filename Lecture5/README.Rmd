@@ -89,9 +89,14 @@ follows:
 plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(-20, 20))
 ```
 
+### Selecting the level of regularization
 
-
-5-fold CV
+Different values of the penalization parameter will typically yield estimators with
+varying predictive accuracies. To select a good level of regularization we estimate
+the MSPE of the estimator resulting from each value of the penalization parameter.
+One way to do this is to run K-fold cross validation for each value of
+the penalty. The `glmnet` package provides a built-in function to do this, 
+and a `plot` method to display the results:
 
 ```{r ridge.cv, fig.width=5, fig.height=5}
 # run 5-fold CV
@@ -100,17 +105,29 @@ tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, family='gaussian'
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-5-fold CV again
+In the above plot the red dots are the estimated MSPE's for each value of the
+penalty, and the vertical lines mark plus/minus one (estimated) standard deviations (for each
+of those estimated MSPE's). The `plot` method will also mark the optimal value of
+the regularization parameter, and also the largest one for which the estimated MSPE
+is within 1-SD of the optimal. The latter is meant to provide a more regularized
+estimator with estimated MSPE within the error-margin of our estimated minimum.
 
-```{r ridge.cv2, fig.width=5, fig.height=5}
+Note, however, that the above "analysis" is random (because of the intrinsic randomness of
+K-fold CV). If we run it again, we will most likely get different results. In many cases, 
+however, the results will be qualitatively similar. If we run 5-fold CV again for this
+data get the following plot:
+
+```{r ridge.cv2, fig.width=5, fig.height=5, echo=FALSE}
 set.seed(23)
 tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, family='gaussian')
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-
-
-What is the optimal lambda?. Average over several runs?
+Note that both plots are similar, but not equal. It would be a good idea to repeat this
+a few times and explore how much variability is involved. If one were interested
+in selecting one value of the penalization parameter that was more stable than 
+that obtained from a single 5-fold CV run, one could run it several times and
+take the average of the estimated optimal values. For example:
 ```{r ridge.opt}
 set.seed(123)
 op.la <- 0
@@ -121,8 +138,9 @@ for(j in 1:20) {
 (op.la <- op.la / 20)
 log(op.la)
 ```
+This value is reasonably close to the ones we saw in the plots above. 
 
-Effective degrees of freedom
+#### Effective degrees of freedom
 
 ```{r ridge2}
 # compute EDF
@@ -132,7 +150,12 @@ xm.svd <- svd(scale(xm, scale=FALSE))
 (est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
 ```
 
-Compare the MSPE of the different models
+## Comparing predictions 
+
+We now run a cross-validation experiment to compare the 
+MSPE of 3 models: the **full** model, the one
+selected by **stepwise** and the **ridge regression**
+one. 
 
 ```{r ridge.mspe}
 library(MASS)
@@ -161,6 +184,44 @@ for(i in 1:N) {
 }
 boxplot(mspe.ri, mspe.st, mspe.f, names=c('Ridge', 'Stepwise', 'Full'), 
         col=c('gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
+        main='Credit - 10 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
+mtext(expression(hat(MSPE)), side=2, line=2.5)
+```
+
+#### A more stable Ridge Regression?
+
+Here we try to obtain a ridge regression estimator
+with more stable predictions by using the 
+average optimal penalty value using 20 runs. 
+The improvement does not appear to be 
+substantial.
+
+```{r stableridge.mspe, echo=FALSE}
+library(MASS)
+n <- nrow(xm)
+k <- 5
+ii <- (1:n) %% k + 1
+set.seed(123)
+N <- 100
+mspe.ri2 <- rep(0, N)
+for(i in 1:N) {
+  ii <- sample(ii)
+  pr.ri2  <- rep(0, n)
+  for(j in 1:k) {
+    op.la <- 0
+    for(h in 1:20) {
+      tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, family='gaussian')
+      op.la <- op.la + tmp$lambda.min # tmp$lambda.1se
+    }
+    op.la <- op.la / 20
+    tmp.ri <- cv.glmnet(x=xm[ii != j, ], y=y[ii != j], lambda=lambdas, nfolds=5, 
+                        alpha=0, family='gaussian')
+    pr.ri2[ ii == j ] <- predict(tmp.ri, s=op.la, newx=xm[ii==j,])
+  }
+  mspe.ri2[i] <- mean( (airp$MORT - pr.ri2)^2 )
+}
+boxplot(mspe.ri2, mspe.ri, mspe.st, mspe.f, names=c('Stable R', 'Ridge', 'Stepwise', 'Full'), 
+        col=c('steelblue', 'gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
         main='Credit - 10 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
