@@ -1,7 +1,7 @@
 STAT406 - Lecture 5 notes
 ================
 Matias Salibian-Barrera
-2017-09-16
+2017-09-17
 
 Lecture slides
 --------------
@@ -162,3 +162,7 @@ mtext(expression(hat(MSPE)), side=2, line=2.5)
 Here we try to obtain a ridge regression estimator with more stable predictions by using the average optimal penalty value using 20 runs. The improvement does not appear to be substantial.
 
 ![](README_files/figure-markdown_github-ascii_identifiers/stableridge.mspe-1.png)
+
+### An important limitation of Ridge Regression
+
+Ridge Regression typically yields estimators with more accurate (less variable) predictions, specially when there is noticeable correlation among covariates. However, it is important to note that Ridge Regression does not select variables, and in that sense it does not "replace" methods like stepwise when the interest is in using a smaller number of explanatory variables. Furthermore, the interpretation of the Ridge Regression coefficient estimates is generally difficult. LASSO regression estimates were proposed to address these two issues (more stable predictions when correlated covariates are present **and** variable selection) simultaneously.

@@ -226,3 +226,16 @@ boxplot(mspe.ri2, mspe.ri, mspe.st, mspe.f, names=c('Stable R', 'Ridge', 'Stepwi
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
+### An important limitation of Ridge Regression
+
+Ridge Regression typically yields estimators with more accurate (less variable) 
+predictions, specially when there is noticeable correlation among covariates. 
+However, it is important to note that Ridge Regression does not select 
+variables, and in that sense it does not "replace" methods like stepwise when
+the interest is in using a smaller number of explanatory variables. Furthermore,
+the interpretation of the Ridge Regression coefficient estimates is 
+generally difficult. LASSO regression estimates were proposed to 
+address these two issues (more stable predictions when correlated 
+covariates are present **and** variable selection) simultaneously. 
+
+
