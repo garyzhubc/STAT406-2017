@@ -157,7 +157,7 @@ MSPE of 3 models: the **full** model, the one
 selected by **stepwise** and the **ridge regression**
 one. 
 
-```{r ridge.mspe}
+```{r ridge.mspe, fig.width=5, fig.height=5}
 library(MASS)
 n <- nrow(xm)
 k <- 5
@@ -184,7 +184,7 @@ for(i in 1:N) {
 }
 boxplot(mspe.ri, mspe.st, mspe.f, names=c('Ridge', 'Stepwise', 'Full'), 
         col=c('gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
-        main='Credit - 10 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
+        main='Air pollution - 100 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
@@ -196,7 +196,7 @@ average optimal penalty value using 20 runs.
 The improvement does not appear to be 
 substantial.
 
-```{r stableridge.mspe, echo=FALSE}
+```{r stableridge.mspe, echo=FALSE, fig.width=5, fig.height=5}
 library(MASS)
 n <- nrow(xm)
 k <- 5
@@ -222,7 +222,7 @@ for(i in 1:N) {
 }
 boxplot(mspe.ri2, mspe.ri, mspe.st, mspe.f, names=c('Stable R', 'Ridge', 'Stepwise', 'Full'), 
         col=c('steelblue', 'gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
-        main='Credit - 10 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
+        main='Air pollution - 100 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
@@ -231,10 +231,90 @@ mtext(expression(hat(MSPE)), side=2, line=2.5)
 In some cases one may not need to select a subset of explanatory
 variables, and in fact, doing so may affect negatively the accuracy of
 the resulting predictions. In what follows we discuss such an example. 
-Consider the credit card data set. 
+Consider the credit card data set that contains information
+on credit card users. The interest is in predicting the 
+balance carried by a client. We first load the data, and to
+simplify the presentation here we consider only the numerical
+explanatory variables:
+```{r credit1}
+x <- read.table('Credit.csv', sep=',', header=TRUE, row.names=1)
+x <- x[, c(1:6, 11)]
+```
+There are 6 available covariates, and a stepwise search selects 
+a model with 5 of them (discarding `Education`):
+```{r credit2, warning=FALSE, message=FALSE}
+library(MASS)
+null <- lm(Balance ~ 1, data=x)
+full <- lm(Balance ~ ., data=x)
+(tmp.st <- stepAIC(null, scope=list(lower=null, upper=full), trace=0))
+```
+It is an easy exercise to check that the MSPE of this
+smaller model is in fact worse than the one for the **full** one:
 
+```{r credit3, fig.width=5, fig.height=5, echo=FALSE}
+n <- nrow(x)
+k <- 5
+ii <- (1:n) %% k + 1
+set.seed(123)
+N <- 100
+mspe.st <- mspe.f <- rep(0, N)
+for(i in 1:N) {
+  ii <- sample(ii)
+  pr.f <- pr.st <- rep(0, n)
+  for(j in 1:k) {
+    null <- lm(Balance ~ 1, data=x[ii != j, ])
+    full <- lm(Balance ~ ., data=x[ii != j, ])
+    tmp.st <- stepAIC(null, scope=list(lower=null, upper=full), trace=0)
+    pr.st[ ii == j ] <- predict(tmp.st, newdata=x[ii==j,])
+    pr.f[ ii == j ] <- predict(full, newdata=x[ii==j,])
+  }
+  mspe.st[i] <- mean( (x$Balance - pr.st)^2 )
+  mspe.f[i] <- mean( (x$Balance - pr.f)^2 )
+}
+boxplot(mspe.st, mspe.f, names=c('Stepwise', 'Full'),
+        col=c('tomato', 'springgreen'), cex.axis=1.5,
+        cex.lab=1.5, main='Credit - 100 runs 5-fold CV', cex.main=2)
+mtext(expression(hat(MSPE)), side=2, line=2.5)
+```
 
+Using ridge regression instead of stepwise to prevent 
+the negative effect of possible correlations among the
+covariates yields a slight improvement (over the **full** model), 
+but it is not clear the gain is worth the effort. 
 
+```{r credit4, fig.width=5, fig.height=5, echo=FALSE}
+library(glmnet)
+y <- as.vector(x$Balance)
+xm <- as.matrix(x[, -7])
+lambdas <- exp( seq(-3, 10, length=50))
+n <- nrow(xm)
+k <- 5
+ii <- (1:n) %% k + 1
+set.seed(123)
+N <- 100
+mspe.st <- mspe.ri <- mspe.f <- rep(0, N)
+for(i in 1:N) {
+  ii <- sample(ii)
+  pr.f <- pr.ri <- pr.st <- rep(0, n)
+  for(j in 1:k) {
+    tmp.ri <- cv.glmnet(x=xm[ii != j, ], y=y[ii != j], lambda=lambdas,
+                     nfolds=5, alpha=0, family='gaussian')
+    null <- lm(Balance ~ 1, data=x[ii != j, ])
+    full <- lm(Balance ~ ., data=x[ii != j, ])
+    tmp.st <- stepAIC(null, scope=list(lower=null, upper=full), trace=0)
+    pr.ri[ ii == j ] <- predict(tmp.ri, s='lambda.min', newx=xm[ii==j,])
+    pr.st[ ii == j ] <- predict(tmp.st, newdata=x[ii==j,])
+    pr.f[ ii == j ] <- predict(full, newdata=x[ii==j,])
+  }
+  mspe.ri[i] <- mean( (x$Balance - pr.ri)^2 )
+  mspe.st[i] <- mean( (x$Balance - pr.st)^2 )
+  mspe.f[i] <- mean( (x$Balance - pr.f)^2 )
+}
+boxplot(mspe.ri, mspe.st, mspe.f, names=c('Ridge', 'Stepwise',
+'Full'), col=c('gray80', 'tomato', 'springgreen'), cex.axis=1.5,
+cex.lab=1.5, main='Credit - 100 runs 5-fold CV', cex.main=2)
+mtext(expression(hat(MSPE)), side=2, line=2.5)
+```
 
 ## An important limitation of Ridge Regression
 

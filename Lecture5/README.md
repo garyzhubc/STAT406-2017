@@ -1,7 +1,7 @@
 STAT406 - Lecture 5 notes
 ================
 Matias Salibian-Barrera
-2017-09-17
+2017-09-18
 
 Lecture slides
 --------------
@@ -151,7 +151,7 @@ for(i in 1:N) {
 }
 boxplot(mspe.ri, mspe.st, mspe.f, names=c('Ridge', 'Stepwise', 'Full'), 
         col=c('gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
-        main='Credit - 10 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
+        main='Air pollution - 100 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
@@ -163,6 +163,44 @@ Here we try to obtain a ridge regression estimator with more stable predictions 
 
 ![](README_files/figure-markdown_github-ascii_identifiers/stableridge.mspe-1.png)
 
-### An important limitation of Ridge Regression
+### An example where one may not need to select variables
+
+In some cases one may not need to select a subset of explanatory variables, and in fact, doing so may affect negatively the accuracy of the resulting predictions. In what follows we discuss such an example. Consider the credit card data set that contains information on credit card users. The interest is in predicting the balance carried by a client. We first load the data, and to simplify the presentation here we consider only the numerical explanatory variables:
+
+``` r
+x <- read.table('Credit.csv', sep=',', header=TRUE, row.names=1)
+x <- x[, c(1:6, 11)]
+```
+
+There are 6 available covariates, and a stepwise search selects a model with 5 of them (discarding `Education`):
+
+``` r
+library(MASS)
+null <- lm(Balance ~ 1, data=x)
+full <- lm(Balance ~ ., data=x)
+(tmp.st <- stepAIC(null, scope=list(lower=null, upper=full), trace=0))
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = Balance ~ Rating + Income + Limit + Age + Cards, 
+    ##     data = x)
+    ## 
+    ## Coefficients:
+    ## (Intercept)       Rating       Income        Limit          Age  
+    ##   -449.3610       2.0224      -7.5621       0.1286      -0.8883  
+    ##       Cards  
+    ##     11.5527
+
+It is an easy exercise to check that the MSPE of this smaller model is in fact worse than the one for the **full** one:
+
+![](README_files/figure-markdown_github-ascii_identifiers/credit3-1.png)
+
+Using ridge regression instead of stepwise to prevent the negative effect of possible correlations among the covariates yields a slight improvement (over the **full** model), but it is not clear the gain is worth the effort.
+
+![](README_files/figure-markdown_github-ascii_identifiers/credit4-1.png)
+
+An important limitation of Ridge Regression
+-------------------------------------------
 
 Ridge Regression typically yields estimators with more accurate (less variable) predictions, specially when there is noticeable correlation among covariates. However, it is important to note that Ridge Regression does not select variables, and in that sense it does not "replace" methods like stepwise when the interest is in using a smaller number of explanatory variables. Furthermore, the interpretation of the Ridge Regression coefficient estimates is generally difficult. LASSO regression estimates were proposed to address these two issues (more stable predictions when correlated covariates are present **and** variable selection) simultaneously.
