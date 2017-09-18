@@ -226,7 +226,17 @@ boxplot(mspe.ri2, mspe.ri, mspe.st, mspe.f, names=c('Stable R', 'Ridge', 'Stepwi
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
-### An important limitation of Ridge Regression
+### An example where one may not need to select variables
+
+In some cases one may not need to select a subset of explanatory
+variables, and in fact, doing so may affect negatively the accuracy of
+the resulting predictions. In what follows we discuss such an example. 
+Consider the credit card data set. 
+
+
+
+
+## An important limitation of Ridge Regression
 
 Ridge Regression typically yields estimators with more accurate (less variable) 
 predictions, specially when there is noticeable correlation among covariates. 
