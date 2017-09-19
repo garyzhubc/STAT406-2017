@@ -11,7 +11,13 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-4-preliminary.pdf).
+* The lecture slides are [here](STAT406-17-lecture-4.pdf).
+* A reference paper for a formal derivation of AIC: 
+Cavanaugh, J.E. (1997). Unifying the derivations for the Akaike 
+and corrected Akaike information criteria. 
+*Statistics & Probability Letters*, **33**(2), 201-208. 
+[DOI: 10.1016/S0167-7152(96)00128-9](https://doi.org/10.1016/S0167-7152(96)00128-9)
+
 
 ## Estimating MSPE with CV when the model was built using the data
 
@@ -224,7 +230,7 @@ boxplot(mspe.t, mspe.st, mspe.f, names=c('True', 'Stepwise', 'Full'),
         col=c('tomato', 'gray60', 'hotpink'), ylab='MSPE')
 ```
 
-### stepwise applied to the "air pollution" data 
+### Stepwise applied to the "air pollution" data 
 
 We now use stepwise on the air pollution data to select a model, and
 estimate its MSPE using 5-fold CV. We compare the predictions of 
@@ -324,7 +330,7 @@ the one found with a "proper" (exhaustive) search, as that returned by
 `leaps`. This is intriguing, but we will see the same phenomenon 
 occur in different contexts later in the course. 
 
-### An example where one may not need to select variables
+## An example where one may not need to select variables
 
 In some cases one may not need to select a subset of explanatory
 variables, and in fact, doing so may affect negatively the accuracy of
@@ -371,7 +377,7 @@ for(i in 1:N) {
 }
 boxplot(mspe.st, mspe.f, names=c('Stepwise', 'Full'),
         col=c('tomato', 'springgreen'), cex.axis=1.5,
-        cex.lab=1.5, main='Credit - 100 runs 5-fold CV', cex.main=2)
+        cex.lab=1.5, cex.main=2)
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 

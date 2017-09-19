@@ -6,7 +6,8 @@ Matias Salibian-Barrera
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-4-preliminary.pdf).
+-   The lecture slides are [here](STAT406-17-lecture-4.pdf).
+-   A reference paper for a formal derivation of AIC: Cavanaugh, J.E. (1997). Unifying the derivations for the Akaike and corrected Akaike information criteria. *Statistics & Probability Letters*, **33**(2), 201-208. [DOI: 10.1016/S0167-7152(96)00128-9](https://doi.org/10.1016/S0167-7152(96)00128-9)
 
 Estimating MSPE with CV when the model was built using the data
 ---------------------------------------------------------------
@@ -166,7 +167,7 @@ Note that since this is a synthetic data set, we can also estimate the MSPE of t
 
 ![](README_files/figure-markdown_github-ascii_identifiers/cv2-1.png)
 
-### stepwise applied to the "air pollution" data
+### Stepwise applied to the "air pollution" data
 
 We now use stepwise on the air pollution data to select a model, and estimate its MSPE using 5-fold CV. We compare the predictions of this model with that of the full model.
 
@@ -313,7 +314,8 @@ boxplot(mspe.st, mspe.f, mspe.l, names=c('Stepwise', 'Full', 'Leaps'),
 
 Note that a "suboptimal" model (stepwise) seems to be better than the one found with a "proper" (exhaustive) search, as that returned by `leaps`. This is intriguing, but we will see the same phenomenon occur in different contexts later in the course.
 
-### An example where one may not need to select variables
+An example where one may not need to select variables
+-----------------------------------------------------
 
 In some cases one may not need to select a subset of explanatory variables, and in fact, doing so may affect negatively the accuracy of the resulting predictions. In what follows we discuss such an example. Consider the credit card data set that contains information on credit card users. The interest is in predicting the balance carried by a client. We first load the data, and to simplify the presentation here we consider only the numerical explanatory variables:
 

@@ -151,7 +151,7 @@ for(i in 1:N) {
 }
 boxplot(mspe.ri, mspe.st, mspe.f, names=c('Ridge', 'Stepwise', 'Full'), 
         col=c('gray80', 'tomato', 'springgreen'), cex.axis=1.5, cex.lab=1.5, 
-        main='Air pollution - 100 runs 5-fold CV', cex.main=2, ylim=c(1300, 3000))
+        cex.main=2, ylim=c(1300, 3000))
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
