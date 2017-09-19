@@ -1,7 +1,7 @@
 STAT406 - Lecture 5 notes
 ================
 Matias Salibian-Barrera
-2017-09-18
+2017-09-19
 
 Lecture slides
 --------------

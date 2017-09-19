@@ -1,7 +1,7 @@
 STAT406 - Lecture 4 notes
 ================
 Matias Salibian-Barrera
-2017-09-15
+2017-09-19
 
 Lecture slides
 --------------
@@ -312,6 +312,39 @@ boxplot(mspe.st, mspe.f, mspe.l, names=c('Stepwise', 'Full', 'Leaps'),
 ![](README_files/figure-markdown_github-ascii_identifiers/mspe.leaps.cv-1.png)
 
 Note that a "suboptimal" model (stepwise) seems to be better than the one found with a "proper" (exhaustive) search, as that returned by `leaps`. This is intriguing, but we will see the same phenomenon occur in different contexts later in the course.
+
+### An example where one may not need to select variables
+
+In some cases one may not need to select a subset of explanatory variables, and in fact, doing so may affect negatively the accuracy of the resulting predictions. In what follows we discuss such an example. Consider the credit card data set that contains information on credit card users. The interest is in predicting the balance carried by a client. We first load the data, and to simplify the presentation here we consider only the numerical explanatory variables:
+
+``` r
+x <- read.table('Credit.csv', sep=',', header=TRUE, row.names=1)
+x <- x[, c(1:6, 11)]
+```
+
+There are 6 available covariates, and a stepwise search selects a model with 5 of them (discarding `Education`):
+
+``` r
+library(MASS)
+null <- lm(Balance ~ 1, data=x)
+full <- lm(Balance ~ ., data=x)
+(tmp.st <- stepAIC(null, scope=list(lower=null, upper=full), trace=0))
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = Balance ~ Rating + Income + Limit + Age + Cards, 
+    ##     data = x)
+    ## 
+    ## Coefficients:
+    ## (Intercept)       Rating       Income        Limit          Age  
+    ##   -449.3610       2.0224      -7.5621       0.1286      -0.8883  
+    ##       Cards  
+    ##     11.5527
+
+It is an easy exercise to check that the MSPE of this smaller model is in fact worse than the one for the **full** one:
+
+![](README_files/figure-markdown_github-ascii_identifiers/credit3-1.png)
 
 <!-- ## Shrinkage methods / Ridge regression  -->
 <!-- Stepwise methods are highly variable, and thus their predictions may not  -->

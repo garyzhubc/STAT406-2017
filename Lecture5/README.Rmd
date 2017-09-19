@@ -316,6 +316,9 @@ cex.lab=1.5, main='Credit - 100 runs 5-fold CV', cex.main=2)
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
+
+
+
 ## An important limitation of Ridge Regression
 
 Ridge Regression typically yields estimators with more accurate (less variable) 
