@@ -18,18 +18,31 @@ The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
 A different approach to perform some type of variable selection that can be
 more stable than stepwise methods is to use an L1 regularization term
 (instead of the L2 one used in ridge regression). Notwidthstanding the
-geometric "interpretation" of the effect of using a L1 penalty, 
-it can be shown that the L1 norm is, in some cases, a convex relaxation
+geometric "interpretation" of the effect of using an L1 penalty, 
+it can also be argued that the L1 norm is, in some cases, a convex relaxation
 (envelope) of the "L0" norm (the number of non-zero elements). As a result,
-the solutions of the LASSO will typically have some 
-of their entries equal to zero, and this is generally used to 
-select a subset of variables to include in a model. 
+estimators based on the LASSO (L1-regularized regression) will typically have some 
+of their entries equal to zero. 
+
+As the value of the penalty parameter increases the solutions change
+from the usual least squares estimator (when the regularization parameter equals
+to zero) to a vector of all zeroes (when the penalty constant is sufficiently 
+large). This sequence of solutions is generally used 
+as a way to rank (or sequence) the explanatory variables, listing them
+in the order in which they "enter" (their estimated coefficient changes from 
+zero to a non-zero value). 
+
+Of course we can also try to estimate the MSPE of each solution (on a finite
+grid of values of the penalty parameter) and select one estimator with
+good prediction properties. If any of the 
+corresponding estimated regression coefficients are exactly zero it
+is commonly said that those explanatory variables were not selected to
+enter the model. 
 
 There are two main implementation of the LASSO in `R`, one is
 via the `glmnet` function (in package `glmnet`), and the other
 is with the function `lars` in package `lars`. Both, of course,
-do the same, but in different ways, and present the results 
-differently as well. 
+compute the same estimators, but they do so in different ways. 
 
 We first compute the path of LASSO solutions for the `credit` data
 used in previous lectures:
