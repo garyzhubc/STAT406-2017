@@ -13,9 +13,7 @@ LASSO
 
 A different approach to perform some type of variable selection that can be more stable than stepwise methods is to use an L1 regularization term (instead of the L2 one used in ridge regression). Notwidthstanding the geometric "interpretation" of the effect of using an L1 penalty, it can also be argued that the L1 norm is, in some cases, a convex relaxation (envelope) of the "L0" norm (the number of non-zero elements). As a result, estimators based on the LASSO (L1-regularized regression) will typically have some of their entries equal to zero.
 
-As the value of the penalty parameter increases the solutions change from the usual least squares estimator (when the regularization parameter equals to zero) to a vector of all zeroes (when the penalty constant is sufficiently large). This sequence of solutions is generally used as a way to rank (or sequence) the explanatory variables, listing them in the order in which they "enter" (their estimated coefficient changes from zero to a non-zero value).
-
-Of course we can also try to estimate the MSPE of each solution (on a finite grid of values of the penalty parameter) and select one estimator with good prediction properties. If any of the corresponding estimated regression coefficients are exactly zero it is commonly said that those explanatory variables were not selected to enter the model.
+As the value of the penalty parameter increases the solutions change from the usual least squares estimator (when the regularization parameter equals to zero) to a vector of all zeroes (when the penalty constant is sufficiently large). This sequence of solutions is generally used as a way to rank (or sequence) the explanatory variables, listing them in the order in which they "enter" (their estimated coefficient changes from zero to a non-zero value). <!-- Varying the value of the penalty term we obtain a path of solutions (much like --> <!-- we did in ridge regression), where the vector of estimated regression --> <!-- coefficients becomes sparser as the penalty gets stronger.  --> We can also estimate the MSPE of each solution (on a finite grid of values of the penalty parameter) to select one with good prediction properties. If any of the estimated regression coefficients in the selected solution are exactly zero it is commonly said that those explanatory variables are not included in the chosen model.
 
 There are two main implementation of the LASSO in `R`, one is via the `glmnet` function (in package `glmnet`), and the other is with the function `lars` in package `lars`. Both, of course, compute the same estimators, but they do so in different ways.
 
@@ -40,7 +38,7 @@ The `plot` method can be used to show the path of solutions, just as we did for 
 plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditlasso3-1.png)
+![](README_files/figure-markdown_github/creditlasso3-1.png)
 
 Using `lars::lars()` we obtain:
 
@@ -50,7 +48,7 @@ b <- lars(x=xm, y=y, type='lasso', intercept=TRUE)
 plot(b, lwd=4)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditlars1-1.png)
+![](README_files/figure-markdown_github/creditlars1-1.png)
 
 With `lars` the returned object is a matrix of regression estimators, one for each value of the penalty constant where a new coefficient "enters" the model:
 
@@ -92,7 +90,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
                   index=seq(0, 1, length=20))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditlars3-1.png)
+![](README_files/figure-markdown_github/creditlars3-1.png)
 
 Given their random nature, it is always a good idea to run K-fold CV experiments more than once:
 
@@ -102,7 +100,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
                   index=seq(0, 1, length=20))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditlars4-1.png)
+![](README_files/figure-markdown_github/creditlars4-1.png)
 
 We now repeat the same steps as above but using the implementation in `glmnet`:
 
@@ -114,7 +112,7 @@ tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1,
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditcv-1.png)
+![](README_files/figure-markdown_github/creditcv-1.png)
 
 We ran CV again:
 
@@ -125,7 +123,7 @@ tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1,
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditcv2-1.png)
+![](README_files/figure-markdown_github/creditcv2-1.png)
 
 Zoom in the CV plot to check the 1-SE rule:
 
@@ -133,7 +131,7 @@ Zoom in the CV plot to check the 1-SE rule:
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/creditcv4-1.png)
+![](README_files/figure-markdown_github/creditcv4-1.png)
 
 The returned object includes the "optimal" value of the penalization parameter, which can be used to find the corresponding estimates for the regression coefficients:
 

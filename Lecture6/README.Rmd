@@ -24,6 +24,7 @@ it can also be argued that the L1 norm is, in some cases, a convex relaxation
 estimators based on the LASSO (L1-regularized regression) will typically have some 
 of their entries equal to zero. 
 
+
 As the value of the penalty parameter increases the solutions change
 from the usual least squares estimator (when the regularization parameter equals
 to zero) to a vector of all zeroes (when the penalty constant is sufficiently 
@@ -31,13 +32,15 @@ large). This sequence of solutions is generally used
 as a way to rank (or sequence) the explanatory variables, listing them
 in the order in which they "enter" (their estimated coefficient changes from 
 zero to a non-zero value). 
-
-Of course we can also try to estimate the MSPE of each solution (on a finite
-grid of values of the penalty parameter) and select one estimator with
+<!-- Varying the value of the penalty term we obtain a path of solutions (much like -->
+<!-- we did in ridge regression), where the vector of estimated regression -->
+<!-- coefficients becomes sparser as the penalty gets stronger.  -->
+We can also estimate the MSPE of each solution (on a finite
+grid of values of the penalty parameter) to select one with
 good prediction properties. If any of the 
-corresponding estimated regression coefficients are exactly zero it
-is commonly said that those explanatory variables were not selected to
-enter the model. 
+estimated regression coefficients in the selected solution are exactly zero it
+is commonly said that those explanatory variables are not included 
+in the chosen model. 
 
 There are two main implementation of the LASSO in `R`, one is
 via the `glmnet` function (in package `glmnet`), and the other
