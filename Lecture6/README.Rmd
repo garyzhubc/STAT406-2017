@@ -1,0 +1,114 @@
+---
+title: "STAT406 - Lecture 6 notes"
+author: "Matias Salibian-Barrera"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Lecture slides
+
+The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
+
+## LASSO 
+
+```{r creditlasso}
+x <- read.table('../Lecture5/Credit.csv', sep=',', header=TRUE, row.names=1)
+# use non-factor variables
+x <- x[, c(1:6, 11)]
+y <- as.vector(x$Balance)
+xm <- as.matrix(x[, -7])
+```
+
+```{r creditlasso2, warning=FALSE, message=FALSE}
+library(glmnet)
+# alpha = 1 - LASSO
+
+lambdas <- exp( seq(-3, 10, length=50))
+a <- glmnet(x=xm, y=y, lambda=rev(lambdas),
+            family='gaussian', alpha=1, intercept=TRUE)
+```
+
+Now plot
+
+```{r creditlasso3, fig.width=5, fig.height=5}
+# plot trajectories
+plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2)
+```
+
+Another way of doing it
+
+```{r creditlars1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+# Another display
+library(lars)
+b <- lars(x=xm, y=y, type='lasso', intercept=TRUE)
+plot(b, lwd=4)
+```
+
+Look at the returned object
+
+```{r creditlars2}
+# see the variables
+coef(b)
+b
+```
+
+Pick one solution from the path
+
+```{r creditlars3, fig.width=5, fig.height=5}
+# select one solution
+set.seed(123)
+tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
+                  index=seq(0, 1, length=20))
+```
+
+Another run
+
+```{r creditlars4, fig.width=5, fig.height=5}
+set.seed(23)
+tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
+                  index=seq(0, 1, length=20))
+```
+
+And now with `glmnet`:
+
+```{r creditcv, fig.width=5, fig.height=5}
+# run 5-fold CV with glmnet()
+set.seed(123)
+tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1, 
+                 family='gaussian', intercept=TRUE)
+plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
+```
+
+And again:
+
+```{r creditcv2, fig.width=5, fig.height=5}
+set.seed(23)
+tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1, 
+                 family='gaussian', intercept=TRUE)
+plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
+```
+
+The "optimal" fit:
+
+```{r creditcv3}
+# optimal lambda
+tmp$lambda.min
+# coefficients for the optimal lambda
+coef(tmp, s=tmp$lambda.min)
+# coefficients for other values of lambda
+coef(tmp, s=exp(4))
+coef(tmp, s=exp(4.5)) # note no. of zeroes...
+```
+
+Zoom in the CV plot
+
+```{r creditcv4, fig.width=5, fig.height=5}
+# zoom-in in CV plot
+plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
+# check "1-SE rule"
+```
+
