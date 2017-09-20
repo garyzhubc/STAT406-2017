@@ -11,36 +11,36 @@ The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
 LASSO
 -----
 
+A different approach to perform some type of variable selection that can be more stable than stepwise methods is to use an L1 regularization term (instead of the L2 one used in ridge regression). Notwidthstanding the geometric "interpretation" of the effect of using a L1 penalty, it can be shown that the L1 norm is, in some cases, a convex relaxation (envelope) of the "L0" norm (the number of non-zero elements). As a result, the solutions of the LASSO will typically have some of their entries equal to zero, and this is generally used to select a subset of variables to include in a model.
+
+There are two main implementation of the LASSO in `R`, one is via the `glmnet` function (in package `glmnet`), and the other is with the function `lars` in package `lars`. Both, of course, do the same, but in different ways, and present the results differently as well.
+
+We first compute the path of LASSO solutions for the `credit` data used in previous lectures:
+
 ``` r
 x <- read.table('../Lecture5/Credit.csv', sep=',', header=TRUE, row.names=1)
 # use non-factor variables
 x <- x[, c(1:6, 11)]
 y <- as.vector(x$Balance)
 xm <- as.matrix(x[, -7])
-```
-
-``` r
 library(glmnet)
 # alpha = 1 - LASSO
-
 lambdas <- exp( seq(-3, 10, length=50))
 a <- glmnet(x=xm, y=y, lambda=rev(lambdas),
             family='gaussian', alpha=1, intercept=TRUE)
 ```
 
-Now plot
+The `plot` method can be used to show the path of solutions, just as we did for ridge regression:
 
 ``` r
-# plot trajectories
 plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditlasso3-1.png)
 
-Another way of doing it
+Using `lars::lars()` we obtain:
 
 ``` r
-# Another display
 library(lars)
 b <- lars(x=xm, y=y, type='lasso', intercept=TRUE)
 plot(b, lwd=4)
@@ -48,7 +48,7 @@ plot(b, lwd=4)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditlars1-1.png)
 
-Look at the returned object
+With `lars` the returned object is a matrix of regression estimators, one for each value of the penalty constant where a new coefficient "enters" the model:
 
 ``` r
 # see the variables
@@ -77,7 +77,9 @@ b
     ## Var       3     2      1   5     4         6
     ## Step      1     2      3   4     5         6
 
-Pick one solution from the path
+The presentation below exploits the fact that the LASSO regression estimators are piecewise linear between values of the regularization parameter where a variable enters or drops the model.
+
+In order to select one LASSO estimator (among the infinitely many that are possible) we can use K-fold CV to estimate the MSPE of a few of them (for a grid of values of the penalty parameter, for example), and choose the one with smallest estimated MSPE:
 
 ``` r
 # select one solution
@@ -88,7 +90,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditlars3-1.png)
 
-Another run
+Given their random nature, it is always a good idea to run K-fold CV experiments more than once:
 
 ``` r
 set.seed(23)
@@ -98,7 +100,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditlars4-1.png)
 
-And now with `glmnet`:
+We now repeat the same steps as above but using the implementation in `glmnet`:
 
 ``` r
 # run 5-fold CV with glmnet()
@@ -110,7 +112,7 @@ plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditcv-1.png)
 
-And again:
+We ran CV again:
 
 ``` r
 set.seed(23)
@@ -121,7 +123,15 @@ plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditcv2-1.png)
 
-The "optimal" fit:
+Zoom in the CV plot to check the 1-SE rule:
+
+``` r
+plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/creditcv4-1.png)
+
+The returned object includes the "optimal" value of the penalization parameter, which can be used to find the corresponding estimates for the regression coefficients:
 
 ``` r
 # optimal lambda
@@ -173,16 +183,3 @@ coef(tmp, s=exp(4.5)) # note no. of zeroes...
     ## Cards          .         
     ## Age            .         
     ## Education      .
-
-Zoom in the CV plot
-
-``` r
-# zoom-in in CV plot
-plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/creditcv4-1.png)
-
-``` r
-# check "1-SE rule"
-```
