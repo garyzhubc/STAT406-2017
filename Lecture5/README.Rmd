@@ -140,16 +140,6 @@ log(op.la)
 ```
 This value is reasonably close to the ones we saw in the plots above. 
 
-#### Effective degrees of freedom
-
-```{r ridge2}
-# compute EDF
-xm.svd <- svd(xm) #  scale(xm, scale=FALSE))
-(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
-xm.svd <- svd(scale(xm, scale=FALSE))
-(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
-```
-
 ## Comparing predictions 
 
 We now run a cross-validation experiment to compare the 

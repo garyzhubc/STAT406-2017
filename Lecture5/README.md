@@ -1,7 +1,7 @@
 STAT406 - Lecture 5 notes
 ================
 Matias Salibian-Barrera
-2017-09-19
+2017-09-21
 
 Lecture slides
 --------------
@@ -101,23 +101,6 @@ log(op.la)
     ## [1] 2.340994
 
 This value is reasonably close to the ones we saw in the plots above.
-
-#### Effective degrees of freedom
-
-``` r
-# compute EDF
-xm.svd <- svd(xm) #  scale(xm, scale=FALSE))
-(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
-```
-
-    ## [1] 13.15941
-
-``` r
-xm.svd <- svd(scale(xm, scale=FALSE))
-(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
-```
-
-    ## [1] 13.05737
 
 Comparing predictions
 ---------------------

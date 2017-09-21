@@ -1,12 +1,35 @@
 STAT406 - Lecture 6 notes
 ================
 Matias Salibian-Barrera
-2017-09-20
+2017-09-21
 
 Lecture slides
 --------------
 
 The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
+
+Effective degrees of freedom for Ridge Regression
+-------------------------------------------------
+
+``` r
+airp <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
+y <- as.vector(airp$MORT)
+xm <- as.matrix(airp[, -16])
+library(glmnet)
+lambdas <- exp( seq(-3, 10, length=50))
+set.seed(123)
+op.la <- 0
+for(j in 1:20) {
+  tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, family='gaussian')
+  op.la <- op.la + tmp$lambda.min # tmp$lambda.1se
+}
+op.la <- op.la / 20
+xm <- scale(as.matrix(airp[, -16]), scale=FALSE)
+xm.svd <- svd(xm)
+(est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
+```
+
+    ## [1] 13.05737
 
 LASSO
 -----
