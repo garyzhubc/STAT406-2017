@@ -38,7 +38,7 @@ The `plot` method can be used to show the path of solutions, just as we did for 
 plot(a, xvar='lambda', label=TRUE, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github/creditlasso3-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditlasso3-1.png)
 
 Using `lars::lars()` we obtain:
 
@@ -48,7 +48,7 @@ b <- lars(x=xm, y=y, type='lasso', intercept=TRUE)
 plot(b, lwd=4)
 ```
 
-![](README_files/figure-markdown_github/creditlars1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditlars1-1.png)
 
 With `lars` the returned object is a matrix of regression estimators, one for each value of the penalty constant where a new coefficient "enters" the model:
 
@@ -90,7 +90,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
                   index=seq(0, 1, length=20))
 ```
 
-![](README_files/figure-markdown_github/creditlars3-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditlars3-1.png)
 
 Given their random nature, it is always a good idea to run K-fold CV experiments more than once:
 
@@ -100,7 +100,7 @@ tmp.la <- cv.lars(x=xm, y=y, intercept=TRUE, type='lasso', K=5,
                   index=seq(0, 1, length=20))
 ```
 
-![](README_files/figure-markdown_github/creditlars4-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditlars4-1.png)
 
 We now repeat the same steps as above but using the implementation in `glmnet`:
 
@@ -112,7 +112,7 @@ tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1,
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github/creditcv-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditcv-1.png)
 
 We ran CV again:
 
@@ -123,7 +123,7 @@ tmp <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1,
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2)
 ```
 
-![](README_files/figure-markdown_github/creditcv2-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditcv2-1.png)
 
 Zoom in the CV plot to check the 1-SE rule:
 
@@ -131,7 +131,7 @@ Zoom in the CV plot to check the 1-SE rule:
 plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
 ```
 
-![](README_files/figure-markdown_github/creditcv4-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/creditcv4-1.png)
 
 The returned object includes the "optimal" value of the penalization parameter, which can be used to find the corresponding estimates for the regression coefficients:
 
@@ -185,3 +185,9 @@ coef(tmp, s=exp(4.5)) # note no. of zeroes...
     ## Cards          .         
     ## Age            .         
     ## Education      .
+
+Compare MSPEs of Ridge & LASSO on the credit data
+-------------------------------------------------
+
+Compare MSPEs of Ridge & LASSO on the air pollution data
+--------------------------------------------------------

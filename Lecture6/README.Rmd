@@ -152,3 +152,7 @@ coef(tmp, s=exp(4))
 coef(tmp, s=exp(4.5)) # note no. of zeroes...
 ```
 
+## Compare MSPEs of Ridge & LASSO on the credit data
+
+## Compare MSPEs of Ridge & LASSO on the air pollution data
+
