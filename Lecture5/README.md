@@ -6,7 +6,7 @@ Matias Salibian-Barrera
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-5-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-5.pdf).
 
 Ridge regression
 ----------------
