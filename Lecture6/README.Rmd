@@ -13,7 +13,40 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
 
-## Effective degrees of freedom for Ridge Regression
+## Effective degrees of freedom 
+
+Intuitively, if we interpret "degrees of freedom" as the number of
+"free" parameters that are available to us for tuning when
+we fit / train
+a model or predictor, then we would expect a Ridge Regression estimator 
+to have less 
+"degrees of freedom" than a regular least squares regression 
+estimator, give that it is the solution of a constrained
+optimization problem. This is, of course, an informal 
+argument, particularly since there is no proper definition
+of "degrees of freedom". 
+
+The more general definition discussed in class, called "effective
+degrees of freedom" (EDF), reduces to the trace of the "hat" matrix for
+any linear predictor (including, but not limited to, linear
+regression models), and is due to Efron:
+
+> Efron, B. (1986). How biased is the apparent error rate of a 
+> prediction rule? *Journal of the American Statistical Association*, 
+> **81**(394):461-470. 
+> DOI: [10.1080/01621459.1986.10478291](https://doi.org/10.1080/01621459.1986.10478291)
+
+You may also want to look at some of the more recent papers that
+cite the one above. 
+
+It is easy (but worth your time doing it) to see that for a Ridge 
+Regression estimator computed with a penalty / regularization 
+parameter equal to **b**, the corresponding EDF are the sum of the 
+ratio of each eigenvalue of **X'X** with respect to itself plus **b**
+(see the formula on the lecture slides). We compute the EDF 
+of the Ridge Regression fit to the air pollution data when 
+the penalty parameter is considered to be fixed at the  
+average optimal value over 20 runs of 5-fold CV:
 
 ```{r ridge2, warning=FALSE, message=FALSE}
 airp <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
@@ -33,10 +66,23 @@ xm.svd <- svd(xm)
 (est.edf <- sum( xm.svd$d^2 / ( xm.svd$d^2 + op.la ) ))
 ```
 
+### Important caveat!
+
+Note that in the above discussion of EDF we have assumed that
+the matrix defining the linear predictor does not depend on the 
+values of the response variable (that it only depends on the matrix **X**), 
+as it is the case in linear regression. This is fine for 
+Ridge Regression estimators **as long as the penalty parameter
+was not chosen using the data**. This is typically not the case 
+in practice. Although the general definition of EDF still holds, 
+it is not longer true that Ridge Regression yields a linear 
+predictor, and thus the corresponding EDF may not be
+equal to the trace of the corresponding
+matrix. 
 
 ## LASSO 
 
-A different approach to perform some type of variable selection that can be
+A different approach to perform *some kind* of variable selection that may be
 more stable than stepwise methods is to use an L1 regularization term
 (instead of the L2 one used in ridge regression). Notwidthstanding the
 geometric "interpretation" of the effect of using an L1 penalty, 
@@ -45,12 +91,18 @@ it can also be argued that the L1 norm is, in some cases, a convex relaxation
 estimators based on the LASSO (L1-regularized regression) will typically have some 
 of their entries equal to zero. 
 
-
-As the value of the penalty parameter increases the solutions change
+Just as it was the case for Ridge Regression, 
+as the value of the penalty parameter increases, the solutions 
+to the L1 regularized problem change
 from the usual least squares estimator (when the regularization parameter equals
 to zero) to a vector of all zeroes (when the penalty constant is sufficiently 
-large). This sequence of solutions is generally used 
-as a way to rank (or sequence) the explanatory variables, listing them
+large). One difference between using an L1 or an L2 penalty is that
+for an L1-regularized problem, there usually is a finite value of the penalty term
+that produces a solution of all zeroes, whereas for the L2 penalizations
+this is not generally true. 
+
+The sequence of solutions changing by value of the penalty parameter
+is often used as a way to rank (or "sequence"") the explanatory variables, listing them
 in the order in which they "enter" (their estimated coefficient changes from 
 zero to a non-zero value). 
 <!-- Varying the value of the penalty term we obtain a path of solutions (much like -->
@@ -212,4 +264,17 @@ mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
 
 ## Compare MSPEs of Ridge & LASSO on the air pollution data
+
+On the air pollution data example there are groups of
+correlated variables and the different behaviour of
+LASSO and Ridge Regression is interesting to note. 
+Elastic Net estimators were introduced to find an 
+informative compromise.
+
+## Less desirable properties of LASSO
+
+* Not "variable selection"-consistent
+* Not oracle
+* Tends to only pick one variable (randomly) from groups of correlated ones 
+
 
