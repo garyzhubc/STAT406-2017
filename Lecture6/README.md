@@ -1,7 +1,7 @@
 STAT406 - Lecture 6 notes
 ================
 Matias Salibian-Barrera
-2017-09-22
+2017-09-23
 
 Lecture slides
 --------------
@@ -269,15 +269,3 @@ mtext(expression(hat(MSPE)), side = 2, line = 2.5)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/mspecredit-1.png)
-
-Compare MSPEs of Ridge & LASSO on the air pollution data
---------------------------------------------------------
-
-On the air pollution data example there are groups of correlated variables and the different behaviour of LASSO and Ridge Regression is interesting to note. Elastic Net estimators were introduced to find an informative compromise.
-
-Less desirable properties of LASSO
-----------------------------------
-
--   Not "variable selection"-consistent
--   Not oracle
--   Tends to only pick one variable (randomly) from groups of correlated ones
