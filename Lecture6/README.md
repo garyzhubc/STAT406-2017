@@ -1,7 +1,7 @@
 STAT406 - Lecture 6 notes
 ================
 Matias Salibian-Barrera
-2017-09-23
+2017-09-24
 
 Lecture slides
 --------------
@@ -173,7 +173,7 @@ plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
 
 ![](README_files/figure-markdown_github-ascii_identifiers/creditcv4-1.png)
 
-The returned object includes the "optimal" value of the penalization parameter, which can be used to find the corresponding estimates for the regression coefficients:
+The returned object includes the "optimal" value of the penalization parameter, which can be used to find the corresponding estimates for the regression coefficients, using the method `coef`:
 
 ``` r
 # optimal lambda
@@ -196,6 +196,8 @@ coef(tmp, s=tmp$lambda.min)
     ## Cards         10.4021961
     ## Age           -0.8801089
     ## Education      1.9363219
+
+We can also use `coef` to compute the coefficients at any value of the penalty parameter. For example we show below the coefficients corresponding to penalty values of exp(4) and exp(4.5):
 
 ``` r
 # coefficients for other values of lambda
@@ -229,7 +231,7 @@ coef(tmp, s=exp(4.5)) # note no. of zeroes...
 Compare MSPEs of Ridge & LASSO on the credit data
 -------------------------------------------------
 
-We now compare the MSPEs of the different estimators / predictors:
+We now use 50 runs of 5-fold cross-validation to estimate (and compare) the MSPEs of the different estimators / predictors:
 
 ``` r
 library(MASS)
@@ -269,3 +271,5 @@ mtext(expression(hat(MSPE)), side = 2, line = 2.5)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/mspecredit-1.png)
+
+We see that in this example LASSO does not seem to provide better predictions than Ridge Regression. However, it does yield a sequence of explanatory variables that can be interpreted as based on "importance" for the linear regression model (see above).

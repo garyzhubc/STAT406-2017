@@ -1,7 +1,7 @@
 STAT406 - Lecture 7 notes
 ================
 Matias Salibian-Barrera
-2017-09-23
+2017-09-24
 
 Lecture slides
 --------------
@@ -13,7 +13,7 @@ Comparing LASSO with Ridge Regression on the air pollution data
 
 Let us compare the Ridge Regression and LASSO fits to the air pollution data. Of course, by *the Ridge Regression fit* and *the LASSO fit* we mean the fit obtained with the optimal value of the penalty constant chosen in terms of the corresponding estimated MSPE (which is in general estimated using K-fold cross validation).
 
-We first load the data and use `glmnet::cv.glmnet()` with `alpha = 0` to select an **approximately optimal** Ridge Regression fit (what makes the calculation below **only approximately** optimal?).
+We first load the data and use `cv.glmnet()` with `alpha = 0` to select an **approximately optimal** Ridge Regression fit (what makes the calculation below **only approximately** optimal?).
 
 ``` r
 airp <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
@@ -30,7 +30,7 @@ plot(air.l2)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/comparing.airp-1.png)
 
-We now compute an approximately optimal LASSO fit.
+The plot above is included for illustration purposes only. Similarly, we now compute an approximately optimal LASSO fit, and look at the curve of estimated MSPEs:
 
 ``` r
 # LASSO
@@ -115,42 +115,72 @@ Elastic net
 
 Elastic Net estimators were introduced to find an informative compromise between LASSO and Ridge Regression.
 
+Note that `cv.glmnet` only considers fits with variying values of one of the penalty constants, while the other one (`alpha`) is kept fixed. To compare different Elastic Net fits we run `cv.glmnet` with 4 values of `alpha`: 0.05, 0.1, 0.5 and 0.75.
+
 ``` r
 # EN
 set.seed(23)
-air.en <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.75, 
+air.en.75 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.75, 
                  family='gaussian', intercept=TRUE)
-plot(air.en)
+set.seed(23)
+air.en.05 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.05, 
+                 family='gaussian', intercept=TRUE)
+set.seed(23)
+air.en.1 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.1, 
+                 family='gaussian', intercept=TRUE)
+set.seed(23)
+air.en.5 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.5, 
+                 family='gaussian', intercept=TRUE)
+plot(air.en.05)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/airp.en-1.png)
 
-### Run EN on airpollution data, compare fits
-
 ``` r
-cbind(round(coef(air.l2, s='lambda.min'), 3),
-round(coef(air.l1, s='lambda.min'), 3), 
-round(coef(air.en, s='lambda.min'), 3))
+plot(air.en.5)
 ```
 
-    ## 16 x 3 sparse Matrix of class "dgCMatrix"
-    ##                    1        1        1
-    ## (Intercept) 1084.916 1100.355 1099.067
-    ## PREC           1.407    1.503    1.495
-    ## JANT          -0.886   -1.189   -1.153
-    ## JULT          -0.836   -1.247   -1.182
-    ## OVR65         -2.000    .        .    
-    ## POPN           5.977    .        .    
-    ## EDUC          -8.154  -10.510  -10.147
-    ## HOUS          -1.156   -0.503   -0.575
-    ## DENS           0.005    0.004    0.004
-    ## NONW           2.655    3.979    3.895
-    ## WWDRK         -0.458   -0.002   -0.052
-    ## POOR           0.725    .        .    
-    ## HC            -0.027    .        .    
-    ## NOX            0.049    .        .    
-    ## SO.            0.232    0.228    0.230
-    ## HUMID          0.391    .        0.005
+![](README_files/figure-markdown_github-ascii_identifiers/airp.en-2.png)
+
+``` r
+plot(air.en.75)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/airp.en-3.png)
+
+### Run EN on airpollution data, compare fits
+
+We now compare the estimates of the regression coefficients obtained with the different methods discussed so far to alleviate potential problems caused by correlated covariates.
+
+``` r
+a <- cbind(round(coef(air.l2, s='lambda.min'), 3),
+round(coef(air.l1, s='lambda.min'), 3), 
+round(coef(air.en.05, s='lambda.min'), 3),
+round(coef(air.en.1, s='lambda.min'), 3),
+round(coef(air.en.5, s='lambda.min'), 3), 
+round(coef(air.en.75, s='lambda.min'), 3))
+colnames(a) <- c('Ridge', 'LASSO', 'EN-05', 'EN-10', 'EN-50', 'EN-75')
+a
+```
+
+    ## 16 x 6 sparse Matrix of class "dgCMatrix"
+    ##                Ridge    LASSO    EN-05    EN-10    EN-50    EN-75
+    ## (Intercept) 1084.916 1100.355 1103.520 1097.110 1080.652 1099.067
+    ## PREC           1.407    1.503    1.405    1.414    1.426    1.495
+    ## JANT          -0.886   -1.189   -0.883   -0.905   -1.044   -1.153
+    ## JULT          -0.836   -1.247   -0.795   -0.772   -0.854   -1.182
+    ## OVR65         -2.000    .       -1.113   -0.211    .        .    
+    ## POPN           5.977    .        0.073    .        .        .    
+    ## EDUC          -8.154  -10.510   -8.359   -8.516   -9.918  -10.147
+    ## HOUS          -1.156   -0.503   -1.137   -1.107   -0.636   -0.575
+    ## DENS           0.005    0.004    0.005    0.005    0.004    0.004
+    ## NONW           2.655    3.979    2.966    3.250    3.638    3.895
+    ## WWDRK         -0.458   -0.002   -0.440   -0.400   -0.095   -0.052
+    ## POOR           0.725    .        0.315    .        .        .    
+    ## HC            -0.027    .       -0.006   -0.002    .        .    
+    ## NOX            0.049    .        .        .        .        .    
+    ## SO.            0.232    0.228    0.238    0.237    0.231    0.230
+    ## HUMID          0.391    .        0.281    0.231    0.014    0.005
 
 The same comment made above regarding the need of a more stable choice of "optimal" fits (for each of these methods) applies here. Again, here we limit ourselves to one run of 5-fold CV purely based on simplifying the presentation.
 

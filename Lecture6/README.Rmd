@@ -214,12 +214,18 @@ plot(tmp, lwd=6, cex.axis=1.5, cex.lab=1.2, ylim=c(22000, 33000))
 The returned object includes the "optimal" value of the 
 penalization parameter, which can be used to 
 find the corresponding estimates for the regression
-coefficients:
+coefficients, using the method `coef`:
 ```{r creditcv3}
 # optimal lambda
 tmp$lambda.min
 # coefficients for the optimal lambda
 coef(tmp, s=tmp$lambda.min)
+```
+We can also use `coef` to compute the coefficients at
+any value of the penalty parameter. For example we
+show below the coefficients corresponding 
+to penalty values of exp(4) and exp(4.5):
+```{r creditcoeffs}
 # coefficients for other values of lambda
 coef(tmp, s=exp(4))
 coef(tmp, s=exp(4.5)) # note no. of zeroes...
@@ -227,7 +233,8 @@ coef(tmp, s=exp(4.5)) # note no. of zeroes...
 
 ## Compare MSPEs of Ridge & LASSO on the credit data
 
-We now compare the MSPEs of the different 
+We now use 50 runs of 5-fold cross-validation to
+estimate (and compare) the MSPEs of the different 
 estimators / predictors:
 
 ```{r mspecredit, warning=FALSE, message=FALSE, fig.width=5, fig.height=5, tidy=TRUE}
@@ -262,6 +269,12 @@ for(i in 1:N) {
 boxplot(mspe.la, mspe.ri, mspe.st, mspe.f, names=c('LASSO','Ridge', 'Stepwise', 'Full'), col=c('steelblue', 'gray80', 'tomato', 'springgreen'), cex.axis=1, cex.lab=1, cex.main=2)
 mtext(expression(hat(MSPE)), side=2, line=2.5)
 ```
+
+We see that in this example LASSO does not seem to provide better
+predictions than Ridge Regression. However, it does yield a 
+sequence of explanatory variables that can be interpreted as
+based on "importance" for the linear regression model (see
+above).
 
 
 

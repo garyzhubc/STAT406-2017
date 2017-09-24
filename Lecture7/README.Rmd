@@ -22,7 +22,7 @@ optimal value of the penalty constant chosen in terms
 of the corresponding estimated MSPE (which is in 
 general estimated using K-fold cross validation). 
 
-We first load the data and use `glmnet::cv.glmnet()` with 
+We first load the data and use `cv.glmnet()` with 
 `alpha = 0` to select an **approximately optimal** 
 Ridge Regression fit (what makes the calculation 
 below **only approximately** optimal?).
@@ -40,7 +40,9 @@ air.l2 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0,
 plot(air.l2)
 ```
 
-We now compute an approximately optimal LASSO fit.
+The plot above is included for illustration purposes only. 
+Similarly, we now compute an approximately optimal LASSO fit, 
+and look at the curve of estimated MSPEs:
 
 ```{r airp.lasso, fig.width=5, fig.height=5, warning=FALSE, message=FALSE}
 # LASSO
@@ -158,20 +160,47 @@ using a full linear regression model.
 Elastic Net estimators were introduced to find an 
 informative compromise between LASSO and Ridge Regression. 
 
+Note that `cv.glmnet` only considers fits with variying 
+values of one of the penalty constants, while the other
+one (`alpha`) is kept fixed. To compare different 
+Elastic Net fits we run `cv.glmnet` with 4 values of
+`alpha`: 0.05, 0.1, 0.5 and 0.75. 
+
 ```{r airp.en, fig.width=5, fig.height=5, warning=FALSE, message=FALSE}
 # EN
 set.seed(23)
-air.en <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.75, 
+air.en.75 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.75, 
                  family='gaussian', intercept=TRUE)
-plot(air.en)
+set.seed(23)
+air.en.05 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.05, 
+                 family='gaussian', intercept=TRUE)
+set.seed(23)
+air.en.1 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.1, 
+                 family='gaussian', intercept=TRUE)
+set.seed(23)
+air.en.5 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.5, 
+                 family='gaussian', intercept=TRUE)
+plot(air.en.05)
+plot(air.en.5)
+plot(air.en.75)
 ```
+
 
 ### Run EN on airpollution data, compare fits
 
+We now compare the estimates of the regression coefficients
+obtained with the different methods discussed so far to 
+alleviate potential problems caused by correlated covariates. 
+
 ```{r airp.en.compare}
-cbind(round(coef(air.l2, s='lambda.min'), 3),
+a <- cbind(round(coef(air.l2, s='lambda.min'), 3),
 round(coef(air.l1, s='lambda.min'), 3), 
-round(coef(air.en, s='lambda.min'), 3))
+round(coef(air.en.05, s='lambda.min'), 3),
+round(coef(air.en.1, s='lambda.min'), 3),
+round(coef(air.en.5, s='lambda.min'), 3), 
+round(coef(air.en.75, s='lambda.min'), 3))
+colnames(a) <- c('Ridge', 'LASSO', 'EN-05', 'EN-10', 'EN-50', 'EN-75')
+a
 ```
 
 The same comment made above regarding the need of a 
