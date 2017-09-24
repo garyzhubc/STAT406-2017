@@ -8,22 +8,21 @@ Lecture slides
 
 The lecture slides are [here](STAT406-17-lecture-7-preliminary.pdf).
 
-Compare MSPEs of Ridge & LASSO on the air pollution data
---------------------------------------------------------
+Comparing LASSO with Ridge Regression on the air pollution data
+---------------------------------------------------------------
 
-On the air pollution data example there are groups of correlated variables and the different behaviour of LASSO and Ridge Regression is interesting to note.
+Let us compare the Ridge Regression and LASSO fits to the air pollution data. Of course, by *the Ridge Regression fit* and *the LASSO fit* we mean the fit obtained with the optimal value of the penalty constant chosen in terms of the corresponding estimated MSPE (which is in general estimated using K-fold cross validation).
+
+We first load the data and use `glmnet::cv.glmnet()` with `alpha = 0` to select an **approximately optimal** Ridge Regression fit (what makes the calculation below **only approximately** optimal?).
 
 ``` r
 airp <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
 y <- as.vector(airp$MORT)
 xm <- as.matrix(airp[, names(airp) != 'MORT'])
-
 library(glmnet)
-
 lambdas <- exp( seq(-3, 10, length=50))
-
-# Ridge 
-set.seed(123)
+# Ridge Regression
+set.seed(23)
 air.l2 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, 
                  family='gaussian', intercept=TRUE)
 plot(air.l2)
@@ -31,7 +30,7 @@ plot(air.l2)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/comparing.airp-1.png)
 
-Now LASSO:
+We now compute an approximately optimal LASSO fit.
 
 ``` r
 # LASSO
@@ -43,7 +42,7 @@ plot(air.l1)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/airp.lasso-1.png)
 
-Compare coefficients:
+It is interesting to compare the corresponding estimated regression coefficients, so we put them side by side in two columns:
 
 ``` r
 cbind(round(coef(air.l2, s='lambda.min'), 3),
@@ -52,29 +51,33 @@ round(coef(air.l1, s='lambda.min'), 3))
 
     ## 16 x 2 sparse Matrix of class "dgCMatrix"
     ##                    1        1
-    ## (Intercept) 1179.335 1100.355
-    ## PREC           1.570    1.503
-    ## JANT          -1.109   -1.189
-    ## JULT          -1.276   -1.247
-    ## OVR65         -2.571    .    
-    ## POPN         -10.135    .    
-    ## EDUC          -8.479  -10.510
-    ## HOUS          -1.164   -0.503
+    ## (Intercept) 1084.916 1100.355
+    ## PREC           1.407    1.503
+    ## JANT          -0.886   -1.189
+    ## JULT          -0.836   -1.247
+    ## OVR65         -2.000    .    
+    ## POPN           5.977    .    
+    ## EDUC          -8.154  -10.510
+    ## HOUS          -1.156   -0.503
     ## DENS           0.005    0.004
-    ## NONW           3.126    3.979
-    ## WWDRK         -0.476   -0.002
-    ## POOR           0.576    .    
-    ## HC            -0.035    .    
-    ## NOX            0.064    .    
-    ## SO.            0.240    0.228
-    ## HUMID          0.372    .
+    ## NONW           2.655    3.979
+    ## WWDRK         -0.458   -0.002
+    ## POOR           0.725    .    
+    ## HC            -0.027    .    
+    ## NOX            0.049    .    
+    ## SO.            0.232    0.228
+    ## HUMID          0.391    .
 
-Look at the groups of correlated predictors
+Note how several of them are relatively similar, but LASSO includes fewer of them. A possible explanation for this is the particular correlation structure among the explanatory variables. More specifically, when groups of correlated covariates are present, LASSO tends to choose only one of them, whereas Ridge Regression will tend to keep all of them. For a formal statement see Lemma 2 of
+
+> Zou, H. and Hastie, T. (2005). Regularization and variable selection via the elastic net. *Journal of the Royal Statistical Society: Series B (Statistical Methodology)*, **67**(2), 301-320. [DOI: 10.1111/j.1467-9868.2005.00503.x](http://dx.doi.org/10.1111/j.1467-9868.2005.00503.x)
+
+It is important to note here that the above observations regarding the Ridge Regression and LASSO fits trained on the air pollution data should be made on a more reliable (more stable, less variable) choice of penalty parameter. For example, we may want to run the above 5-fold CV experiments several times and take the average of the estimated optimal penalty parameters. To simplify the presentation we do not purse this here, but it may be a very good exercise for the reader to do so.
+
+The following heatmap of the pairwise correlations among explanatory variables reveals certain patterns that may be used to explain the difference mentioned above. Note that in this visualization method variables were grouped ("clustered") according to their pairwise correlations in order to improve the interpretability of the plot. We will see later in this course the particular clustering method used here (hierarchical clustering).
 
 ``` r
 library(ggcorrplot)
-# Reordering the correlation matrix
-# using hierarchical clustering
 ggcorrplot(cor(xm), hc.order = TRUE, outline.col = "white")
 ```
 
@@ -91,6 +94,15 @@ ggcorrplot(cor(xm), hc.order = TRUE, outline.col = "white")
 <!-- #   geom_point(size = 10, aes(color = coefficient > 0, alpha = abs(coefficient) > 0.5)) + -->
 <!-- #   scale_alpha_manual(values = c("TRUE" = 0.25, "FALSE" = 0)) + -->
 <!-- #   guides(color = FALSE, alpha = FALSE) -->
+Compare MSPE of Ridge and LASSO on air pollution data
+-----------------------------------------------------
+
+Since our focus was on the properties of the resulting predictions, it may be interesting to compare the estimated MSPE of the different models / predictors we have considered so far: a full linear model, a model selected via stepwise + AIC, ridge regression and LASSO. As usual, we use 50 runs of 5-fold CV, and obtain the following boxplots:
+
+![](README_files/figure-markdown_github-ascii_identifiers/bigcompare-1.png)
+
+We see that there is a marginal advantage of LASSO, but it is rather minor, and the three methods we have seen so far improve by similar margins on the predictions obtained by using a full linear regression model.
+
 Less desirable properties of LASSO
 ----------------------------------
 
@@ -103,9 +115,50 @@ Elastic net
 
 Elastic Net estimators were introduced to find an informative compromise between LASSO and Ridge Regression.
 
+``` r
+# EN
+set.seed(23)
+air.en <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0.75, 
+                 family='gaussian', intercept=TRUE)
+plot(air.en)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/airp.en-1.png)
+
 ### Run EN on airpollution data, compare fits
 
+``` r
+cbind(round(coef(air.l2, s='lambda.min'), 3),
+round(coef(air.l1, s='lambda.min'), 3), 
+round(coef(air.en, s='lambda.min'), 3))
+```
+
+    ## 16 x 3 sparse Matrix of class "dgCMatrix"
+    ##                    1        1        1
+    ## (Intercept) 1084.916 1100.355 1099.067
+    ## PREC           1.407    1.503    1.495
+    ## JANT          -0.886   -1.189   -1.153
+    ## JULT          -0.836   -1.247   -1.182
+    ## OVR65         -2.000    .        .    
+    ## POPN           5.977    .        .    
+    ## EDUC          -8.154  -10.510  -10.147
+    ## HOUS          -1.156   -0.503   -0.575
+    ## DENS           0.005    0.004    0.004
+    ## NONW           2.655    3.979    3.895
+    ## WWDRK         -0.458   -0.002   -0.052
+    ## POOR           0.725    .        .    
+    ## HC            -0.027    .        .    
+    ## NOX            0.049    .        .    
+    ## SO.            0.232    0.228    0.230
+    ## HUMID          0.391    .        0.005
+
+The same comment made above regarding the need of a more stable choice of "optimal" fits (for each of these methods) applies here. Again, here we limit ourselves to one run of 5-fold CV purely based on simplifying the presentation.
+
 ### Compare MSPE's of Full, LASSO, Ridge, EN and stepwise
+
+![](README_files/figure-markdown_github-ascii_identifiers/bigcompare2-1.png)
+
+Elastic Net is a bit better.
 
 Non-parametric regression
 =========================
