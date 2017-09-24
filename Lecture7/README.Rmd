@@ -80,9 +80,9 @@ informative compromise between LASSO and Ridge Regression.
 ### Compare MSPE's of Full, LASSO, Ridge, EN and stepwise
 
 
-## Non-parametric regression
+# Non-parametric regression
 
-# Polynomial regression
+## Polynomial regression
 
 ```{r nonparam, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # help(lidar, package='SemiPar')

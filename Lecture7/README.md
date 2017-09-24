@@ -94,10 +94,10 @@ Elastic Net estimators were introduced to find an informative compromise between
 ### Compare MSPE's of Full, LASSO, Ridge, EN and stepwise
 
 Non-parametric regression
--------------------------
+=========================
 
 Polynomial regression
-=====================
+---------------------
 
 ``` r
 # help(lidar, package='SemiPar')
