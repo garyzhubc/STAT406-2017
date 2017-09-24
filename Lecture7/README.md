@@ -26,14 +26,26 @@ lambdas <- exp( seq(-3, 10, length=50))
 set.seed(123)
 air.l2 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=0, 
                  family='gaussian', intercept=TRUE)
+plot(air.l2)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/comparing.airp-1.png)
+
+Now LASSO:
+
+``` r
 # LASSO
 set.seed(23)
 air.l1 <- cv.glmnet(x=xm, y=y, lambda=lambdas, nfolds=5, alpha=1, 
                  family='gaussian', intercept=TRUE)
+plot(air.l1)
+```
 
-a <- data.frame(ridge=round(as.vector(coef(air.l2, s='lambda.min')), 2),
-lasso=round(as.vector(coef(air.l1, s='lambda.min')), 2))
+![](README_files/figure-markdown_github-ascii_identifiers/airp.lasso-1.png)
 
+Compare coefficients:
+
+``` r
 cbind(round(coef(air.l2, s='lambda.min'), 3),
 round(coef(air.l1, s='lambda.min'), 3))
 ```
@@ -57,6 +69,8 @@ round(coef(air.l1, s='lambda.min'), 3))
     ## SO.            0.240    0.228
     ## HUMID          0.372    .
 
+Look at the groups of correlated predictors
+
 ``` r
 library(ggcorrplot)
 # Reordering the correlation matrix
@@ -64,7 +78,7 @@ library(ggcorrplot)
 ggcorrplot(cor(xm), hc.order = TRUE, outline.col = "white")
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/comparing.airp-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/airp.correlations-1.png)
 
 <!-- # # https://briatte.github.io/ggcorr/ -->
 <!-- # source('https://raw.githubusercontent.com/briatte/ggcorr/master/ggcorr.R') -->
