@@ -21,7 +21,7 @@ we fit / train
 a model or predictor, then we would expect a Ridge Regression estimator 
 to have less 
 "degrees of freedom" than a regular least squares regression 
-estimator, give that it is the solution of a constrained
+estimator, given that it is the solution of a constrained
 optimization problem. This is, of course, an informal 
 argument, particularly since there is no proper definition
 of "degrees of freedom". 

@@ -1,7 +1,7 @@
 STAT406 - Lecture 6 notes
 ================
 Matias Salibian-Barrera
-2017-09-24
+2017-09-25
 
 Lecture slides
 --------------
@@ -11,7 +11,7 @@ The lecture slides are [here](STAT406-17-lecture-6-preliminary.pdf).
 Effective degrees of freedom
 ----------------------------
 
-Intuitively, if we interpret "degrees of freedom" as the number of "free" parameters that are available to us for tuning when we fit / train a model or predictor, then we would expect a Ridge Regression estimator to have less "degrees of freedom" than a regular least squares regression estimator, give that it is the solution of a constrained optimization problem. This is, of course, an informal argument, particularly since there is no proper definition of "degrees of freedom".
+Intuitively, if we interpret "degrees of freedom" as the number of "free" parameters that are available to us for tuning when we fit / train a model or predictor, then we would expect a Ridge Regression estimator to have less "degrees of freedom" than a regular least squares regression estimator, given that it is the solution of a constrained optimization problem. This is, of course, an informal argument, particularly since there is no proper definition of "degrees of freedom".
 
 The more general definition discussed in class, called "effective degrees of freedom" (EDF), reduces to the trace of the "hat" matrix for any linear predictor (including, but not limited to, linear regression models), and is due to Efron:
 
