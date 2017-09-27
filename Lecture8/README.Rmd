@@ -30,9 +30,10 @@ Instead here we focus on the case where the
 regression function is **completely unknown**.
 
 Below we will discuss two main approaches to estimating
-E(Y|X): (a) one using bases (e.g. a polynomial basis, or a
-spline basis); and (b) one using kernels (aka 
-local regression).
+E(Y|X): 
+
+(a) one using bases (e.g. a polynomial basis, or a spline basis); and 
+(b) one using kernels (aka local regression).
 
 To simplify the presentation, and also because of
 an intrinsic limitation of these methods (which will
@@ -43,9 +44,9 @@ the case where there is a single explanatory variable
 
 ## Polynomial regression
 
-To illustrate the methods, we will consider the 
+To illustrate these basis methods, we will consider the 
 `lidar` data, available in the package `SemiPar`. More
-information on these data is available from the
+information is available from the
 corresponding help page: `help(lidar, package='SemiPar')`. 
 We now load the data and plot it, the response
 variable is `logratio` and the explanatory one is
@@ -55,7 +56,7 @@ variable is `logratio` and the explanatory one is
 # help(lidar, package='SemiPar')
 
 data(lidar, package='SemiPar')
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 ```
 
 
@@ -65,7 +66,7 @@ as a 4th degree polynomial, the problem reduces to a linear
 regression one (see the lecture slides). So we could use a 
 command like `lm(logratio ~ range + range^2 + range^3 + range^4)`.
 However, that approach  will not work as we intend it 
-(I recommend that you check this and find the explanation). 
+(I recommend that you check this and find out the reason why). 
 Instead, we would need to use something like
 `lm(logratio ~ range + I(range^2) + I(range^3) ... )`, which 
 can quickly get clumsy and error-prone. We can instead use
@@ -78,7 +79,7 @@ and overlays the estimated regression function:
 ```{r poly4, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # Degree 4 polynomials
 pm <- lm(logratio ~ poly(range, 4), data=lidar)
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 lines(predict(pm)[order(range)] ~ sort(range), data=lidar, lwd=4, col='blue')
 ```
 
@@ -92,7 +93,7 @@ a 10th degree one (in red):
 ```{r poly10, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # Degree 10 polynomials
 pm2 <- lm(logratio ~ poly(range, 10), data=lidar)
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 lines(predict(pm)[order(range)] ~ sort(range), data=lidar, lwd=4, col='blue')
 lines(predict(pm2)[order(range)]~sort(range), data=lidar, lwd=4, col='red')
 ```
@@ -106,14 +107,16 @@ but also remarkably flexible basis is given by spline functions,
 as discussed in class. 
 
 We first here show how to build a naive spline basis with 
-5 knots (placed at the `(1:5)/6` quantiles of the
+5 knots (placed at the `(1:5)/6` quantiles 
+(i.e. the `r round((1:5)/6, 2)` percentiles) of the
 observed values of the explanatory variable), and use
 it to estimate the regression function. Note that
 this naive spline basis is numerically very unstable,
 and thus one should not do this in practice. It is
 included here simply as an illustration of the
 methodology and to stress the point that 
-these basis approaches are in fact more complex
+these basis approaches are in fact nothing
+more than slightly more complex
 linear models. 
 
 ```{r splines1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
