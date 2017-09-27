@@ -11,14 +11,14 @@ The lecture slides are [here](STAT406-17-lecture-8-preliminary.pdf).
 Non-parametric regression
 =========================
 
-We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its "form" is **unknown**. If we knew that the regression function was a polynomial in the coordinates of the vector X (e.g. a quadratic function), or if we knew that the true regression function belonged to a family of functions that we can parametrize, then the regression function could be estimated via least squares. Instead here we focus on the case where the regression function is **completely unknown**.
+We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its *form* is **unknown**. If we knew that the regression function was a polynomial in the coordinates of the vector X (e.g. a quadratic function), or if we knew that the true regression function belonged to a family of functions that we can parametrize, then the regression function could be estimated via least squares. Instead here we focus on the case where the regression function is **completely unknown**.
 
 Below we will discuss two main approaches to estimating E(Y|X):
 
 1.  one using bases (e.g. a polynomial basis, or a spline basis); and
 2.  one using kernels (aka local regression).
 
-To simplify the presentation, and also because of an intrinsic limitation of these methods (which will be discussed in more detail later), we will initially only consider the case where there is a single explanatory variable (i.e. X above is a scalar, not a vector).
+To simplify the presentation (but also because of an intrinsic limitation of these methods, which will be discussed in more detail later), we will initially only consider the case where there is a single explanatory variable (i.e. X above is a scalar, not a vector).
 
 Polynomial regression
 ---------------------
@@ -57,25 +57,40 @@ lines(predict(pm2)[order(range)]~sort(range), data=lidar, lwd=4, col='red')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/poly10-1.png)
 
+Note that the 10th order fit follows the data much more closely, but it starts to become "too adaptive" and departing quite often from the main (larger scale) trend we associate with the regression (conditional mean) function.
+
 A more stable basis: splines
 ----------------------------
 
 Part of the problem with polynomial bases is that they necessarily become more wiggly within the range of the data, and also quickly increase or decrease near the edge of the observations. A more stable but also remarkably flexible basis is given by spline functions, as discussed in class.
 
-We first here show how to build a naive spline basis with 5 knots (placed at the `(1:5)/6` quantiles (i.e. the 0.17, 0.33, 0.5, 0.67, 0.83 percentiles) of the observed values of the explanatory variable), and use it to estimate the regression function. Note that this naive spline basis is numerically very unstable, and thus one should not do this in practice. It is included here simply as an illustration of the methodology and to stress the point that these basis approaches are in fact nothing more than slightly more complex linear models.
+We first here show how to build a naive linear spline basis with 5 knots (placed at the `(1:5)/6` quantiles (i.e. the 0.17, 0.33, 0.5, 0.67, 0.83 percentiles) of the observed values of the explanatory variable), and use it to estimate the regression function. Remember that a linear spline function with knot *w* is given by `f_w(x) = max( x - w, 0 )`. Given a fixed set of pre-selected knots *w\_1*, *w\_2*, ..., *w\_k*, we consider regreesion functions that are linear combinations of the corresponding k linear spline functions.
+
+Note that for higher-order splines (e.g. cubic splines discussed below), the naive spline basis used above is numerically very unstable, and usually works poorly in practice. I include here simply as an illustration of the methodology and to stress the point that these basis approaches are in fact nothing more than slightly more complex linear models.
+
+First we find the 5 knots mentioned above:
 
 ``` r
-# linear splines ``by hand''
-# select the knots at 5 quantiles
-kn <- as.numeric( quantile(lidar$range, (1:5)/6) )
+# select the knots at 5 specific quantiles
+( kn <- as.numeric( quantile(lidar$range, (1:5)/6) ) )
+```
 
+    ## [1] 444.6667 499.6667 555.0000 609.6667 664.6667
+
+Now we compute the matrix of "explanatory variables", that is the matrix that has each of the 5 basis functions *f\_1*, *f\_2*, ..., *f\_5* evaluated at the n observed values of the (single) explanatory variable *x\_1*, ..., *x\_n*. In other words, the matrix **X** has in its (i, j) cell the value *f\_j(x\_i)*, for *j=1*, ..., *k*, and *i=1*, ..., *n*. In the code below we use / abuse *recycling* rules used by `R` when operating with vectors and arrays (can you spot it?)
+
+``` r
 # prepare the matrix of covariates / explanatory variables
 x <- matrix(0, dim(lidar)[1], length(kn)+1)
 for(j in 1:length(kn)) {
   x[,j] <- pmax(lidar$range-kn[j], 0)
 }
 x[, length(kn)+1] <- lidar$range
+```
 
+Now that we have the matrix of our "explanatory variables", we can simply use `lm` to estimate the coefficients of the linear combination of the functions in the spline basis that will provide our regression function estimator. We then plot the data and overlay the fitted / estimated regression function:
+
+``` r
 # Fit the regression model
 ppm <- lm(lidar$logratio ~ x)
 plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
@@ -84,20 +99,26 @@ lines(predict(ppm)[order(range)]~sort(range), data=lidar, lwd=6, col='hotpink')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/splines1-1.png)
 
-There are better (more stable) bases for the same linear space spanned by these spline functions. Here we use the function `bs` to build a b-spline basis. To show that this in fact provides the exact same results as using our **poor person** solution above, I overlay both fits (the naive one in pink as above, and the one using b-splines in blue):
+There are better (more stable) bases for the same linear space spanned by these spline functions. Here we use the function `bs` to build a b-spline basis. Given the chosen knots and the degree of the splines (linear, quadratic, cubic, etc.) the set of possible functions (a linear space, really) is the same regardless of the basis we use. As a consequence, the estimated regression function should be identical for any basis we use (provided we do not run into serious numerical issues). To illustrate this fact, we will use a B-spline basis with the same 5 knots as above, and compare the estimated regression function with the one we obtained above using our **poor people** naive basis. The plot below overlays both fits (the naive one with a thick pink line as above, and the one using b-splines with a thinner blue line):
 
 ``` r
 # a better way to obtain the same fit
 library(splines)
 ppm2 <- lm(logratio ~ bs(range, degree=1, knots=kn), data=lidar)
 plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
-lines(predict(ppm)[order(range)]~sort(range), data=lidar, lwd=6, col='hotpink')
+lines(predict(ppm)[order(range)]~sort(range), data=lidar, lwd=8, col='hotpink')
 lines(predict(ppm2)[order(range)]~sort(range), data=lidar, lwd=2, col='darkblue')
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bsplines1-1.png)
 
+As expected, both provide the same estimated regression function.
+
+Note that because we are using a set of linear splines, our estimated regression functions will always be piece-wise linear. To obtain smoother (e.g. differentiable, or even continuously differentiable) regression estimators we can use higher-order splines.
+
 ### Higher order splines (quadratic, cubic, etc.)
+
+Here we do not even try to build the spline basis by hand, and directly use the function `bs` to evaluate the desired spline basis on the observed values of the explanatory variable (in this case `range`). We use the arguments `degree = 2` and `knots = kn` to indicate we want a quadratic spline basis with knots located at the elements of the vector `kn`. As before, we then simply use `lm` to estimate the coefficients, and overlay the estimated regression function over the data:
 
 ``` r
 plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
@@ -107,6 +128,8 @@ lines(predict(ppmq)[order(range)]~sort(range), data=lidar, lwd=4, col='steelblue
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bsplines2-1.png)
 
+Cubic splines yield an even smoother fit:
+
 ``` r
 # cubic splines
 plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
@@ -114,4 +137,14 @@ ppmc <- lm(logratio ~ bs(range, degree=3, knots=kn), data=lidar)
 lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='tomato3')
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/bsplines2-2.png)
+![](README_files/figure-markdown_github-ascii_identifiers/bsplines3-1.png)
+
+Note that the estimated regression function seems to have started to "twitch" and wiggle, particularly at the upper end of our observations.
+
+Upcoming
+--------
+
+-   We still need to choose the knots (both "how many" and their locations)
+-   And we also need to choose the order of the spline basis
+-   A neat property of *natural cubic splines* will simplify our approach, showing that we only need to consider regularized (penalized) *natural cubic splines* with *n* knots, one per observed value of the explanatory variable. Then, we will only to choose the value of the penalization term.
+-   *natural cubic splines* are linear beyond the first and last knot, and thus will not "twich" at the edges, and will provide a more stable regression estimator.
