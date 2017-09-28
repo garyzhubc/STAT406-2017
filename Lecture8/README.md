@@ -1,7 +1,7 @@
 STAT406 - Lecture 8 notes
 ================
 Matias Salibian-Barrera
-2017-09-26
+2017-09-27
 
 Lecture slides
 --------------
@@ -128,7 +128,54 @@ lines(predict(ppmq)[order(range)]~sort(range), data=lidar, lwd=4, col='steelblue
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bsplines2-1.png)
 
-Cubic splines yield an even smoother fit:
+A useful consequence of the fact that these regression estimators are in the end just linear regression estimators (but using a richer / more flexible basis than just the straight predictors) is that we can easily compute (pointwise) standard errors for the fitted regression curve.
+
+We first fit and plot a quadratic spline using the same 5 knots as before:
+
+``` r
+# k <- 5
+# kn <- as.numeric( quantile(lidar$range, (1:k)/(k+1)) )
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+ppmc <- lm(logratio ~ bs(range, degree=2, knots=kn), data=lidar)
+lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='gray30')
+```
+
+To compute the estimated standard error of the predicted regression curve on a grid of values of the explanatory variable `range`, we first build a grid of 200 equally spaced points within the observed scope of the variable `range`:
+
+``` r
+xx <- seq(min(lidar$range), max(lidar$range), length=200)
+```
+
+The `predict` method for `lm` objects returns estimated standard errors for each fitted value if we set the argument `se.fit = TRUE`:
+
+``` r
+ppmc <- lm(logratio ~ bs(range, degree=2, knots=kn), data=lidar)
+ps <- predict(ppmc, newdata=list(range=xx), se.fit=TRUE)
+```
+
+We now compute upper and lower confidence bands (I used 2 standard errors) around the fitted regression line:
+
+``` r
+up <- (ps$fit+2*ps$se.fit)
+lo <- (ps$fit-2*ps$se.fit)
+```
+
+The following code relies on **base R** graphical commands to display the *confidence bands* we just constructed:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='gray30')
+myrgb <- col2rgb('red') / 256 #, alpha=TRUE)
+myrgb <- rgb(red=myrgb[1], green=myrgb[2], blue=myrgb[3], alpha=.3)
+polygon(c(xx, rev(xx)), c(up, rev(lo)), density=NA, col=myrgb) #'lightblue')
+lines(ps$fit~xx, data=lidar, lwd=4, col='blue')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bsplines.se5-1.png)
+
+> It is important to note that the above confidence bands were constructed assuming that the knots were fixed (not random), and similarly for the degree of the spline basis.
+
+Increasing the degree of the cubic basis yields smoother fits (having higher order continuous derivatives). For example, using cubic splines yield an even smoother fit:
 
 ``` r
 # cubic splines
@@ -141,6 +188,36 @@ lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='tomato3')
 
 Note that the estimated regression function seems to have started to "twitch" and wiggle, particularly at the upper end of our observations.
 
+How many knots should we use?
+-----------------------------
+
+So far we have used 5 knots, but we could have used any other number of knots. If we consider a quadratic spline basis with 10 knots, the fit appears a bit better (at least aesthetically):
+
+``` r
+k <- 10
+kn <- as.numeric( quantile(lidar$range, (1:k)/(k+1)) )
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+ppmc <- lm(logratio ~ bs(range, degree=2, knots=kn), data=lidar)
+lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='tomato3')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bsplines.10knots-1.png)
+
+What about using more knots? We will try 50:
+
+``` r
+# quadratic splines with 50 knots
+k <- 50
+kn <- as.numeric( quantile(lidar$range, (1:k)/(k+1)) )
+ppmc <- lm(logratio ~ bs(range, degree=2, knots=kn), data=lidar)
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(predict(ppmc)[order(range)]~sort(range), data=lidar, lwd=4, col='hotpink')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bsplines.50knots-1.png)
+
+Clearly not a good idea!
+
 Upcoming
 --------
 
@@ -148,3 +225,76 @@ Upcoming
 -   And we also need to choose the order of the spline basis
 -   A neat property of *natural cubic splines* will simplify our approach, showing that we only need to consider regularized (penalized) *natural cubic splines* with *n* knots, one per observed value of the explanatory variable. Then, we will only to choose the value of the penalization term.
 -   *natural cubic splines* are linear beyond the first and last knot, and thus will not "twich" at the edges, and will provide a more stable regression estimator.
+
+Smoothing splines
+-----------------
+
+The function `smooth.spline` computes a cubic smoothing spline (natural cubic spline). We try a value of the penalization parameter chosen by hand `spar = 0.2`:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+tmp <- smooth.spline(x=lidar$range, y=lidar$logratio, spar=.2, cv=FALSE,
+                     all.knots=TRUE)
+lines(tmp$y~tmp$x, lwd=4, col='magenta')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing1-1.png)
+
+Clearly not enough. We increase it to 0.5:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+tmp <- smooth.spline(x=lidar$range, y=lidar$logratio, spar=.5, cv=FALSE,
+                     all.knots=TRUE)
+lines(tmp$y~tmp$x, lwd=4, col='red')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing1.5-1.png)
+
+The larger the penalty parameter, the closer the fit gets to a linear function (why?), we now set it to 0.8:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+tmp <- smooth.spline(x=lidar$range, y=lidar$logratio, spar=.8, cv=FALSE,
+                     all.knots=TRUE)
+lines(tmp$y~tmp$x, lwd=4, col='blue')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing2-1.png)
+
+... and to 2:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+tmp <- smooth.spline(x=lidar$range, y=lidar$logratio, spar=2, cv=FALSE,
+                     all.knots=TRUE)
+lines(tmp$y~tmp$x, lwd=4, col='tomato3')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing3-1.png)
+
+Use CV to select the penalty parameter (knots and degree of splines are given)
+------------------------------------------------------------------------------
+
+<!-- # using CV -->
+``` r
+tmp.cv <- smooth.spline(x=lidar$range, y=lidar$logratio, cv=TRUE,
+                        all.knots=TRUE)
+# tmp.cv$spar = 0.974
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(tmp.cv$y~tmp.cv$x, lwd=2, col='blue')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing.cv1-1.png)
+
+Which is the same as doing:
+
+``` r
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(tmp.cv$y~tmp.cv$x, lwd=4, col='blue')
+tmp <- smooth.spline(x=lidar$range, y=lidar$logratio, spar=tmp.cv$spar, cv=FALSE,
+                     all.knots=TRUE)
+lines(tmp$y~tmp$x, lwd=2, col='red')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/smoothing.cv2-1.png)
