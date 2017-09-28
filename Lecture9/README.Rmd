@@ -1,0 +1,19 @@
+---
+title: "STAT406 - Lecture 9 notes"
+author: "Matias Salibian-Barrera"
+date: "`r format(Sys.Date())`"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## Lecture slides
+
+The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
+
+## Kernel regression / local regression 
+
+
