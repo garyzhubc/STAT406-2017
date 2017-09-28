@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-7-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-7.pdf).
 
 ## LASSO 
 
@@ -345,14 +345,13 @@ mtext(expression(hat(MSPE)), side=2, line=2.5)
 
 We see that there is a marginal advantage of LASSO, but it is rather minor, and 
 the three methods we have seen so far improve by similar margins 
-on the predictions obtained by
-using a full linear regression model. 
+on the predictions obtained by using a full linear regression model. 
 
 ## Less desirable properties of LASSO
 
-* Not "variable selection"-consistent
-* Not oracle
-* Tends to only pick one variable (randomly) from groups of correlated ones 
+* Not "variable selection"-consistent.
+* Not oracle.
+* Tends to only pick one variable (randomly) from groups of correlated ones.
 
 ## Elastic net
 

@@ -1,12 +1,12 @@
 STAT406 - Lecture 7 notes
 ================
 Matias Salibian-Barrera
-2017-09-26
+2017-09-28
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-7-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-7.pdf).
 
 LASSO
 -----
@@ -334,9 +334,9 @@ We see that there is a marginal advantage of LASSO, but it is rather minor, and 
 Less desirable properties of LASSO
 ----------------------------------
 
--   Not "variable selection"-consistent
--   Not oracle
--   Tends to only pick one variable (randomly) from groups of correlated ones
+-   Not "variable selection"-consistent.
+-   Not oracle.
+-   Tends to only pick one variable (randomly) from groups of correlated ones.
 
 Elastic net
 -----------
