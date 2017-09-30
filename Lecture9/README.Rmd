@@ -16,6 +16,68 @@ The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
 
 ## Kernel regression / local regression 
 
+```{r kernel0, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+dat <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
+plot(MORT ~ SO., data=dat, pch=19, col='gray', cex=1.25)
+
+
+library(KernSmooth)
+x <- dat$SO.
+y <- dat$MORT
+
+h <- 50
+a <- ksmooth(x=x, y=y, kernel='box', bandwidth=h, n.points=1000)
+plot(y ~ x, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+lines(a$x, a$y, lwd=4, col='blue')
+
+
+h <- 60
+a <- ksmooth(x=x, y=y, kernel='box', bandwidth=h, n.points=1000)
+plot(y ~ x, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+lines(a$x, a$y, lwd=4, col='blue')
+
+
+h <- 60
+a <- ksmooth(x=x, y=y, kernel='normal', bandwidth=h, n.points=1000)
+plot(y ~ x, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+lines(a$x, a$y, lwd=4, col='blue')
+
+
+
+data(ethanol, package='SemiPar')
+# local constant
+span <- .4
+b0 <- loess(NOx ~ E, data=ethanol, span=span, degree=0, family='gaussian')
+plot(NOx ~ E, data=ethanol, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+tmp <- order(b0$x)
+lines(b0$x[tmp], b0$fitted[tmp], lwd=4, col='blue')
+
+# local linear
+span <- .4
+b1 <- loess(NOx ~ E, data=ethanol, span=span, degree=1, family='gaussian')
+plot(NOx ~ E, data=ethanol, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+tmp <- order(b1$x)
+lines(b1$x[tmp], b1$fitted[tmp], lwd=4, col='red')
+
+
+
+span <- .4
+b1 <- loess(NOx ~ E, data=ethanol, span=span, degree=1, family='gaussian')
+plot(NOx ~ E, data=ethanol, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+tmp <- order(b1$x)
+lines(b0$x[tmp], b0$fitted[tmp], lwd=4, col='blue')
+lines(b1$x[tmp], b1$fitted[tmp], lwd=4, col='red')
+
+# local quad
+span <- .4
+b2 <- loess(NOx ~ E, data=ethanol, span=span, degree=2, family='gaussian')
+plot(NOx ~ E, data=ethanol, pch=19, col='gray', cex=1.3, xlab='SO.', ylab='MORT')
+tmp <- order(b2$x)
+lines(b1$x[tmp], b1$fitted[tmp], lwd=4, col='red')
+lines(b2$x[tmp], b2$fitted[tmp], lwd=4, col='springgreen3')
+```
+
+
 Kernel (local) regression using `loess()` on the `Ethanol` data.
 
 Effect of span. Local linear, small span (.05)
