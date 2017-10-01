@@ -1,7 +1,7 @@
 STAT406 - Lecture 8 notes
 ================
 Matias Salibian-Barrera
-2017-09-28
+2017-10-01
 
 Lecture slides
 --------------
@@ -11,7 +11,7 @@ The lecture slides are [here](STAT406-17-lecture-8-preliminary.pdf).
 Non-parametric regression
 =========================
 
-We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its *form* is **unknown**. If we knew that the regression function was a polynomial in the coordinates of the vector X (e.g. a quadratic function), or if we knew that the true regression function belonged to a family of functions that we can parametrize, then the regression function could be estimated via least squares. Instead here we focus on the case where the regression function is **completely unknown**.
+We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its *form* is **unknown**. If we knew that the regression function was a linear combination of a sine and a cosine function, "E(Y|X=x) = a + b sin(x) + c cos(x)", where *a*, *b* and *c* are uknown, for example, then the problem would in fact be a linear regression problem. More in general, when the true regression function is known or assumed to belong to a family of functions that we can parametrize, then the estimation can be done via standard least squares. Instead here we focus on the case where the regression function is **completely unknown**.
 
 Below we will discuss two main approaches to estimating E(Y|X):
 
@@ -32,7 +32,7 @@ plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/nonparam-1.png)
 
-It is easy to verify that if we model the regression function as a 4th degree polynomial, the problem reduces to a linear regression one (see the lecture slides). So we could use a command like `lm(logratio ~ range + range^2 + range^3 + range^4)`. However, that approach will not work as we intend it (I recommend that you check this and find out the reason why). Instead, we would need to use something like `lm(logratio ~ range + I(range^2) + I(range^3) ... )`, which can quickly get clumsy and error-prone. We can instead use the function `poly()` in `R` to generate the matrix containing the powers of `range`, and plug that into the call to `lm()`. The code below fits such an approximation, plots the data and overlays the estimated regression function:
+In class we discussed the formal motivation to look into a polynomial approximation of the regression function. This argument, however, does not specify which degree of the approximating polynomial to use. Here we first try a 4th degree polynomial and the problem reduces to a linear regression one (see the lecture slides). We can use a command like `lm(logratio ~ range + range^2 + range^3 + range^4)`. However, this call to `lm` will not work as we intend it (I recommend that you check this and find out the reason why). Instead, we would need to use something like `lm(logratio ~ range + I(range^2) + I(range^3) + I(range^4))`. To avoid having to type a long formula, we can instead use the function `poly()` in `R` to generate the design matrix containing the desired powers of `range`, and plug that into the call to `lm()`. The code below fits such an approximation, plots the data and overlays the estimated regression function:
 
 ``` r
 # Degree 4 polynomials
@@ -43,7 +43,7 @@ lines(predict(pm)[order(range)] ~ sort(range), data=lidar, lwd=6, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/poly4-1.png)
 
-Note that this fit is reasonable, although there is probably room for improvement. It is tempting to increase the order of the approximating polynomial, however, this is easily seen not to be a good idea. Below we compare the 4th degree approximation used above (in blue) with a 10th degree one (in red):
+Note that this fit is reasonable, although there is probably room for improvement. Based on the formal motivation discussed in class to use polynomials in the first place, it may seem natural to increase the order of the approximating polynomial in order to improve the quality of the approximation. However, this is easily seen not to be a good idea. Below we compare the 4th degree approximation used above (in blue) with a 10th degree one (in red):
 
 ``` r
 # Degree 10 polynomials
@@ -57,10 +57,12 @@ lines(predict(pm2)[order(range)]~sort(range), data=lidar, lwd=6, col='red')
 
 Note that the 10th order fit follows the data much more closely, but it starts to become "too adaptive" and departing quite often from the main (larger scale) trend we associate with the regression (conditional mean) function.
 
+(Can you explain the discrepancy between what we observe above and the motivation we used in class, that suggests that higher order polynomials provide better approximations?)
+
 A more stable basis: splines
 ----------------------------
 
-Part of the problem with polynomial bases is that they necessarily become more wiggly within the range of the data, and also quickly increase or decrease near the edge of the observations. A more stable but also remarkably flexible basis is given by spline functions, as discussed in class.
+Part of the problem with global polynomial bases as the ones used above is that they necessarily become more wiggly within the range of the data, and also quickly increase or decrease near the edge of the observations. A more stable but also remarkably flexible basis is given by spline functions, as discussed in class.
 
 We first here show how to build a naive linear spline basis with 5 knots (placed at the `(1:5)/6` quantiles (i.e. the 0.17, 0.33, 0.5, 0.67, 0.83 percentiles) of the observed values of the explanatory variable), and use it to estimate the regression function. Remember that a linear spline function with knot *w* is given by `f_w(x) = max( x - w, 0 )`. Given a fixed set of pre-selected knots *w\_1*, *w\_2*, ..., *w\_k*, we consider regression functions that are linear combinations of the corresponding k linear spline functions.
 
