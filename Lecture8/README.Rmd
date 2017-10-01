@@ -132,21 +132,25 @@ of the corresponding k linear spline functions.
 Note that for higher-order splines (e.g. cubic splines
 discussed below), the naive spline basis used above is numerically 
 very unstable, and usually works poorly in practice. 
-I include here simply as an illustration of the
-methodology and to stress the point that these basis approaches are in fact nothing
+I include it here simply as an illustration of the
+methodology and to stress the point that this type of approach 
+(that estimates the regression function as a linear combination
+of an explicit basis) is in fact nothing
 more than slightly more complex linear models. 
 
-First we find the 5 knots mentioned above: 
+First we find the 5 knots mentioned above that will be used to 
+construct the spline basis: 
 ```{r knots, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # select the knots at 5 specific quantiles
 ( kn <- as.numeric( quantile(lidar$range, (1:5)/6) ) )
 ```
 Now we compute the matrix of "explanatory variables", that
-is the matrix that has each of the 5 basis functions *f_1*, *f_2*, ..., *f_5* evaluated 
+is: the matrix that in its columns has each of the 5 basis 
+functions *f_1*, *f_2*, ..., *f_5* evaluated 
 at the n observed values of the (single) explanatory variable *x_1*, ..., *x_n*. In other words, the
-matrix **X** has in its (i, j) cell the value *f_j(x_i)*, 
-for *j=1*, ..., *k*, and *i=1*, ..., *n*. In the code below we use / abuse *recycling* rules 
-used by `R` when operating with vectors and arrays (can you spot it?)
+matrix **X** has in its *(i, j)* cell the value *f_j(x_i)*, 
+for *j=1*, ..., *k*, and *i=1*, ..., *n*. In the code below we use (abuse?) `R`'s *recycling* rules 
+when operating over vectors and arrays (can you spot it?)
 ```{r linearbasis, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, tidy=TRUE}
 # prepare the matrix of covariates / explanatory variables
 x <- matrix(0, dim(lidar)[1], length(kn)+1)
@@ -163,12 +167,21 @@ fitted / estimated regression function:
 ```{r splines1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # Fit the regression model
 ppm <- lm(lidar$logratio ~ x)
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
-lines(predict(ppm)[order(range)]~sort(range), data=lidar, lwd=6, col='hotpink')
+plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(predict(ppm)[order(range)] ~ sort(range), data=lidar, lwd=6, col='hotpink')
 ```
 
-There are better (more stable) bases for the same linear space spanned by these spline functions. Here we
-use the function `bs` to build a b-spline basis. Given the chosen knots and the degree of the splines
+There are better (numerically more stable) bases for the same linear 
+space spanned by these spline functions. These bases have different 
+numerical properties and can become cumbersome to describe. Here we
+use the function `bs` (in package `splines`) to build a B-spline basis. 
+For an accesible discussion, see for example Section 4.1 of
+
+> Wood, S. (2006). *Generalized additive models : an introduction with R*.
+> Chapman & Hall/CRC, 
+> Boca Raton, FL. [Library link](http://resolve.library.ubc.ca/cgi-bin/catsearch?bid=8140311).
+
+Given the chosen knots and the degree of the splines
 (linear, quadratic, cubic, etc.) the set of possible functions 
 (a linear space, really) is the same regardless of the basis we use. As a consequence,
 the estimated regression function should be identical for any basis we use (provided we do not run into
@@ -181,22 +194,30 @@ using b-splines with a thinner blue line):
 ```{r bsplines1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 library(splines)
 ppm2 <- lm(logratio ~ bs(range, degree=1, knots=kn), data=lidar)
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=1.5)
-lines(predict(ppm)[order(range)]~sort(range), data=lidar, lwd=8, col='hotpink')
-lines(predict(ppm2)[order(range)]~sort(range), data=lidar, lwd=3, col='darkblue')
+plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
+lines(predict(ppm)[order(range)] ~ sort(range), data=lidar, lwd=8, col='hotpink')
+lines(predict(ppm2)[order(range)] ~ sort(range), data=lidar, lwd=3, col='darkblue')
 ```
 
-As expected, both provide the same estimated regression function. Note that because we are 
-using a set of linear splines, our estimated regression functions will always be piece-wise 
-linear. To obtain smoother (e.g. differentiable, or even continuously differentiable)
-regression estimators we can use higher-order splines. 
+As expected, both fits provide the same estimated regression function, although
+its coefficients will be different:
+```{r bsplines.coef}
+coef(ppm)
+coef(ppm2)
+```
+Note that, because we are 
+using a set of linear splines, our estimated regression functions will always be piecewise 
+linear (i.e. linear functions between each pair of knots). To obtain smoother (e.g. differentiable, 
+continuously differentiable, or even twice continously differentiable) 
+regression estimators below we will use higher-order splines. 
 
 ### Higher order splines (quadratic, cubic, etc.)
 
 Here we directly use the function `bs` to evaluate the desired
-spline basis on the observed values of the explanatory variable (in this case `range`). We use the arguments
-`degree = 2` and `knots = kn` to indicate we want a 
-quadratic spline basis with knots located at the elements of the vector `kn`. As before, we then simply use `lm` 
+spline basis on the observed values of the explanatory variable (in this case `range`). 
+We use the arguments `degree = 2` and `knots = kn` to indicate we want a 
+quadratic spline basis with knots located at the elements of the vector `kn`. 
+As before, we then simply use `lm` 
 to estimate the coefficients, and overlay the estimated regression function over the data: 
 
 ```{r bsplines2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
@@ -205,7 +226,8 @@ ppmq <- lm(logratio ~ bs(range, degree=2, knots=kn), data=lidar)
 lines(predict(ppmq)[order(range)]~sort(range), data=lidar, lwd=6, col='steelblue')
 ```
 
-A useful consequence of the fact that these regression estimators are in fact just linear regression estimators
+A useful consequence of the fact that these regression estimators are in fact 
+just linear regression estimators
 (but using a richer / more flexible basis than just the straight
 predictors) is that we can easily compute (pointwise) standard errors
 for the fitted regression curve, as follows. We first fit and plot a quadratic 
