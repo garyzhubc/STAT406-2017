@@ -18,8 +18,138 @@ The lecture slides are [here](STAT406-17-lecture-10-preliminary.pdf).
 
 ### Curse of dimensionality
 
+```{r curse, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+# X ~ U(0,1)
+# how many points do you expect within 0.25 of 1/2?
+n <- 100
+x <- runif(n)
+sum( abs(x-1/2) < 0.25 ) # half the width of the dist'n
+
+p <- 5
+x <- matrix( runif(n*p), n, p)
+# how many points in the hypercube (0.25, 0.75)^p ?
+tmp <- apply(x, 1, function(a) all(abs(a-1/2)<0.25))
+sum(tmp)
+
+# how many obs do we need to have 50 in the hypercube?
+n <- 50 / (0.5^p)
+x <- matrix( runif(n*p), n, p)
+# how many points in the hypercube (0.25, 0.75)^p ?
+tmp <- apply(x, 1, function(a) all(abs(a-1/2)<0.25))
+sum(tmp)
+
+# how wide should the hypercube be to get 50 neighbours
+# with sample of 1000 points?
+n <- 1000
+h <- 1 / ((n / 50)^(1/p) * 2)
+x <- matrix( runif(n*p), n, p)
+# how many points in the hypercube (0.25, 0.75)^p ?
+tmp <- apply(x, 1, h=h, function(a,h) all(abs(a-1/2)<h))
+sum(tmp)
+
+# repeat with p = 10
+# with p = 20, n > 52,000,000
+```
+
+
 ### Regression trees as constrained non-parametric regression
+
+
+```{r tree, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+library(rpart)
+# Regression trees
+data(Boston, package='MASS')
+
+# split data into a training and
+# a test set
+set.seed(123456) 
+n <- nrow(Boston)
+ii <- sample(n, floor(n/4))
+dat.te <- Boston[ ii, ]
+dat.tr <- Boston[ -ii, ]
+
+set.seed(123)
+bos.t <- rpart(medv ~ ., data=dat.tr, method='anova')
+plot(bos.t, uniform=TRUE) 
+text(bos.t, pretty=TRUE)
+
+plot(bos.t, uniform=FALSE)
+text(bos.t, pretty=TRUE)
+
+
+# predictions on the test set
+pr.t <- predict(bos.t, newdata=dat.te, type='vector')
+with(dat.te, mean( (medv - pr.t)^2) )
+
+
+# full linear model
+bos.lm <- lm(medv ~ ., data=dat.tr)
+pr.lm <- predict(bos.lm, newdata=dat.te)
+with(dat.te, mean( (medv - pr.lm)^2) )
+
+# use stepwise try to make it better
+library(MASS)
+null <- lm(medv ~ 1, data=dat.tr)
+full <- lm(medv ~ ., data=dat.tr)
+bos.aic <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
+pr.aic <- predict(bos.aic, newdata=dat.te)
+with(dat.te, mean( (medv - pr.aic)^2 ) )
+
+# LASSO?
+library(glmnet)
+x.tr <- as.matrix(dat.tr[,-14])
+y.tr <- as.vector(dat.tr$medv)
+set.seed(123)
+bos.la <- cv.glmnet(x=x.tr, y=y.tr, alpha=1)
+x.te <- as.matrix(dat.te[,-14])
+pr.la <- predict(bos.la, s='lambda.1se', newx=x.te)
+with(dat.te, mean( (medv - pr.la)^2 ) )
+```
 
 #### Pruning regression trees
 
+```{r prune, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+# build a big tree (overfitting?)
+myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
+set.seed(123)
+bos.to <- rpart(medv ~ ., data=dat.tr, method='anova',
+                control=myc)
+plot(bos.to, compress=TRUE) # type='proportional')
+# predictions are poor, unsurprisingly
+pr.to <- predict(bos.to, newdata=dat.te, type='vector')
+with(dat.te, mean((medv - pr.to)^2) )
+
+# prune it
+
+
+# find cp corresponding to smallest cv-estimated
+# prediction error
+
+plot(bos.to)
+printcp(bos.to)
+b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"]
+bos.t3 <- prune(bos.to, cp=b)
+plot(bos.t3, uniform=FALSE)
+text(bos.t3, pretty=TRUE)
+
+# predictions are better
+pr.t3 <- predict(bos.t3, newdata=dat.te, type='vector')
+with(dat.te, mean((medv - pr.t3)^2) )
+
+# what if we prune the original tree?
+b <- bos.t$cptable[which.min(bos.t$cptable[,"xerror"]),"CP"]
+bos.t4 <- prune(bos.t, cp=b)
+plot(bos.t4)
+plot(bos.t4, uniform=FALSE)
+text(bos.t4, pretty=TRUE)
+# same as original
+plot(bos.t, uniform=FALSE)
+text(bos.t, pretty=TRUE)
+
+
+pr.t4 <- predict(bos.t4, newdata=dat.te, type='vector')
+with(dat.te, mean((medv - pr.t4)^2) )
+# same tree, really
+with(dat.te, mean((medv - pr.t)^2) )
+```
 
