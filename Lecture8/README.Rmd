@@ -25,13 +25,13 @@ of a sine and a cosine function, "E(Y|X=x) = a + b sin(x)
 + c cos(x)", where *a*, *b* and *c* are uknown, 
 for example, then the problem would in fact be a linear
 regression problem. More in general, 
-when the true regression function is known or
-assumed to belong to a family of functions that we can parametrize, then
+when the true regression function is known (or
+assumed) to belong to a family of functions that we can parametrize, then
 the estimation can be done via standard least squares.
 Instead here we focus on the case where the
 regression function is **completely unknown**.
 
-Below we will discuss two main approaches to estimating
+In this note and the next one will discuss two ways to estimating
 E(Y|X): 
 
 (a) one using bases (e.g. a polynomial basis, or a spline basis); and 
@@ -39,7 +39,7 @@ E(Y|X):
 
 To simplify the presentation (but also because of
 an intrinsic limitation of these methods, which will
-be discussed in more detail later), we will initially only consider
+be discussed in more detail later in the course), we will initially only consider
 the case where there is a single explanatory variable
 (i.e. X above is a scalar, not a vector). 
 
@@ -73,7 +73,8 @@ To avoid having to type a long formula, we can instead use
 the function `poly()` in `R` to generate the design matrix 
 containing the desired powers
 of `range`, and plug that into the call to `lm()`. 
-The code below fits such an approximation, plots the data
+The code below fits two such approximations (a 3rd degree and a 
+4th degree polynomial), plots the data
 and overlays the estimated regression function:
 
 ```{r poly4, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
@@ -81,6 +82,9 @@ and overlays the estimated regression function:
 pm <- lm(logratio ~ poly(range, 4), data=lidar)
 plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 lines(predict(pm)[order(range)] ~ sort(range), data=lidar, lwd=6, col='blue')
+pm3 <- lm(logratio ~ poly(range, 3), data=lidar)
+lines(predict(pm3)[order(range)] ~ sort(range), data=lidar, lwd=6, col='hotpink')
+legend('topright', legend=c('3rd degree', '4th degree'), lwd=6, col=c('hotpink', 'blue'))
 ```
 
 Note that this fit is reasonable, although there is probably 
@@ -175,18 +179,20 @@ There are better (numerically more stable) bases for the same linear
 space spanned by these spline functions. These bases have different 
 numerical properties and can become cumbersome to describe. Here we
 use the function `bs` (in package `splines`) to build a B-spline basis. 
-For an accesible discussion, see for example Section 4.1 of
+For an accessible discussion, see for example Section 4.1 of
 
 > Wood, S. (2006). *Generalized additive models : an introduction with R*.
 > Chapman & Hall/CRC, 
 > Boca Raton, FL. [Library link](http://resolve.library.ubc.ca/cgi-bin/catsearch?bid=8140311).
 
 Given the chosen knots and the degree of the splines
-(linear, quadratic, cubic, etc.) the set of possible functions 
-(a linear space, really) is the same regardless of the basis we use. As a consequence,
-the estimated regression function should be identical for any basis we use (provided we do not run into
-serious numerical issues). To illustrate this fact, we will use a B-spline basis with the same 5 knots
-as above, and compare the estimated regression function with the one we obtained above 
+(linear, quadratic, cubic, etc.) the set (linear space) 
+of functions we are using to construct our regression estimate
+does not depend on the basis we use. As a consequence,
+the estimated regression function should be the same regardless of the basis we use 
+(provided we do not run into serious numerical issues). To illustrate this fact, we will 
+use a B-spline basis with the same 5 knots as above, and compare the estimated regression 
+function with the one we obtained above 
 using our **poor people** naive basis. The plot below overlays both
 fits (the naive one with a thick pink line as above, and the one
 using b-splines with a thinner blue line):
@@ -316,6 +322,7 @@ this would require considerable computational effort (we would need
 to perform an exhaustive search on a 3-dimensional grid). 
 
 We saw in class that *natural cubic splines* provide a natural
+*optimal* 
 space to look for a good regression estimator. Furthermore, 
 we only need to select one parameter--the penalty term, which 
 can be done using any cross-validation "flavour" (although 
@@ -374,8 +381,11 @@ lines(tmp$y~tmp$x, lwd=6, col='tomato3')
 
 ## Selecting an "optimal" penalty parameter
 
-The function `smooth.spline` will compute an optimal value for the penalty term using 
-leave-one-out cross-validation, if we set the argument `cv` to `TRUE`: 
+As discussed in class, an "optimal" natural cubic spline can be found using 
+cross-validation, and for these linear predictors, leave-one-out cross-validation
+is particularly attractive (in terms of computational cost).
+The function `smooth.spline` in `R` will compute (and use) an optimal value for the penalty term using 
+leave-one-out cross-validation when we set the argument `cv = TRUE`: 
 
 ```{r smoothing.cv1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, tidy=TRUE}
 tmp.cv <- smooth.spline(x=lidar$range, y=lidar$logratio, cv=TRUE, all.knots=TRUE)
@@ -384,7 +394,8 @@ plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 lines(tmp.cv$y ~ tmp.cv$x, lwd=6, col='blue')
 ```
 
-Note that the optimal value found for `spar` is returned in the element 
+Note that the optimal value found for the regularization parameter (`spar`) is 
+also returned in the element 
 `$spar` of the object returned by `smooth.spline`. Just as a **sanity check**
 we can now call `smooth.spline` with `cv = FALSE` and manually set
 `spar` to this optimal value, and verify that we obtain the same fit:

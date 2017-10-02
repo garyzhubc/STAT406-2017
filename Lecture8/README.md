@@ -11,14 +11,14 @@ The lecture slides are [here](STAT406-17-lecture-8-preliminary.pdf).
 Non-parametric regression
 =========================
 
-We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its *form* is **unknown**. If we knew that the regression function was a linear combination of a sine and a cosine function, "E(Y|X=x) = a + b sin(x) + c cos(x)", where *a*, *b* and *c* are uknown, for example, then the problem would in fact be a linear regression problem. More in general, when the true regression function is known or assumed to belong to a family of functions that we can parametrize, then the estimation can be done via standard least squares. Instead here we focus on the case where the regression function is **completely unknown**.
+We now turn our attention to the situation where the regression function E(Y|X) is not necessarily linear. Furthermore, we will assume that its *form* is **unknown**. If we knew that the regression function was a linear combination of a sine and a cosine function, "E(Y|X=x) = a + b sin(x) + c cos(x)", where *a*, *b* and *c* are uknown, for example, then the problem would in fact be a linear regression problem. More in general, when the true regression function is known (or assumed) to belong to a family of functions that we can parametrize, then the estimation can be done via standard least squares. Instead here we focus on the case where the regression function is **completely unknown**.
 
-Below we will discuss two main approaches to estimating E(Y|X):
+In this note and the next one will discuss two ways to estimating E(Y|X):
 
 1.  one using bases (e.g. a polynomial basis, or a spline basis); and
 2.  one using kernels (aka local regression).
 
-To simplify the presentation (but also because of an intrinsic limitation of these methods, which will be discussed in more detail later), we will initially only consider the case where there is a single explanatory variable (i.e. X above is a scalar, not a vector).
+To simplify the presentation (but also because of an intrinsic limitation of these methods, which will be discussed in more detail later in the course), we will initially only consider the case where there is a single explanatory variable (i.e. X above is a scalar, not a vector).
 
 Polynomial regression
 ---------------------
@@ -32,13 +32,16 @@ plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/nonparam-1.png)
 
-In class we discussed the formal motivation to look into a polynomial approximation of the regression function. This argument, however, does not specify which degree of the approximating polynomial to use. Here we first try a 4th degree polynomial and the problem reduces to a linear regression one (see the lecture slides). We can use a command like `lm(logratio ~ range + range^2 + range^3 + range^4)`. However, this call to `lm` will not work as we intend it (I recommend that you check this and find out the reason why). Instead, we would need to use something like `lm(logratio ~ range + I(range^2) + I(range^3) + I(range^4))`. To avoid having to type a long formula, we can instead use the function `poly()` in `R` to generate the design matrix containing the desired powers of `range`, and plug that into the call to `lm()`. The code below fits such an approximation, plots the data and overlays the estimated regression function:
+In class we discussed the formal motivation to look into a polynomial approximation of the regression function. This argument, however, does not specify which degree of the approximating polynomial to use. Here we first try a 4th degree polynomial and the problem reduces to a linear regression one (see the lecture slides). We can use a command like `lm(logratio ~ range + range^2 + range^3 + range^4)`. However, this call to `lm` will not work as we intend it (I recommend that you check this and find out the reason why). Instead, we would need to use something like `lm(logratio ~ range + I(range^2) + I(range^3) + I(range^4))`. To avoid having to type a long formula, we can instead use the function `poly()` in `R` to generate the design matrix containing the desired powers of `range`, and plug that into the call to `lm()`. The code below fits two such approximations (a 3rd degree and a 4th degree polynomial), plots the data and overlays the estimated regression function:
 
 ``` r
 # Degree 4 polynomials
 pm <- lm(logratio ~ poly(range, 4), data=lidar)
 plot(logratio ~ range, data=lidar, pch=19, col='gray', cex=1.5)
 lines(predict(pm)[order(range)] ~ sort(range), data=lidar, lwd=6, col='blue')
+pm3 <- lm(logratio ~ poly(range, 3), data=lidar)
+lines(predict(pm3)[order(range)] ~ sort(range), data=lidar, lwd=6, col='hotpink')
+legend('topright', legend=c('3rd degree', '4th degree'), lwd=6, col=c('hotpink', 'blue'))
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/poly4-1.png)
@@ -99,11 +102,11 @@ lines(predict(ppm)[order(range)] ~ sort(range), data=lidar, lwd=6, col='hotpink'
 
 ![](README_files/figure-markdown_github-ascii_identifiers/splines1-1.png)
 
-There are better (numerically more stable) bases for the same linear space spanned by these spline functions. These bases have different numerical properties and can become cumbersome to describe. Here we use the function `bs` (in package `splines`) to build a B-spline basis. For an accesible discussion, see for example Section 4.1 of
+There are better (numerically more stable) bases for the same linear space spanned by these spline functions. These bases have different numerical properties and can become cumbersome to describe. Here we use the function `bs` (in package `splines`) to build a B-spline basis. For an accessible discussion, see for example Section 4.1 of
 
 > Wood, S. (2006). *Generalized additive models : an introduction with R*. Chapman & Hall/CRC, Boca Raton, FL. [Library link](http://resolve.library.ubc.ca/cgi-bin/catsearch?bid=8140311).
 
-Given the chosen knots and the degree of the splines (linear, quadratic, cubic, etc.) the set of possible functions (a linear space, really) is the same regardless of the basis we use. As a consequence, the estimated regression function should be identical for any basis we use (provided we do not run into serious numerical issues). To illustrate this fact, we will use a B-spline basis with the same 5 knots as above, and compare the estimated regression function with the one we obtained above using our **poor people** naive basis. The plot below overlays both fits (the naive one with a thick pink line as above, and the one using b-splines with a thinner blue line):
+Given the chosen knots and the degree of the splines (linear, quadratic, cubic, etc.) the set (linear space) of functions we are using to construct our regression estimate does not depend on the basis we use. As a consequence, the estimated regression function should be the same regardless of the basis we use (provided we do not run into serious numerical issues). To illustrate this fact, we will use a B-spline basis with the same 5 knots as above, and compare the estimated regression function with the one we obtained above using our **poor people** naive basis. The plot below overlays both fits (the naive one with a thick pink line as above, and the one using b-splines with a thinner blue line):
 
 ``` r
 library(splines)
@@ -243,7 +246,7 @@ Smoothing splines
 
 If we were to follow the approach discussed so far we would need to find an "optimal" of selecting the number of knots and their positions, **plus** the order of the spline basis. Although one could consider using cross-validation for this, we note that this would require considerable computational effort (we would need to perform an exhaustive search on a 3-dimensional grid).
 
-We saw in class that *natural cubic splines* provide a natural space to look for a good regression estimator. Furthermore, we only need to select one parameter--the penalty term, which can be done using any cross-validation "flavour" (although in this setting leave-one-out CV is particularly appealing, as we discussed in class).
+We saw in class that *natural cubic splines* provide a natural *optimal* space to look for a good regression estimator. Furthermore, we only need to select one parameter--the penalty term, which can be done using any cross-validation "flavour" (although in this setting leave-one-out CV is particularly appealing, as we discussed in class).
 
 <!-- our approach, showing -->
 <!-- that we only need to consider regularized (penalized) *natural cubic splines*  -->
@@ -302,7 +305,7 @@ lines(tmp$y ~ tmp$x, lwd = 6, col = "tomato3")
 Selecting an "optimal" penalty parameter
 ----------------------------------------
 
-The function `smooth.spline` will compute an optimal value for the penalty term using leave-one-out cross-validation, if we set the argument `cv` to `TRUE`:
+As discussed in class, an "optimal" natural cubic spline can be found using cross-validation, and for these linear predictors, leave-one-out cross-validation is particularly attractive (in terms of computational cost). The function `smooth.spline` in `R` will compute (and use) an optimal value for the penalty term using leave-one-out cross-validation when we set the argument `cv = TRUE`:
 
 ``` r
 tmp.cv <- smooth.spline(x = lidar$range, y = lidar$logratio, cv = TRUE, all.knots = TRUE)
@@ -313,7 +316,7 @@ lines(tmp.cv$y ~ tmp.cv$x, lwd = 6, col = "blue")
 
 ![](README_files/figure-markdown_github-ascii_identifiers/smoothing.cv1-1.png)
 
-Note that the optimal value found for `spar` is returned in the element `$spar` of the object returned by `smooth.spline`. Just as a **sanity check** we can now call `smooth.spline` with `cv = FALSE` and manually set `spar` to this optimal value, and verify that we obtain the same fit:
+Note that the optimal value found for the regularization parameter (`spar`) is also returned in the element `$spar` of the object returned by `smooth.spline`. Just as a **sanity check** we can now call `smooth.spline` with `cv = FALSE` and manually set `spar` to this optimal value, and verify that we obtain the same fit:
 
 ``` r
 plot(logratio ~ range, data = lidar, pch = 19, col = "gray", cex = 1.5)
