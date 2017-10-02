@@ -11,11 +11,11 @@ The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
 Kernel regression / local regression
 ------------------------------------
 
-A different approach to constructing an estimated regression function is based on recalling that the definition of the regression function is *f(a) = E(Y | X = a)*, the mean of the response variable *Y* **conditional** to the event that the explanatory variable(s) **X** equal(s) **a**. If we had lots of data, we could, in principle, think of the following intuitively simple regression estimator: given **c**, consider all observations (Y, **X**) in your training set that have **X = c**, and take our estimated *f(c)* as the average of the corresponding observed values of the response variable Y. This would be a resonable estimator for E(Y | **X** = **c** ) (if we had sufficient cases in our training data pairs for which **X** = **c**).
+A different approach to estimate a regression function is based on recalling that the true regression function is *f(a) = E(Y | X = a)*, the mean of the response variable *Y* **conditional** to the event that the explanatory variable(s) **X** equal(s) **a**. If we had lots of data, we could, in principle, think of the following intuitively simple regression estimator: given **c**, consider all observations (Y, **X**) in your training set that have **X = c**, and take our estimated *f(c)* as the average of the corresponding observed values of the response variable Y. This would be a resonable estimator for E(Y | **X** = **c** ) (if we had sufficient cases in our training data pairs for which **X** = **c**).
 
-Although the simple approach above does not usually work in practice (because we do not have enough training points with **X** = **c** for many values of **c**), the idea can still be used to construct a regression estimator that works **locally**, i.e. that given **c** uses the points in the training set that have **X close to c** (you can think of this as *working with the neighbours* of **c**). This family of regression estimators are called *local regression*, or *kernel regression*. The latter name is based on the fact that we will use a specific family of functions (called kernels) to define which points are *neighbours* and how they will be used to estimate the regression function. Note that these *kernel functions* are different from those used in Support Vector Machines and other reproducible kernel Hilbert spaces methods.
+Although the simple approach above does not usually work in practice (because we do not have enough training points with **X** = **c** for many values of **c**), the idea can still be used to construct a regression estimator that works **locally**, i.e. that given **c** uses the points in the training set that have **X close to c** (you can think of this as *working in a neighbourhood* of **c**). This family of regression estimators is called *local regression*, or *kernel regression*. The latter name is based on the fact that we will use a specific family of functions (called kernels) to define which points are *neighbours* and how they will be used to estimate the regression function. Note that these *kernel functions* are different from those used in Support Vector Machines and other reproducible kernel Hilbert spaces methods.
 
-Probably the simplest kernel regression estimator would be to take the average of the responses of the training points where the explanatory variables are within *h* of the point of interest. This "window width" *h* is called the *bandwidth*. We can use the function `ksmooth` in package `KernSmooth` in `R` to do this (**but it would be a great exercise to write your own `R` function to do it**). The code below considers one specific explanatory variable for the air pollution data (just for illustration purposes) and fits a local averages regression estimator, with bandwidth 50:
+Probably the simplest kernel regression estimator is to simply take the average of the responses of the training points where the explanatory variables are within *h* of the point of interest. This "window width" *h* is called the *bandwidth*. We can use the function `ksmooth` in package `KernSmooth` in `R` to do this (**but it would be a great exercise to write your own `R` function to do it**). The code below considers one specific explanatory variable for the air pollution data (just for illustration purposes) and fits a local averages regression estimator, with bandwidth equal to 50:
 
 ``` r
 dat <- read.table('../Lecture1/rutgers-lib-30861_CSV-1.csv', header=TRUE, sep=',')
@@ -30,7 +30,9 @@ lines(a$x, a$y, lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0-1.png)
 
-Note the gaps in the estimated regression function. Why do you think they happened? We now increase the bandwidth from 50 to 60:
+Note the gap in the estimated regression function. Why do you think this happened?
+
+If we increase the bandwidth from 50 to 60 we obtain the following estimated regression function:
 
 ``` r
 h <- 60
@@ -41,9 +43,9 @@ lines(a$x, a$y, lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0.1-1.png)
 
-This fit is still rather unsatisfactory. For example, note how it looks like a *staircase*, the estimated regression curve is fairly jagged, which is usually not how the true regression function is expected to be. Can you explain why the above regression estimator would look like this?
+This fit is still rather unsatisfactory. For example, note how it looks like a *staircase*. The estimated regression curve is fairly jagged, which is usually not how we expect the true regression function to be. Can you explain why the above regression estimator looks like this?
 
-As discussed in class, using a smoother kernel function results in a smoother estimated regression function. The plot below uses the same bandwidth as before, but we use a standard gaussian density function as our kernel:
+As discussed in class, using a smoother kernel function results in a smoother estimated regression function. The plot below uses the same bandwidth as before, but the kernel function is the standard gaussian density:
 
 ``` r
 h <- 60
@@ -54,7 +56,9 @@ lines(a$x, a$y, lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0.2-1.png)
 
-Better properties for the estimated regression function are obtained when one uses a smooth kernel with *compact support* (the support of the gaussian density function is the whole real line and thus not compact). The reasons for this (better kernel regression estimators when the kernel has compact support) are rather technical and will not be discussed here. Below we will use the `R` function `loess` that implements this approach with a tri-cubic kernel given by *k(a) = ( 1 - (|a|)^3 )^3* if *|a| &lt; 1*, and 0 otherwise. The following plot compares this kernel with the gaussian one. Since the important characteristics of a kernel are its shape and support set, below I standardized both of them to reach the same maximum value (1):
+Better properties for the estimated regression function are obtained when one uses a smooth kernel with *compact support* (the support of the gaussian density function is the whole real line and thus not compact). The reasons for this (better kernel regression estimators when the kernel has compact support) are rather technical and will not be discussed here.
+
+In what follows we will use the `R` function `loess` that implements this approach with a tri-cubic kernel given by *k(a) = ( 1 - (|a|)^3 )^3* if *|a| &lt; 1*, and 0 otherwise. The following plot compares this kernel with the gaussian one. Since the important characteristics of a kernel are its shape and support set, below I standardized both of them to reach the same maximum value (1):
 
 ``` r
 tt <- seq(-2, 2, length=100)
@@ -88,9 +92,9 @@ Although we have not yet discussed how to choose a bandwidth (either fixed or va
 
 ### Local regression versus local means
 
-As discussed in more detail in class, a better way to exploit the approximating properties of a Taylor expansion, is to use it locally. In particular, using kernels as above, we can estimate the regression function *locally*, using a linear function (corresponding to a Taylor expansion of order 1), or a quadratic function (expansion of order 2), etc. We will illustrate this points using the `ethanol` data in package `SemiPar`. As usual, information about the data can be found on its help page.
+As discussed in more detail in class, a better way to exploit the approximating properties of a Taylor expansion, is to use it locally. In particular, using kernels as above, we can estimate the regression function using a linear function *locally* (corresponding to a Taylor expansion of order 1), or a quadratic function (expansion of order 2), etc. We will illustrate these points on the `ethanol` data in package `SemiPar`. As usual, information about the data can be found on its help page.
 
-Below we load the data and compute a *local constant* (`degree = 0`) regression estimator, where the response variable is `NOx` and the explanatory variable is `E`. The span was arbitrarily set to 0.40.
+Below we load the data and compute a *local constant* (`degree = 0`) *regression estimator*, where the response variable is `NOx` and the explanatory variable is `E`. The span was arbitrarily set to 0.40 (but this will discussed in more detail below).
 
 ``` r
 data(ethanol, package='SemiPar')
@@ -104,7 +108,7 @@ lines(b0$x[tmp], b0$fitted[tmp], lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0.3-1.png)
 
-Note how this regression estimator tends to miss the trends on the *tails* of the data (e.g. for the smallest and largest observed values of `E`). A better fit is obtained with a *locally linear* estimator, shown below in red, over the *locally constant* one (in blue):
+Note how this regression estimator tends to not fit well the *tails* of the data (i.e. the smallest and largest observed values of `E`). A better fit is obtained with a *locally linear* estimator (`degree = 1`), shown below in red, over the *locally constant* one (in blue):
 
 ``` r
 # local linear
@@ -118,7 +122,7 @@ lines(b0$x[tmp], b0$fitted[tmp], lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0.4-1.png)
 
-This fit is an improvement from the previous one, but it is still unable to capture the *peak* of the data (around `E` = 0.90). It is easy to see that a quadratic local fit might be able to do this, without affecting the quality of the fit elsewhere. Below we compare the locally linear (red) and locally quadratic (dark green) fits:
+This fit is an improvement from the previous one, but it does not capture well the *peak* of the data (around `E` = 0.90). It is easy to see that a quadratic local fit might be able to do this, without affecting the quality of the fit elsewhere. Below we compare the locally linear (red) and locally quadratic (dark green) fits:
 
 ``` r
 # local quad
