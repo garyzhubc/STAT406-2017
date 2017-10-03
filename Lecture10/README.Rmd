@@ -117,13 +117,31 @@ tmp <- apply(x, 1, h=h, function(a,h) all(abs(a-1/2)<h))
 
 Regression trees provide an alternative non-regression
 estimator that works well, even with many available features. 
+As discussed in class, the basic idea is to approximate the
+regression function by a linear combination of "simple" 
+functions (i.e. functions *h(x) = I( x \in A)* which equals
+1 if the argument *x* belongs to the set *A* and 0 otherwise. 
+Each function has its own support set *A*. Furthermore, 
+this linear combination is not computed at once, but
+iteratively, and only considering a specific class of
+sets *A* (which ones?) As a result, the regression tree
+is not the *global* optimal approximation by functions of
+this type, but a good one that can be computed very rapidly.
+Details were discussed in class, refer to your notes and
+the corresponding slides.
 
+There are several packages in `R` implementing trees,
+in this course we will use `rpart`. To illustrate their
+use we will consider the `Boston` data set, that contains
+information on housing in the US city of Boston. The 
+corresponding help page contains more information. 
 
+To simplify the comparison of the predictions obtained
+by trees and other regression estimators, we first randomly split the 
+available data into a training and test set:
 ```{r tree, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 library(rpart)
-# Regression trees
 data(Boston, package='MASS')
-
 # split data into a training and
 # a test set
 set.seed(123456) 
@@ -131,34 +149,59 @@ n <- nrow(Boston)
 ii <- sample(n, floor(n/4))
 dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
+```
 
+We now build a regression tree, leaving most of the arguments to their
+default values. We specify the response and explanatory variables using
+a `formula`, as usual, and the argument `method` to indicate we
+need a regression tree (as opposed to a classification one, for example).
+Finally, we use the corresponding `plot` method to display the tree
+structure:
+<!-- # ```{r tree2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE} -->
+<!-- # set.seed(123) -->
+<!-- # bos.t <- rpart(medv ~ ., data=dat.tr, method='anova') -->
+<!-- # plot(bos.t, uniform=TRUE, margin=0.05) -->
+<!-- # text(bos.t, pretty=TRUE) -->
+<!-- # ``` -->
+<!-- Another plot? -->
+```{r tree3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 set.seed(123)
 bos.t <- rpart(medv ~ ., data=dat.tr, method='anova')
-plot(bos.t, uniform=TRUE) 
+plot(bos.t, uniform=FALSE, margin=0.05)
 text(bos.t, pretty=TRUE)
+```
 
-plot(bos.t, uniform=FALSE)
-text(bos.t, pretty=TRUE)
+A few questions for you to work on:
 
+* Why do we need / want to set the pseudo-random generation seed before calling `rpart`? Is there anything random about building these trees?
+* What does the `uniform` argument for `plot.rpart` do? What does `text` do here? 
 
+#### Compare predictions 
+
+Estimated MSPE for the tree using the test set:
+```{r tree4, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions on the test set
 pr.t <- predict(bos.t, newdata=dat.te, type='vector')
 with(dat.te, mean( (medv - pr.t)^2) )
-
-
+```
+Estimated MSPE for a full linear model using the test set:
+```{r tree5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # full linear model
 bos.lm <- lm(medv ~ ., data=dat.tr)
 pr.lm <- predict(bos.lm, newdata=dat.te)
 with(dat.te, mean( (medv - pr.lm)^2) )
-
-# use stepwise try to make it better
+```
+Estimated MSPE for a linear model constructed via stepwise:
+```{r tree6, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 library(MASS)
 null <- lm(medv ~ 1, data=dat.tr)
 full <- lm(medv ~ ., data=dat.tr)
 bos.aic <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
 pr.aic <- predict(bos.aic, newdata=dat.te)
 with(dat.te, mean( (medv - pr.aic)^2 ) )
-
+```
+Estimated MSPE of the "optimal" LASSO fit:
+```{r tree7, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # LASSO?
 library(glmnet)
 x.tr <- as.matrix(dat.tr[,-14])
@@ -170,9 +213,13 @@ pr.la <- predict(bos.la, s='lambda.1se', newx=x.te)
 with(dat.te, mean( (medv - pr.la)^2 ) )
 ```
 
+A very good exercise for you would be to repeat the above comparison for
+different training/test splits, or even better, using all the data for
+training and K-fold CV to estimate the different MSPEs. 
+
 #### Pruning regression trees
 
-```{r prune, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+```{r prune, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # build a big tree (overfitting?)
 myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
 set.seed(123)
@@ -182,38 +229,57 @@ plot(bos.to, compress=TRUE) # type='proportional')
 # predictions are poor, unsurprisingly
 pr.to <- predict(bos.to, newdata=dat.te, type='vector')
 with(dat.te, mean((medv - pr.to)^2) )
+```
 
-# prune it
+Prune it. 
 
+```{r prune2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+plot(bos.to, margin=0.05)
+```
 
-# find cp corresponding to smallest cv-estimated
-# prediction error
-
-plot(bos.to)
+Find cp corresponding to smallest cv-estimated
+prediction error.
+```{r prune3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 printcp(bos.to)
+```
+
+Prune and plot prunned tree:
+
+```{r prune4, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"]
 bos.t3 <- prune(bos.to, cp=b)
 plot(bos.t3, uniform=FALSE)
 text(bos.t3, pretty=TRUE)
+```
 
+Predictions improve:
+```{r prune5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions are better
 pr.t3 <- predict(bos.t3, newdata=dat.te, type='vector')
 with(dat.te, mean((medv - pr.t3)^2) )
+```
+Pruning doesn't always improve a tree:
 
+```{r prune8, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # what if we prune the original tree?
 b <- bos.t$cptable[which.min(bos.t$cptable[,"xerror"]),"CP"]
 bos.t4 <- prune(bos.t, cp=b)
-plot(bos.t4)
-plot(bos.t4, uniform=FALSE)
+plot(bos.t4, uniform=FALSE, margin=0.05)
 text(bos.t4, pretty=TRUE)
-# same as original
-plot(bos.t, uniform=FALSE)
-text(bos.t, pretty=TRUE)
-
-
-pr.t4 <- predict(bos.t4, newdata=dat.te, type='vector')
-with(dat.te, mean((medv - pr.t4)^2) )
-# same tree, really
-with(dat.te, mean((medv - pr.t)^2) )
 ```
+
+Pruning gives the same tree as the original
+
+```{r prune6, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+plot(bos.t, uniform=FALSE, margin=0.05)
+text(bos.t, pretty=TRUE)
+```
+
+<!-- Sanity check: -->
+<!-- ```{r prune7, fig.width=6, fig.height=6, message=FALSE, warning=FALSE} -->
+<!-- pr.t4 <- predict(bos.t4, newdata=dat.te, type='vector') -->
+<!-- with(dat.te, mean((medv - pr.t4)^2) ) -->
+<!-- # same tree, really -->
+<!-- with(dat.te, mean((medv - pr.t)^2) ) -->
+<!-- ``` -->
 
