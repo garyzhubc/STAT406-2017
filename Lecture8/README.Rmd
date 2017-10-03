@@ -324,8 +324,18 @@ to perform an exhaustive search on a 3-dimensional grid).
 
 We saw in class that *natural cubic splines* provide a natural
 *optimal* 
-space to look for a good regression estimator. Furthermore, 
-we only need to select one parameter--the penalty term, which 
+space to look for a good regression estimator. For a formal
+but surprisingly simple proof of this optimality result, 
+see again Section 4.1 of
+
+> Wood, S. (2006). *Generalized additive models : an introduction with R*.
+> Chapman & Hall/CRC, 
+> Boca Raton, FL. [Library link](http://resolve.library.ubc.ca/cgi-bin/catsearch?bid=8140311).
+
+This result not only justifies using natural cubic splines, 
+but also eliminates many of the unknown "tuning parameters" (the degree
+of the spline basis, the number of knots, and their locations). 
+In fact, we only need to select one tuning parameter--the penalty term, which 
 can be done using any cross-validation "flavour" (although 
 in this setting leave-one-out CV is particularly appealing, as
 we discussed in class).
