@@ -16,7 +16,7 @@ The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
 
 ## Kernel regression / local regression 
 
-A different approach to estimate a regression function is
+A different approach to estimating a regression function is
 based on recalling that the  true regression function 
 is *f(a) = E(Y | X = a)*, the mean of the response variable *Y* **conditional**
 to the event that the explanatory variable(s) **X** equal(s) **a**. If we

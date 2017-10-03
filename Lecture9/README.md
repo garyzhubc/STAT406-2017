@@ -1,7 +1,7 @@
 STAT406 - Lecture 9 notes
 ================
 Matias Salibian-Barrera
-2017-10-01
+2017-10-02
 
 Lecture slides
 --------------
@@ -11,7 +11,7 @@ The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
 Kernel regression / local regression
 ------------------------------------
 
-A different approach to estimate a regression function is based on recalling that the true regression function is *f(a) = E(Y | X = a)*, the mean of the response variable *Y* **conditional** to the event that the explanatory variable(s) **X** equal(s) **a**. If we had lots of data, we could, in principle, think of the following intuitively simple regression estimator: given **c**, consider all observations (Y, **X**) in your training set that have **X = c**, and take our estimated *f(c)* as the average of the corresponding observed values of the response variable Y. This would be a resonable estimator for E(Y | **X** = **c** ) (if we had sufficient cases in our training data pairs for which **X** = **c**).
+A different approach to estimating a regression function is based on recalling that the true regression function is *f(a) = E(Y | X = a)*, the mean of the response variable *Y* **conditional** to the event that the explanatory variable(s) **X** equal(s) **a**. If we had lots of data, we could, in principle, think of the following intuitively simple regression estimator: given **c**, consider all observations (Y, **X**) in your training set that have **X = c**, and take our estimated *f(c)* as the average of the corresponding observed values of the response variable Y. This would be a resonable estimator for E(Y | **X** = **c** ) (if we had sufficient cases in our training data pairs for which **X** = **c**).
 
 Although the simple approach above does not usually work in practice (because we do not have enough training points with **X** = **c** for many values of **c**), the idea can still be used to construct a regression estimator that works **locally**, i.e. that given **c** uses the points in the training set that have **X close to c** (you can think of this as *working in a neighbourhood* of **c**). This family of regression estimators is called *local regression*, or *kernel regression*. The latter name is based on the fact that we will use a specific family of functions (called kernels) to define which points are *neighbours* and how they will be used to estimate the regression function. Note that these *kernel functions* are different from those used in Support Vector Machines and other reproducible kernel Hilbert spaces methods.
 
