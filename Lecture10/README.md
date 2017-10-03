@@ -11,27 +11,42 @@ The lecture slides are [here](STAT406-17-lecture-10-preliminary.pdf).
 Regression trees
 ----------------
 
+Trees provide a non-parametric regression estimator that is able to overcome a serious limitation of "classical non-parametric" estimators (like those based on splines, or kernels) when several (more than 2 or 3) explanatory variables are available.
+
+Below we first describe the problem afflicting classical non-parametric methods (this is also known as the "curse of dimensionality") and then describe how to compute regression trees in `R` using the `rpart` package (although other implementations exist). Details were discussed in class.
+
 ### Curse of dimensionality
+
+Suppose you have a random sample of *n = 100* observations, uniformly distributed on the \[0, 1\] interval. How many do you expect to find within 0.25 of the middle point of the interval (i.e. how many will be between 0.25 and 0.75)? A trivial calculation shows that the expected number of observations falling between 0.25 and 0.75 will be *n/2*, in this case *50*. This is easy verified with a simple numerical experiment:
 
 ``` r
 # X ~ U(0,1)
 # how many points do you expect within 0.25 of 1/2?
+set.seed(1234)
 n <- 100
 x <- runif(n)
-sum( abs(x-1/2) < 0.25 ) # half the width of the dist'n
+( sum( abs(x-1/2) < 0.25 ) )# half the width of the dist'n
 ```
 
-    ## [1] 52
+    ## [1] 50
+
+(wow! what are the chances?)
+
+Consider now a sample of 100 observations, each with 5 variables (5-dimensional observations), uniformly distributed in the 5-dimensional unit cube (*\[0,1\]^5*). How many do you expect to see in the *central hypercube* with sides \[0.25, 0.75\] x \[0.25, 0.75\] ... x \[0.25, 0.75\] = \[0.25, 0.75\]^5? A simple experiment shows that this number is probably rather small:
 
 ``` r
 p <- 5
 x <- matrix( runif(n*p), n, p)
 # how many points in the hypercube (0.25, 0.75)^p ?
 tmp <- apply(x, 1, function(a) all(abs(a-1/2)<0.25))
-sum(tmp)
+( sum(tmp) )
 ```
 
-    ## [1] 2
+    ## [1] 4
+
+In fact, the expected number of observations in that central hypercube is exactly *n / 2^5*, which is approximately *3* when *n = 100*.
+
+A relevant question for our local regression estimation problem is: "how large should our sample be if we want to have about 50 observations in our central hypercube?". Easy calculations show that this number is *50 / (1/2)^p*, which, for *p = 5* is *1600*. Again, we can verify this with a simple experiment:
 
 ``` r
 # how many obs do we need to have 50 in the hypercube?
@@ -39,30 +54,47 @@ n <- 50 / (0.5^p)
 x <- matrix( runif(n*p), n, p)
 # how many points in the hypercube (0.25, 0.75)^p ?
 tmp <- apply(x, 1, function(a) all(abs(a-1/2)<0.25))
-sum(tmp)
+( sum(tmp) )
 ```
 
-    ## [1] 46
+    ## [1] 57
+
+However, when *p = 10*, in order to expect 50 observations in the central \[0.25, 0.75\] hypercube we need a sample of size *n = 51,200* and when *p = 20* we need over 52 million observations to have (just!) 50 in the central hypercube!
+
+Another way to illustrate this problem is to ask: "given a sample size of *n = 1000*, say, how wide / large should the central hypercube be to expect about *50* observations in it?". The answer is easily found to be *1 / (2 (n/50)^(1/p))*, which for *n = 1000* and *p = 5* equals 0.27, with *p = 10* is 0.37 and with *p = 20* is 0.43, almost the full unit hypercube!
+
+In other words, in moderate to high dimensions, *local neighbourhoods* are either empty or not *local*.
 
 ``` r
 # how wide should the hypercube be to get 50 neighbours
 # with sample of 1000 points?
 n <- 1000
-h <- 1 / ((n / 50)^(1/p) * 2)
+p <- 20
+( h <- 1 / ((n / 50)^(1/p) * 2) )
+```
+
+    ## [1] 0.4304458
+
+``` r
+# the sides of the "central hypercube" should be:
+( c(0.50 - h, 0.50 + h) )
+```
+
+    ## [1] 0.06955417 0.93044583
+
+``` r
+# verify it with a single sample:
 x <- matrix( runif(n*p), n, p)
 # how many points in the hypercube (0.25, 0.75)^p ?
 tmp <- apply(x, 1, h=h, function(a,h) all(abs(a-1/2)<h))
-sum(tmp)
+( sum(tmp) )
 ```
 
-    ## [1] 34
-
-``` r
-# repeat with p = 10
-# with p = 20, n > 52,000,000
-```
+    ## [1] 54
 
 ### Regression trees as constrained non-parametric regression
+
+Regression trees provide an alternative non-regression estimator that works well, even with many available features.
 
 ``` r
 library(rpart)
