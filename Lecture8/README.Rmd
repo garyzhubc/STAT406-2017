@@ -12,7 +12,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-8-preliminary.pdf).
+* The lecture slides are [here](STAT406-17-lecture-8.pdf).
+* Information on the data challenge is [here](http://thisisstatistics.org/policedatachallenge).
 
 # Non-parametric regression
 

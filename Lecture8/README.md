@@ -1,12 +1,13 @@
 STAT406 - Lecture 8 notes
 ================
 Matias Salibian-Barrera
-2017-10-01
+2017-10-03
 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-8-preliminary.pdf).
+-   The lecture slides are [here](STAT406-17-lecture-8.pdf).
+-   Information on the data challenge is [here](http://thisisstatistics.org/policedatachallenge).
 
 Non-parametric regression
 =========================
