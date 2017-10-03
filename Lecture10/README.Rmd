@@ -68,7 +68,7 @@ which is approximately *3* when *n = 100*.
 
 A relevant question for our local regression estimation
 problem is: "how large should our sample be if we want
-to have about 50 observations in our central hypercube?". 
+to still have about 50 observations in our central hypercube?". 
 Easy calculations show that this number is *50 / (1/2)^p*,
 which, for *p = 5* is *1600*. Again, we can verify
 this with a simple experiment:
@@ -80,13 +80,21 @@ x <- matrix( runif(n*p), n, p)
 tmp <- apply(x, 1, function(a) all(abs(a-1/2)<0.25))
 ( sum(tmp) )
 ```
-However, when *p = 10*, in order to expect
+So we see that if the dimension of our problem increases 
+from *p = 1* to *p = 5*, the number of observations we 
+need to maintain an expectation of having about 50 points
+in our central hypercube increases by a factor of 16 (not 5).
+However, if we  double the dimension of the problem (to *p = 10*), in order to expect
 50 observations in the central [0.25, 0.75] hypercube
-we need a sample of size *n = 51,200* and when 
-*p = 20* we need over 52 million observations
-to have (just!) 50 in the central hypercube!
+we need a sample of size *n = 51,200*. That is we
+doubled the dimension, but need 32 times more data (!)
+to *fill* the central hypercube with the same number of points. 
+If we doubled the dimension again (to *p = 20*) we would need over 
+52 million observations
+to have (just!) 50 in the central hypercube! We doubled the
+dimension and now need 1024 times more data! 
 
-Another way to illustrate this problem is to 
+Another way to think about this problem is to 
 ask: "given a sample size of *n = 1000*, say, how wide / large
 should the central hypercube be to expect 
 about *50* observations in it?". The answer is
@@ -98,20 +106,21 @@ easily found to be *1 / (2 (n/50)^(1/p))*, which for
 In other words, in moderate to high dimensions,
 *local neighbourhoods* are either empty
 or not *local*.
-```{r curse.3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
-# how wide should the hypercube be to get 50 neighbours
-# with sample of 1000 points?
-n <- 1000
-p <- 20
-( h <- 1 / ((n / 50)^(1/p) * 2) )
-# the sides of the "central hypercube" should be:
-( c(0.50 - h, 0.50 + h) )
-# verify it with a single sample:
-x <- matrix( runif(n*p), n, p)
-# how many points in the hypercube (0.25, 0.75)^p ?
-tmp <- apply(x, 1, h=h, function(a,h) all(abs(a-1/2)<h))
-( sum(tmp) )
-```
+
+<!-- ```{r curse.3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE} -->
+<!-- # how wide should the hypercube be to get 50 neighbours -->
+<!-- # with sample of 1000 points? -->
+<!-- n <- 1000 -->
+<!-- p <- 20 -->
+<!-- ( h <- 1 / ((n / 50)^(1/p) * 2) ) -->
+<!-- # the sides of the "central hypercube" should be: -->
+<!-- ( c(0.50 - h, 0.50 + h) ) -->
+<!-- # verify it with a single sample: -->
+<!-- x <- matrix( runif(n*p), n, p) -->
+<!-- # how many points in the hypercube (0.25, 0.75)^p ? -->
+<!-- tmp <- apply(x, 1, h=h, function(a,h) all(abs(a-1/2)<h)) -->
+<!-- ( sum(tmp) ) -->
+<!-- ``` -->
 
 ### Regression trees as constrained non-parametric regression
 
@@ -119,14 +128,14 @@ Regression trees provide an alternative non-regression
 estimator that works well, even with many available features. 
 As discussed in class, the basic idea is to approximate the
 regression function by a linear combination of "simple" 
-functions (i.e. functions *h(x) = I( x \in A)* which equals
+functions (i.e. functions $h(x) = I( x \in A )$ which equals
 1 if the argument *x* belongs to the set *A* and 0 otherwise. 
 Each function has its own support set *A*. Furthermore, 
-this linear combination is not computed at once, but
+this linear combination is not estimated at once, but
 iteratively, and only considering a specific class of
 sets *A* (which ones?) As a result, the regression tree
-is not the *global* optimal approximation by functions of
-this type, but a good one that can be computed very rapidly.
+is not the *global* optimal approximation by simple functions, 
+but a good *suboptimal* one, that can be computed very rapidly.
 Details were discussed in class, refer to your notes and
 the corresponding slides.
 
@@ -136,8 +145,9 @@ use we will consider the `Boston` data set, that contains
 information on housing in the US city of Boston. The 
 corresponding help page contains more information. 
 
-To simplify the comparison of the predictions obtained
-by trees and other regression estimators, we first randomly split the 
+**To simplify the comparison here** of the predictions obtained
+by trees and other regression estimators, instead of using
+K-fold CV, we start by randomly splitting the 
 available data into a training and test set:
 ```{r tree, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 library(rpart)
@@ -151,12 +161,14 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-We now build a regression tree, leaving most of the arguments to their
+We now build a regression tree using the function `rpart` and leaving most of 
+its arguments to take their
 default values. We specify the response and explanatory variables using
-a `formula`, as usual, and the argument `method` to indicate we
-need a regression tree (as opposed to a classification one, for example).
+a `formula`, as usual, and setting  `method='anova'` to indicate we
+want to train a regression tree (as opposed to a classification one, for example).
 Finally, we use the corresponding `plot` method to display the tree
 structure:
+
 <!-- # ```{r tree2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE} -->
 <!-- # set.seed(123) -->
 <!-- # bos.t <- rpart(medv ~ ., data=dat.tr, method='anova') -->
@@ -171,7 +183,7 @@ plot(bos.t, uniform=FALSE, margin=0.05)
 text(bos.t, pretty=TRUE)
 ```
 
-A few questions for you to work on:
+A few questions for you:
 
 * Why do we need / want to set the pseudo-random generation seed before calling `rpart`? Is there anything random about building these trees?
 * What does the `uniform` argument for `plot.rpart` do? What does `text` do here? 
