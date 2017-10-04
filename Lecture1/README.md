@@ -1,7 +1,11 @@
 STAT406 - Lecture 1 notes
 ================
 Matias Salibian-Barrera
-2017-09-07
+2017-10-04
+
+#### LICENSE
+
+These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 International" license. See the **human-readable version** [here](https://creativecommons.org/licenses/by-sa/4.0/) and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/legalcode).
 
 Lecture slides
 --------------
@@ -58,13 +62,13 @@ full <- lm(MORT ~ . , data=x.tr)
 plot(full, which=1)
 ```
 
-![](README_files/figure-markdown_github/full-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/full-1.png)
 
 ``` r
 plot(full, which=2)
 ```
 
-![](README_files/figure-markdown_github/full-2.png)
+![](README_files/figure-markdown_github-ascii_identifiers/full-2.png)
 
 We also take a look at the estimated coeficients:
 
@@ -141,13 +145,13 @@ summary(reduced)
 plot(reduced, which=1)
 ```
 
-![](README_files/figure-markdown_github/reduced-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/reduced-1.png)
 
 ``` r
 plot(reduced, which=2)
 ```
 
-![](README_files/figure-markdown_github/reduced-2.png)
+![](README_files/figure-markdown_github-ascii_identifiers/reduced-2.png)
 
 Although the reduced linear model (with 5 predictors) does not seem to provide a fit
 as good as the one we get with full model, it is still acceptable.

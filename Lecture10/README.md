@@ -3,6 +3,10 @@ STAT406 - Lecture 10 notes
 Matias Salibian-Barrera
 2017-10-04
 
+#### LICENSE
+
+These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 International" license. See the **human-readable version** [here](https://creativecommons.org/licenses/by-sa/4.0/) and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/legalcode).
+
 Lecture slides
 --------------
 
