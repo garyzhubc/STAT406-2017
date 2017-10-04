@@ -163,10 +163,10 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-We now build a regression tree using the function `rpart` and leaving most of 
-its arguments to take their
+We now build a regression tree using the function `rpart` and leave most of 
+its arguments to their
 default values. We specify the response and explanatory variables using
-a `formula`, as usual, and setting  `method='anova'` to indicate we
+a `formula`, as usual, and set  `method='anova'` to indicate we
 want to train a regression tree (as opposed to a classification one, for example).
 Finally, we use the corresponding `plot` method to display the tree
 structure:
@@ -187,7 +187,8 @@ text(bos.t, pretty=TRUE)
 
 A few questions for you:
 
-* Why do we need / want to set the pseudo-random generation seed before calling `rpart`? Is there anything random about building these trees?
+* Why did we set the pseudo-random generation seed (`set.seed(123)`) 
+before calling `rpart`? Is there anything random about building these trees?
 * What does the `uniform` argument for `plot.rpart` do? What does `text` do here? 
 
 #### Compare predictions 
@@ -237,7 +238,7 @@ we cannot really assess whether the observed differences are beyond
 the uncertainty associated with our MSPE estimators. In other words,
 would these differences still be so if we used a different 
 training / test data split? In fact, a very good exercise for you 
-would be to repeat the above comparison using
+would be to repeat the above comparison using **many**
 different training/test splits, or even better: using all the data for
 training and K-fold CV to estimate the different MSPEs. 
 
@@ -251,7 +252,11 @@ in class, one solution is to purposedly grow / train a very large overfitting
 tree, and then prune it. One can also estimate the corresponding MSPE
 of each tree in the prunning sequence and choose an optimal one. 
 The function `rpart` implements this approach, and we illustrate it
-below:
+below. We force `rpart` to build a very large tree via the arguments
+of the function `rpart.control`. At the same time, to obtain a good
+picture of the evolution of MSPE for different subtrees, we set the smallest 
+complexity parameter to be considered by the cross-validation
+experiment to a very low value (here we use `1e-8`).
 ```{r prune, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
 set.seed(123)
@@ -269,36 +274,42 @@ with(dat.te, mean((medv - pr.to)^2) )
 ```
 
 To prune we explore the *CP table* returned in the
-`rpart` object, and find the value of the complexity
+`rpart` object to find the value of the complexity
 parameter with optimal estimated prediction error:  
 ```{r prune3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 printcp(bos.to)
 ```
 It is probably better and easier to find this 
-optimal value programatically. 
+optimal value *programatically* as follows: 
 ```{r prune4.2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 ( b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"] )
 ```
 
 We can now use the function 
 `prune` on the `rpart` object setting the complexity parameter
-to the estimated optimal value:
+to the estimated optimal value found above:
 ```{r prune4, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 bos.t3 <- prune(bos.to, cp=b)
 ```
-We can display the optimally pruned tree:
+This is how the optimally pruned tree looks:
 
 ```{r prune4.5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 plot(bos.t3, uniform=FALSE, margin=0.05)
 text(bos.t3, pretty=TRUE)
 ```
 
-We can verify that the predictions on the test set did improve:
+Finally, we can verify that the predictions of the pruned 
+tree on the test set are better than before:
 ```{r prune5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions are better
 pr.t3 <- predict(bos.t3, newdata=dat.te, type='vector')
 with(dat.te, mean((medv - pr.t3)^2) )
 ```
+
+Again, it would be a **very good exercise** for you to 
+compare the MSPE of the pruned tree with that of several
+of the alternative methods we have seen in class so far,
+**without using a training / test split**. 
 
 Note that pruning doesn't always improve a tree. For example, 
 if we prune the first tree we fit in this example:

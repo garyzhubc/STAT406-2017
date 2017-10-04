@@ -1,7 +1,7 @@
 STAT406 - Lecture 10 notes
 ================
 Matias Salibian-Barrera
-2017-10-03
+2017-10-04
 
 Lecture slides
 --------------
@@ -99,7 +99,7 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-We now build a regression tree using the function `rpart` and leaving most of its arguments to take their default values. We specify the response and explanatory variables using a `formula`, as usual, and setting `method='anova'` to indicate we want to train a regression tree (as opposed to a classification one, for example). Finally, we use the corresponding `plot` method to display the tree structure:
+We now build a regression tree using the function `rpart` and leave most of its arguments to their default values. We specify the response and explanatory variables using a `formula`, as usual, and set `method='anova'` to indicate we want to train a regression tree (as opposed to a classification one, for example). Finally, we use the corresponding `plot` method to display the tree structure:
 
 <!-- # ```{r tree2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE} -->
 <!-- # set.seed(123) -->
@@ -119,7 +119,7 @@ text(bos.t, pretty=TRUE)
 
 A few questions for you:
 
--   Why do we need / want to set the pseudo-random generation seed before calling `rpart`? Is there anything random about building these trees?
+-   Why did we set the pseudo-random generation seed (`set.seed(123)`) before calling `rpart`? Is there anything random about building these trees?
 -   What does the `uniform` argument for `plot.rpart` do? What does `text` do here?
 
 #### Compare predictions
@@ -176,11 +176,11 @@ with(dat.te, mean( (medv - pr.la)^2 ) )
 
     ## [1] 29.20216
 
-Note that the regression tree appears to have the best MSPE, although we cannot really assess whether the observed differences are beyond the uncertainty associated with our MSPE estimators. In other words, would these differences still be so if we used a different training / test data split? In fact, a very good exercise for you would be to repeat the above comparison using different training/test splits, or even better: using all the data for training and K-fold CV to estimate the different MSPEs.
+Note that the regression tree appears to have the best MSPE, although we cannot really assess whether the observed differences are beyond the uncertainty associated with our MSPE estimators. In other words, would these differences still be so if we used a different training / test data split? In fact, a very good exercise for you would be to repeat the above comparison using **many** different training/test splits, or even better: using all the data for training and K-fold CV to estimate the different MSPEs.
 
 #### Pruning regression trees
 
-The stopping criteria generally used when fitting regression trees do not take into account explicitly the complexity of the tree. Hence, we may end up with an overfitting tree, which typically results in a decline in the quality of the corresponding predictions. As discussed in class, one solution is to purposedly grow / train a very large overfitting tree, and then prune it. One can also estimate the corresponding MSPE of each tree in the prunning sequence and choose an optimal one. The function `rpart` implements this approach, and we illustrate it below:
+The stopping criteria generally used when fitting regression trees do not take into account explicitly the complexity of the tree. Hence, we may end up with an overfitting tree, which typically results in a decline in the quality of the corresponding predictions. As discussed in class, one solution is to purposedly grow / train a very large overfitting tree, and then prune it. One can also estimate the corresponding MSPE of each tree in the prunning sequence and choose an optimal one. The function `rpart` implements this approach, and we illustrate it below. We force `rpart` to build a very large tree via the arguments of the function `rpart.control`. At the same time, to obtain a good picture of the evolution of MSPE for different subtrees, we set the smallest complexity parameter to be considered by the cross-validation experiment to a very low value (here we use `1e-8`).
 
 ``` r
 myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
@@ -202,7 +202,7 @@ with(dat.te, mean((medv - pr.to)^2) )
 
     ## [1] 36.51097
 
-To prune we explore the *CP table* returned in the `rpart` object, and find the value of the complexity parameter with optimal estimated prediction error:
+To prune we explore the *CP table* returned in the `rpart` object to find the value of the complexity parameter with optimal estimated prediction error:
 
 ``` r
 printcp(bos.to)
@@ -445,7 +445,7 @@ printcp(bos.to)
     ## 222 2.0196e-07    249 0.0016676 0.27151 0.046227
     ## 223 1.0000e-08    250 0.0016674 0.27153 0.046227
 
-It is probably better and easier to find this optimal value programatically.
+It is probably better and easier to find this optimal value *programatically* as follows:
 
 ``` r
 ( b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"] )
@@ -453,13 +453,13 @@ It is probably better and easier to find this optimal value programatically.
 
     ## [1] 0.00937962
 
-We can now use the function `prune` on the `rpart` object setting the complexity parameter to the estimated optimal value:
+We can now use the function `prune` on the `rpart` object setting the complexity parameter to the estimated optimal value found above:
 
 ``` r
 bos.t3 <- prune(bos.to, cp=b)
 ```
 
-We can display the optimally pruned tree:
+This is how the optimally pruned tree looks:
 
 ``` r
 plot(bos.t3, uniform=FALSE, margin=0.05)
@@ -468,7 +468,7 @@ text(bos.t3, pretty=TRUE)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/prune4.5-1.png)
 
-We can verify that the predictions on the test set did improve:
+Finally, we can verify that the predictions of the pruned tree on the test set are better than before:
 
 ``` r
 # predictions are better
@@ -477,6 +477,8 @@ with(dat.te, mean((medv - pr.t3)^2) )
 ```
 
     ## [1] 18.96988
+
+Again, it would be a **very good exercise** for you to compare the MSPE of the pruned tree with that of several of the alternative methods we have seen in class so far, **without using a training / test split**.
 
 Note that pruning doesn't always improve a tree. For example, if we prune the first tree we fit in this example:
 
