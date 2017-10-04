@@ -86,13 +86,16 @@ need to maintain an expectation of having about 50 points
 in our central hypercube increases by a factor of 16 (not 5).
 However, if we  double the dimension of the problem (to *p = 10*), in order to expect
 50 observations in the central [0.25, 0.75] hypercube
-we need a sample of size *n = 51,200*. That is we
+we need a sample of size *n = 51,200*. In other words, we
 doubled the dimension, but need 32 times more data (!)
 to *fill* the central hypercube with the same number of points. 
-If we doubled the dimension again (to *p = 20*) we would need over 
-52 million observations
-to have (just!) 50 in the central hypercube! We doubled the
-dimension and now need 1024 times more data! 
+Moreover, if we doubled the dimension again (to *p = 20*) we would need over 
+52 million observations to have (just!) 50 in the central hypercube! 
+Note that now we doubled the
+dimension again but need 1024 times more data! The number of
+observations needed to maintain a fixed number of observations
+in a region of the space grows exponentially with the 
+dimension of the space. 
 
 Another way to think about this problem is to 
 ask: "given a sample size of *n = 1000*, say, how wide / large
@@ -103,9 +106,8 @@ easily found to be *1 / (2 (n/50)^(1/p))*, which for
 *p = 10* is 0.37 and with *p = 20* is 
 0.43, almost the full unit hypercube!
 
-In other words, in moderate to high dimensions,
-*local neighbourhoods* are either empty
-or not *local*.
+In this sense it is fair to say that in moderate to high dimensions
+*local neighbourhoods* are either empty or not really *local*.
 
 <!-- ```{r curse.3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE} -->
 <!-- # how wide should the hypercube be to get 50 neighbours -->
@@ -129,7 +131,7 @@ estimator that works well, even with many available features.
 As discussed in class, the basic idea is to approximate the
 regression function by a linear combination of "simple" 
 functions (i.e. functions $h(x) = I( x \in A )$ which equals
-1 if the argument *x* belongs to the set *A* and 0 otherwise. 
+1 if the argument *x* belongs to the set *A*, and 0 otherwise. 
 Each function has its own support set *A*. Furthermore, 
 this linear combination is not estimated at once, but
 iteratively, and only considering a specific class of
@@ -148,7 +150,7 @@ corresponding help page contains more information.
 **To simplify the comparison here** of the predictions obtained
 by trees and other regression estimators, instead of using
 K-fold CV, we start by randomly splitting the 
-available data into a training and test set:
+available data into a training and a test set:
 ```{r tree, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 library(rpart)
 data(Boston, package='MASS')
@@ -190,20 +192,25 @@ A few questions for you:
 
 #### Compare predictions 
 
-Estimated MSPE for the tree using the test set:
+We now compare the predictions we obtain on the test with the 
+above regression tree, the usual linear model using all
+explanatory variables, another one constructed using stepwise
+variable selections methods, and the "optimal" LASSO. 
+
+First, we estimate the MSPE of the regression tree using the test set:
 ```{r tree4, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions on the test set
 pr.t <- predict(bos.t, newdata=dat.te, type='vector')
 with(dat.te, mean( (medv - pr.t)^2) )
 ```
-Estimated MSPE for a full linear model using the test set:
+For a full linear model, the estimated MSPE using the test set is:
 ```{r tree5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # full linear model
 bos.lm <- lm(medv ~ ., data=dat.tr)
 pr.lm <- predict(bos.lm, newdata=dat.te)
 with(dat.te, mean( (medv - pr.lm)^2) )
 ```
-Estimated MSPE for a linear model constructed via stepwise:
+The estimated MSPE of a linear model constructed via stepwise is:
 ```{r tree6, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 library(MASS)
 null <- lm(medv ~ 1, data=dat.tr)
@@ -212,7 +219,7 @@ bos.aic <- stepAIC(null, scope=list(lower=null, upper=full), trace=FALSE)
 pr.aic <- predict(bos.aic, newdata=dat.te)
 with(dat.te, mean( (medv - pr.aic)^2 ) )
 ```
-Estimated MSPE of the "optimal" LASSO fit:
+Finally, the estimated MSPE of the "optimal" LASSO fit is:
 ```{r tree7, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # LASSO?
 library(glmnet)
@@ -225,62 +232,89 @@ pr.la <- predict(bos.la, s='lambda.1se', newx=x.te)
 with(dat.te, mean( (medv - pr.la)^2 ) )
 ```
 
-A very good exercise for you would be to repeat the above comparison for
-different training/test splits, or even better, using all the data for
+Note that the regression tree appears to have the best MSPE, although
+we cannot really assess whether the observed differences are beyond
+the uncertainty associated with our MSPE estimators. In other words,
+would these differences still be so if we used a different 
+training / test data split? In fact, a very good exercise for you 
+would be to repeat the above comparison using
+different training/test splits, or even better: using all the data for
 training and K-fold CV to estimate the different MSPEs. 
 
 #### Pruning regression trees
 
+The stopping criteria generally used when fitting regression trees do not
+take into account explicitly the complexity of the tree. Hence, we 
+may end up with an overfitting tree, which typically results in 
+a decline in the quality of the corresponding predictions. As discussed
+in class, one solution is to purposedly grow / train a very large overfitting
+tree, and then prune it. One can also estimate the corresponding MSPE
+of each tree in the prunning sequence and choose an optimal one. 
+The function `rpart` implements this approach, and we illustrate it
+below:
 ```{r prune, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-# build a big tree (overfitting?)
 myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
 set.seed(123)
 bos.to <- rpart(medv ~ ., data=dat.tr, method='anova',
                 control=myc)
 plot(bos.to, compress=TRUE) # type='proportional')
+```
+
+Not surprisingly, the predictions of this large tree are 
+not very good:
+```{r prune2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions are poor, unsurprisingly
 pr.to <- predict(bos.to, newdata=dat.te, type='vector')
 with(dat.te, mean((medv - pr.to)^2) )
 ```
 
-Prune it. 
-
-```{r prune2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-plot(bos.to, margin=0.05)
-```
-
-Find cp corresponding to smallest cv-estimated
-prediction error.
+To prune we explore the *CP table* returned in the
+`rpart` object, and find the value of the complexity
+parameter with optimal estimated prediction error:  
 ```{r prune3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 printcp(bos.to)
 ```
+It is probably better and easier to find this 
+optimal value programatically. 
+```{r prune4.2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+( b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"] )
+```
 
-Prune and plot prunned tree:
-
+We can now use the function 
+`prune` on the `rpart` object setting the complexity parameter
+to the estimated optimal value:
 ```{r prune4, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"]
 bos.t3 <- prune(bos.to, cp=b)
-plot(bos.t3, uniform=FALSE)
+```
+We can display the optimally pruned tree:
+
+```{r prune4.5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+plot(bos.t3, uniform=FALSE, margin=0.05)
 text(bos.t3, pretty=TRUE)
 ```
 
-Predictions improve:
+We can verify that the predictions on the test set did improve:
 ```{r prune5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # predictions are better
 pr.t3 <- predict(bos.t3, newdata=dat.te, type='vector')
 with(dat.te, mean((medv - pr.t3)^2) )
 ```
-Pruning doesn't always improve a tree:
 
+Note that pruning doesn't always improve a tree. For example, 
+if we prune the first tree we fit in this example:
 ```{r prune8, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # what if we prune the original tree?
 b <- bos.t$cptable[which.min(bos.t$cptable[,"xerror"]),"CP"]
 bos.t4 <- prune(bos.t, cp=b)
+```
+We obtain the same tree as before:
+
+```{r prune10, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 plot(bos.t4, uniform=FALSE, margin=0.05)
 text(bos.t4, pretty=TRUE)
 ```
 
-Pruning gives the same tree as the original
+Below is the original tree:
 
 ```{r prune6, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 plot(bos.t, uniform=FALSE, margin=0.05)
