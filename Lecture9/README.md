@@ -60,7 +60,9 @@ lines(a$x, a$y, lwd=4, col='blue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel0.2-1.png)
 
-Better properties for the estimated regression function are obtained when one uses a smooth kernel with *compact support* (the support of the gaussian density function is the whole real line and thus not compact). The reasons for this (better kernel regression estimators when the kernel has compact support) are rather technical and will not be discussed here.
+Better properties for the estimated regression function are obtained when one uses a smooth kernel with *compact support* (the support of the gaussian density function is the whole real line and thus not compact). The reasons for this (better kernel regression estimators when the kernel has compact support) are rather technical and will not be discussed here. A good technical reference for these topics is the following, which is available on-line via the Library:
+
+> Nonparametric and Semiparametric Models. (2004). Hardle, W., Werwatz, A., Muller, M. and Sperlich, S. Springer-Verlag Berlin Heidelberg. DOI: [10.1007/978-3-642-17146-8](http://doi.org/10.1007/978-3-642-17146-8)
 
 In what follows we will use the `R` function `loess` that implements this approach with a tri-cubic kernel given by *k(a) = ( 1 - (|a|)^3 )^3* if *|a| &lt; 1*, and 0 otherwise. The following plot compares this kernel with the gaussian one. Since the important characteristics of a kernel are its shape and support set, below I standardized both of them to reach the same maximum value (1):
 
@@ -92,7 +94,7 @@ lines(a$x[tmp], a$fitted[tmp], lwd=4, col='steelblue')
 
 Note, in particular, how the upper end of the estimated regression function looks better than the approach discussed before using fixed bandwidths.
 
-Although we have not yet discussed how to choose a bandwidth (either fixed or variable) among the infinitely many possible ones, I expect the reader to already know how this may be done.
+Although we have not yet discussed how to choose a bandwidth (either fixed or variable) among the infinitely many possible ones, I expect you to already know how this may be done.
 
 ### Local regression versus local means
 
@@ -142,7 +144,9 @@ lines(b2$x[tmp], b2$fitted[tmp], lwd=4, col='darkgreen')
 
 ### Choosing the bandwidth
 
-Effect of span. Local quadratic, small span (0.05):
+It is easy to see that the bandwidths plays a similar role to the one played by the penalty term in smoothers based on splines or other bases. A very small bandwidth results in an estimator that is too adaptive to local quirks of the training set. Similarly, a bandwidth that is too large will result in an estimator that essentially fit a single global model to the whole data set.
+
+We illustrate the effect of different choices of bandwidths below. We take a local quadratic (2nd degree polynomial) fit, with a very small span (0.05):
 
 ``` r
 tmp <- loess(NOx ~ E, data=ethanol, span = .05, degree=2, family='gaussian')
@@ -154,7 +158,7 @@ lines(predict(tmp, newdata=prs) ~ prs, data=ethanol, lwd=4, col='steelblue')
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel1-1.png)
 
-Better spans (0.25, and 0.50):
+Larger spans result in "better" fits, at least in the sense of being more pleasant to the eye:
 
 ``` r
 tmp <- loess(NOx ~ E, data=ethanol, span = .25, degree=2, family='gaussian')
@@ -166,6 +170,11 @@ legend('topleft', legend=c('span: 0.25', 'span: 0.50'), col=c('hotpink', 'darkgr
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/kernel2-1.png)
+
+The range of sensible or acceptable values of the argument `span` in `loess` is determined, of course, by the exact definition of this parameter. Information can be found in the corresponding help page, as usual. As you probably know, an "optimal" value of span could be chosen using cross-validation. A couple of **very good** questions for you are the following:
+
+-   are kernel regression estimators *linear* in the sense of there being a matrix **S** such that the fitted values equal **S y**, where **y** is the vector of responses in the training set, and **S** does not depend on **y**?
+-   use K-fold cross-validation to choose an "optimal" value of `span`.
 
 <!-- Effect of the degree, now quadratic: -->
 <!-- ```{r kernel3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE} -->
