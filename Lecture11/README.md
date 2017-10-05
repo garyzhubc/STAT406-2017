@@ -90,23 +90,57 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set.
+I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set. This is not the best (most efficient) way to implement bagging, but the purpose here is to understand what we are doing.
 
-<!-- myc <- tree.control(nobs=nrow(dat.tr), mincut=1, minsize=2,  -->
-<!--                     mindev=1e-5) -->
-<!-- N <- 5 # 5 500 2000 5000 all improve, but less each time -->
-<!-- # [1] 13.89539, [1] 12.08049, [1] 11.87869, [1] 11.77328 -->
-<!-- myps <- matrix(NA, nrow(dat.te), N) -->
-<!-- n.tr <- nrow(dat.tr) -->
-<!-- set.seed(123456) -->
-<!-- for(j in 1:N) { -->
-<!--   ii <- sample(n.tr, replace=TRUE) -->
-<!--   tmp <- tree(medv ~ ., data=dat.tr[ii,], split='deviance', -->
-<!--                     control=myc) -->
-<!--   myps[,j] <- predict(tmp, newdata=dat.te, type='vector') -->
-<!-- } -->
-<!-- pr.ba <- rowMeans(myps) -->
-<!-- mean((dat.te$medv - pr.ba)^2) -->
+First create an array where we will store all the predictions:
+
+``` r
+N <- 5
+myps <- array(NA, dim=c(nrow(dat.te), N))
+con <- rpart.control(minsplit=3, cp=1e-3, xval=1)
+```
+
+The last object (`con`) contains my options to train large (potentially overfitting) trees.
+
+``` r
+n.tr <- nrow(dat.tr)
+set.seed(123456)
+for(j in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  tmp <- rpart(medv ~ ., data=dat.tr[ii, ], method='anova', control=con)
+  myps[,j] <- predict(tmp, newdata=dat.te, type='vector')
+}
+pr.bagg <- rowMeans(myps)
+with(dat.te, mean( (medv - pr.bagg)^2 ) )
+```
+
+    ## [1] 14.81517
+
+And compare with predictions from the pruned tree, and the ones from other predictors discussed in the previous note:
+
+``` r
+myc <- rpart.control(minsplit=3, cp=1e-8, xval=10)
+set.seed(123)
+bos.to <- rpart(medv ~ ., data=dat.tr, method='anova',
+                control=myc)
+b <- bos.to$cptable[which.min(bos.to$cptable[,"xerror"]),"CP"]
+bos.t3 <- prune(bos.to, cp=b)
+pr.t3 <- predict(bos.t3, newdata=dat.te, type='vector')
+with(dat.te, mean((medv - pr.t3)^2) )
+```
+
+    ## [1] 18.96988
+
+What if we *bagg* *N* = 10 trees?
+
+    ## [1] 14.80446
+
+or *N* = 100 trees?
+
+    ## [1] 12.71124
+
+Should we consider higher values of *N*? How about other training / test splits? Should we use CV instead?
+
 ### Bagging a regression spline
 
 <!-- data(lidar, package='SemiPar') -->
