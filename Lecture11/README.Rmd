@@ -161,55 +161,139 @@ for(j in 1:N) {
 pr.bagg <- rowMeans(myps)
 with(dat.te, mean( (medv - pr.bagg)^2 ) )
 ```
+or $N = 1000$ trees? 
+```{r bag1000, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, echo=FALSE}
+N <- 1000
+myps <- array(NA, dim=c(nrow(dat.te), N))
+n.tr <- nrow(dat.tr)
+set.seed(123456)
+for(j in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  tmp <- rpart(medv ~ ., data=dat.tr[ii, ], method='anova', control=con)
+  myps[,j] <- predict(tmp, newdata=dat.te, type='vector')
+}
+pr.bagg <- rowMeans(myps)
+with(dat.te, mean( (medv - pr.bagg)^2 ) )
+```
+
+
+
 
 Should we consider higher values of $N$? How about other
 training / test splits? Should we use CV instead? 
 
+Another split:
+```{r anothersplit, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, echo=FALSE}
+set.seed(123)
+n <- nrow(Boston)
+ii <- sample(n, floor(n/4))
+dat.te <- Boston[ ii, ]
+dat.tr <- Boston[ -ii, ]
+for(N in c(5, 10, 100, 1000)) {
+myps <- array(NA, dim=c(nrow(dat.te), N))
+n.tr <- nrow(dat.tr)
+set.seed(123456)
+for(j in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  tmp <- rpart(medv ~ ., data=dat.tr[ii, ], method='anova', control=con)
+  myps[,j] <- predict(tmp, newdata=dat.te, type='vector')
+}
+pr.bagg <- rowMeans(myps)
+print(c(N, with(dat.te, mean( (medv - pr.bagg)^2 ) )))
+}
+```
 
-
-
+Similar conclusion: increasing $N$ helps, but the improvement 
+becomes smaller, while the computational cost keeps increasing. 
 
 ### Bagging a regression spline
 
-<!-- data(lidar, package='SemiPar') -->
-<!-- plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5) -->
+Does not provide that much of an advantage for linear
+predictors. Why? 
 
-<!-- # split in training and testing  -->
-<!-- set.seed(123456)  -->
-<!-- n <- nrow(lidar) -->
-<!-- ii <- sample(n, floor(n/5)) -->
-<!-- lid.te <- lidar[ ii, ] -->
-<!-- lid.tr <- lidar[ -ii, ] -->
 
-<!-- bound <- c(min(lidar$range), max(lidar$range)) -->
+```{r bagsplines, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+data(lidar, package='SemiPar')
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
 
-<!-- library(splines) -->
+# split in training and testing
+set.seed(123456)
+n <- nrow(lidar)
+ii <- sample(n, floor(n/5))
+lid.te <- lidar[ ii, ]
+lid.tr <- lidar[ -ii, ]
 
-<!-- a <- lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr) -->
-<!-- oo <- order(lid.tr$range) -->
-<!-- plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5) -->
-<!-- lines(predict(a)[oo] ~ lid.tr$range[oo], lwd=4, col='red') -->
-<!-- pr.of <- predict(a, newdata=lid.te) -->
-<!-- mean( (lid.te$logratio - pr.of)^2 ) -->
+bound <- c(min(lidar$range), max(lidar$range))
 
-<!-- N <- 100 # 5 500 1500 -->
-<!-- xseq <- seq(min(lidar$range), max(lidar$range), length=500) -->
-<!-- myps <- matrix(NA, nrow(lid.te), N) -->
-<!-- myse <- matrix(NA, length(xseq), N) -->
-<!-- set.seed(123456) -->
-<!-- n.tr <- nrow(lid.tr) -->
-<!-- for(i in 1:N) { -->
-<!--   ii <- sample(n.tr, replace=TRUE) -->
-<!--   a.b <- lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]) -->
-<!--     # try(lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]), silent=TRUE) -->
-<!-- #  if(class(a.b) != 'try-error') { -->
-<!--   myps[,i] <- predict(a.b, newdata=lid.te) -->
-<!--   myse[,i] <- predict(a.b, newdata=list(range=xseq)) -->
-<!-- #  } -->
-<!-- } -->
-<!-- pr.ba <- rowMeans(myps)# , na.rm=TRUE) -->
-<!-- mean( (lid.te$logratio - pr.ba)^2 ) -->
-<!-- pr.se <- rowMeans(myse)# , na.rm=TRUE) -->
+library(splines)
+
+a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
+oo <- order(lid.tr$range)
+plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
+lines(predict(a)[oo] ~ lid.tr$range[oo], lwd=4, col='red')
+pr.of <- predict(a, newdata=lid.te)
+mean( (lid.te$logratio - pr.of)^2 )
+
+N <- 100 # 5 500 1500
+# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
+myps <- matrix(NA, nrow(lid.te), N)
+# myse <- matrix(NA, length(xseq), N)
+set.seed(123456)
+n.tr <- nrow(lid.tr)
+for(i in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  a.b <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr[ii,])
+    # try(lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]), silent=TRUE)
+#  if(class(a.b) != 'try-error') {
+  myps[,i] <- predict(a.b, newdata=lid.te)
+#  myse[,i] <- predict(a.b, newdata=list(range=xseq))
+#  }
+}
+pr.ba <- rowMeans(myps)# , na.rm=TRUE)
+mean( (lid.te$logratio - pr.ba)^2 )
+# pr.se <- rowMeans(myse)# , na.rm=TRUE)
+```
+
+
+
+
+```{r bagsmooth, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+data(lidar, package='SemiPar')
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
+
+# split in training and testing
+set.seed(123456)
+n <- nrow(lidar)
+ii <- sample(n, floor(n/5))
+lid.te <- lidar[ ii, ]
+lid.tr <- lidar[ -ii, ]
+
+a <- smooth.spline(x = lid.tr$range, y = lid.tr$logratio, cv = TRUE, all.knots = TRUE)
+
+# a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
+oo <- order(lid.tr$range)
+plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
+lines(a$y ~ a$x, lwd = 8, col = "blue")
+pr.of <- predict(a, x=lid.te$range)$y
+mean( (lid.te$logratio - pr.of)^2 )
+
+N <- 5 # 5 500 1500
+# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
+myps <- matrix(NA, nrow(lid.te), N)
+# myse <- matrix(NA, length(xseq), N)
+set.seed(123456)
+n.tr <- nrow(lid.tr)
+for(i in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  a.b <- smooth.spline(x = lid.tr$range[ii], y = lid.tr$logratio[ii], cv = TRUE, all.knots = TRUE)
+  myps[,i] <- predict(a.b, x=lid.te$range)$y
+}
+pr.ba <- rowMeans(myps)# , na.rm=TRUE)
+mean( (lid.te$logratio - pr.ba)^2 )
+# pr.se <- rowMeans(myse)# , na.rm=TRUE)
+```
+
+
 
 
 <!-- pr.ofse <- predict(a, newdata=list(range=xseq)) -->
@@ -218,6 +302,6 @@ training / test splits? Should we use CV instead?
 <!-- points(logratio~range, data=lid.te, pch=19, col='blue', cex=.75) -->
 <!-- lines(pr.ofse ~ xseq, lwd=4, col='red') -->
 <!-- lines(pr.se ~ xseq, lwd=4, col='magenta') -->
-
+<!-- ``` -->
 
 

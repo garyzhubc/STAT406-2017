@@ -139,47 +139,143 @@ or *N* = 100 trees?
 
     ## [1] 12.71124
 
+or *N* = 1000 trees?
+
+    ## [1] 12.566
+
 Should we consider higher values of *N*? How about other training / test splits? Should we use CV instead?
+
+Another split:
+
+    ## [1]  5.00000 20.32676
+    ## [1] 10.00000 20.52832
+    ## [1] 100.00000  18.24876
+    ## [1] 1000.00000   17.93342
+
+Similar conclusion: increasing *N* helps, but the improvement becomes smaller, while the computational cost keeps increasing.
 
 ### Bagging a regression spline
 
-<!-- data(lidar, package='SemiPar') -->
-<!-- plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5) -->
-<!-- # split in training and testing  -->
-<!-- set.seed(123456)  -->
-<!-- n <- nrow(lidar) -->
-<!-- ii <- sample(n, floor(n/5)) -->
-<!-- lid.te <- lidar[ ii, ] -->
-<!-- lid.tr <- lidar[ -ii, ] -->
-<!-- bound <- c(min(lidar$range), max(lidar$range)) -->
-<!-- library(splines) -->
-<!-- a <- lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr) -->
-<!-- oo <- order(lid.tr$range) -->
-<!-- plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5) -->
-<!-- lines(predict(a)[oo] ~ lid.tr$range[oo], lwd=4, col='red') -->
-<!-- pr.of <- predict(a, newdata=lid.te) -->
-<!-- mean( (lid.te$logratio - pr.of)^2 ) -->
-<!-- N <- 100 # 5 500 1500 -->
-<!-- xseq <- seq(min(lidar$range), max(lidar$range), length=500) -->
-<!-- myps <- matrix(NA, nrow(lid.te), N) -->
-<!-- myse <- matrix(NA, length(xseq), N) -->
-<!-- set.seed(123456) -->
-<!-- n.tr <- nrow(lid.tr) -->
-<!-- for(i in 1:N) { -->
-<!--   ii <- sample(n.tr, replace=TRUE) -->
-<!--   a.b <- lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]) -->
-<!--     # try(lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]), silent=TRUE) -->
-<!-- #  if(class(a.b) != 'try-error') { -->
-<!--   myps[,i] <- predict(a.b, newdata=lid.te) -->
-<!--   myse[,i] <- predict(a.b, newdata=list(range=xseq)) -->
-<!-- #  } -->
-<!-- } -->
-<!-- pr.ba <- rowMeans(myps)# , na.rm=TRUE) -->
-<!-- mean( (lid.te$logratio - pr.ba)^2 ) -->
-<!-- pr.se <- rowMeans(myse)# , na.rm=TRUE) -->
+Does not provide that much of an advantage for linear predictors. Why?
+
+``` r
+data(lidar, package='SemiPar')
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bagsplines-1.png)
+
+``` r
+# split in training and testing
+set.seed(123456)
+n <- nrow(lidar)
+ii <- sample(n, floor(n/5))
+lid.te <- lidar[ ii, ]
+lid.tr <- lidar[ -ii, ]
+
+bound <- c(min(lidar$range), max(lidar$range))
+
+library(splines)
+
+a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
+oo <- order(lid.tr$range)
+plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
+lines(predict(a)[oo] ~ lid.tr$range[oo], lwd=4, col='red')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bagsplines-2.png)
+
+``` r
+pr.of <- predict(a, newdata=lid.te)
+mean( (lid.te$logratio - pr.of)^2 )
+```
+
+    ## [1] 0.008443088
+
+``` r
+N <- 100 # 5 500 1500
+# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
+myps <- matrix(NA, nrow(lid.te), N)
+# myse <- matrix(NA, length(xseq), N)
+set.seed(123456)
+n.tr <- nrow(lid.tr)
+for(i in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  a.b <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr[ii,])
+    # try(lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]), silent=TRUE)
+#  if(class(a.b) != 'try-error') {
+  myps[,i] <- predict(a.b, newdata=lid.te)
+#  myse[,i] <- predict(a.b, newdata=list(range=xseq))
+#  }
+}
+pr.ba <- rowMeans(myps)# , na.rm=TRUE)
+mean( (lid.te$logratio - pr.ba)^2 )
+```
+
+    ## [1] 0.008215519
+
+``` r
+# pr.se <- rowMeans(myse)# , na.rm=TRUE)
+```
+
+``` r
+data(lidar, package='SemiPar')
+plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bagsmooth-1.png)
+
+``` r
+# split in training and testing
+set.seed(123456)
+n <- nrow(lidar)
+ii <- sample(n, floor(n/5))
+lid.te <- lidar[ ii, ]
+lid.tr <- lidar[ -ii, ]
+
+a <- smooth.spline(x = lid.tr$range, y = lid.tr$logratio, cv = TRUE, all.knots = TRUE)
+
+# a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
+oo <- order(lid.tr$range)
+plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
+lines(a$y ~ a$x, lwd = 8, col = "blue")
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/bagsmooth-2.png)
+
+``` r
+pr.of <- predict(a, x=lid.te$range)$y
+mean( (lid.te$logratio - pr.of)^2 )
+```
+
+    ## [1] 0.008020659
+
+``` r
+N <- 5 # 5 500 1500
+# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
+myps <- matrix(NA, nrow(lid.te), N)
+# myse <- matrix(NA, length(xseq), N)
+set.seed(123456)
+n.tr <- nrow(lid.tr)
+for(i in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  a.b <- smooth.spline(x = lid.tr$range[ii], y = lid.tr$logratio[ii], cv = TRUE, all.knots = TRUE)
+  myps[,i] <- predict(a.b, x=lid.te$range)$y
+}
+pr.ba <- rowMeans(myps)# , na.rm=TRUE)
+mean( (lid.te$logratio - pr.ba)^2 )
+```
+
+    ## [1] 0.007836638
+
+``` r
+# pr.se <- rowMeans(myse)# , na.rm=TRUE)
+```
+
 <!-- pr.ofse <- predict(a, newdata=list(range=xseq)) -->
 <!-- plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5) -->
 <!-- points(logratio~range, data=lid.tr, pch=19, col='gray30', cex=.75) -->
 <!-- points(logratio~range, data=lid.te, pch=19, col='blue', cex=.75) -->
 <!-- lines(pr.ofse ~ xseq, lwd=4, col='red') -->
 <!-- lines(pr.se ~ xseq, lwd=4, col='magenta') -->
+<!-- ``` -->
