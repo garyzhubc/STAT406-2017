@@ -36,21 +36,22 @@ n <- nrow(Boston)
 ii <- sample(n, floor(n/2))
 dat.t1 <- Boston[ -ii, ]
 bos.t1 <- rpart(medv ~ ., data=dat.t1, method='anova')
-plot(bos.t1, uniform=TRUE, margin=0.05)
+plot(bos.t1, uniform=FALSE, margin=0.05)
 text(bos.t1, pretty=TRUE, cex=.8)
 ```
 
 ```{r inst2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 dat.t2 <- Boston[ ii, ]
 bos.t2 <- rpart(medv ~ ., data=dat.t2, method='anova')
-plot(bos.t2, uniform=TRUE, margin=0.05)
+plot(bos.t2, uniform=FALSE, margin=0.05)
 text(bos.t2, pretty=TRUE, cex=.8)
 ```
 
-Now how the two trees are rather different, although we would expect both 
-random halves of the same (moderately large) training set to be 
-at least qualitatively similar. As a comparison, we fit a linear
-regression model to each half, and below list the estimated
+Although we would expect both random halves of the same (moderately large) 
+training set to beat least qualitatively similar, 
+Note that the two trees are rather different. 
+To compare with a more stable predictor, we fit a linear
+regression model to each half, and look at the two sets of estimated
 coefficients side by side:
 ```{r inst3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 # bos.lmf <- lm(medv ~ ., data=Boston)
@@ -59,28 +60,46 @@ bos.lm2 <- lm(medv ~ ., data=dat.t2)
 cbind(round(coef(bos.lm1),2),
 round(coef(bos.lm2),2))
 ```
-Note that the estimated regression coefficients are 
-similar, or at least qualitatively comparable. 
+Note that most of the estimated regression coefficients are 
+similar, and all of them are at least qualitatively comparable. 
 
 ## Bagging
 
 One strategy to obtain more stable predictors is called
 **Bootstrap AGGregatING** (bagging). It can be applied to
 many predictors (not only trees), and it generally results
-in a larger improvement when it is used with predictors
-that are highly flexible (low bias), but highly variable.
+in larger improvements in prediction quality when it is used with predictors
+that are flexible (low bias), but highly variable.
 
+The justification and motivation were discussed in class. Intuitively
+we are averaging the predictions obtained from an estimate of the 
+"average prediction" we would have computed had we had access to 
+several (many?) independent training sets (samples). 
+
+There are several (many?) `R` packages implementing
+bagging for different predictors, with varying degrees of 
+flexibility (the implementations) and user-friendliness. 
+However, for pedagogical and illustrative purposes, in these notes I will
+*bagg* by hand.
 
 ### Bagging by hand
 
+Again, to simplify the discussion and presentation, in order to evaluate 
+prediction quality I will split the 
+data (`Boston`) into a training and a test set. We do this now:
+```{r bag1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+set.seed(123456)
+n <- nrow(Boston)
+ii <- sample(n, floor(n/4))
+dat.te <- Boston[ ii, ]
+dat.tr <- Boston[ -ii, ]
+```
+I will now train $N = 5$ trees and average their predictions. 
+Note that, in order to illustrate the process more
+clearly, I will compute and store the $N \times n_e$
+predictions, where $n_e$ denotes the number of observations in 
+the test set. 
 
-<!-- # bagging by hand -->
-
-<!-- set.seed(123456) -->
-<!-- n <- nrow(Boston) -->
-<!-- ii <- sample(n, floor(n/4)) -->
-<!-- dat.te <- Boston[ ii, ] -->
-<!-- dat.tr <- Boston[ -ii, ] -->
 
 <!-- myc <- tree.control(nobs=nrow(dat.tr), mincut=1, minsize=2,  -->
 <!--                     mindev=1e-5) -->
