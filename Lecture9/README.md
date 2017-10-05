@@ -1,7 +1,7 @@
 STAT406 - Lecture 9 notes
 ================
 Matias Salibian-Barrera
-2017-10-04
+2017-10-05
 
 #### LICENSE
 
@@ -10,7 +10,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-9.pdf).
 
 Kernel regression / local regression
 ------------------------------------

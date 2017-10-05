@@ -17,7 +17,7 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-9-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-9.pdf).
 
 ## Kernel regression / local regression 
 
