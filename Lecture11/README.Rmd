@@ -98,8 +98,14 @@ I will now train $N = 5$ trees and average their predictions.
 Note that, in order to illustrate the process more
 clearly, I will compute and store the $N \times n_e$
 predictions, where $n_e$ denotes the number of observations in 
-the test set. This is not the best (most efficient) way to implement bagging,
-but the purpose here is to understand what we are doing. 
+the test set. This is not the best (most efficient) way of implementing *bagging*,
+but the main purpose here is to understand **what** we are doing. Also note that
+an alternative (better in terms of reusability of the
+ensamble, but maybe still not the most efficient option) would be
+to store the $N$ trees directly. This would also allow for
+more elegant and easy to read code. Once again, this approach 
+will be sacrificed in the altar of clarity of presentation and 
+pedagogy (but do try it yourself!)
 
 First create an array where we will store all the predictions:
 ```{r bag2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
@@ -209,99 +215,66 @@ becomes smaller, while the computational cost keeps increasing.
 ### Bagging a regression spline
 
 Does not provide that much of an advantage for linear
-predictors. Why? 
-
-
+predictors (why?) Nevertheless, let us try it on the `lidar` data, 
+which, as before is randomly split
+into a training and test set:
 ```{r bagsplines, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 data(lidar, package='SemiPar')
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
-
-# split in training and testing
 set.seed(123456)
 n <- nrow(lidar)
 ii <- sample(n, floor(n/5))
 lid.te <- lidar[ ii, ]
 lid.tr <- lidar[ -ii, ]
-
-bound <- c(min(lidar$range), max(lidar$range))
-
+```
+Now fit a cubic spline, and estimate the MSPE using the test set:
+```{r bagsplines2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 library(splines)
-
-a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
+a <- lm(logratio ~ bs(x=range, df=10, degree=3), data=lid.tr) 
 oo <- order(lid.tr$range)
-plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
-lines(predict(a)[oo] ~ lid.tr$range[oo], lwd=4, col='red')
 pr.of <- predict(a, newdata=lid.te)
 mean( (lid.te$logratio - pr.of)^2 )
-
-N <- 100 # 5 500 1500
-# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
+```
+We build an ensemble of 10 fits and estimate the corresponding
+MSPE using the test set:
+```{r bagsplines3, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+N <- 10 # 5 500 1500
 myps <- matrix(NA, nrow(lid.te), N)
-# myse <- matrix(NA, length(xseq), N)
 set.seed(123456)
 n.tr <- nrow(lid.tr)
 for(i in 1:N) {
   ii <- sample(n.tr, replace=TRUE)
-  a.b <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr[ii,])
-    # try(lm(logratio ~ bs(x=range, df=30, Boundary.knots=bound), data=lid.tr[ii,]), silent=TRUE)
-#  if(class(a.b) != 'try-error') {
+  a.b <- lm(logratio ~ bs(x=range, df=10, degree=3), data=lid.tr[ii,]) 
   myps[,i] <- predict(a.b, newdata=lid.te)
-#  myse[,i] <- predict(a.b, newdata=list(range=xseq))
-#  }
 }
 pr.ba <- rowMeans(myps)# , na.rm=TRUE)
 mean( (lid.te$logratio - pr.ba)^2 )
-# pr.se <- rowMeans(myse)# , na.rm=TRUE)
 ```
 
 
 
 
-```{r bagsmooth, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
-data(lidar, package='SemiPar')
-plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5)
-
-# split in training and testing
-set.seed(123456)
-n <- nrow(lidar)
-ii <- sample(n, floor(n/5))
-lid.te <- lidar[ ii, ]
-lid.tr <- lidar[ -ii, ]
-
-a <- smooth.spline(x = lid.tr$range, y = lid.tr$logratio, cv = TRUE, all.knots = TRUE)
-
-# a <- lm(logratio ~ bs(x=range, df=10, Boundary.knots=bound), data=lid.tr)
-oo <- order(lid.tr$range)
-plot(logratio~range, data=lid.tr, pch=19, col='gray', cex=2.5)
-lines(a$y ~ a$x, lwd = 8, col = "blue")
-pr.of <- predict(a, x=lid.te$range)$y
-mean( (lid.te$logratio - pr.of)^2 )
-
-N <- 5 # 5 500 1500
-# xseq <- seq(min(lidar$range), max(lidar$range), length=500)
-myps <- matrix(NA, nrow(lid.te), N)
-# myse <- matrix(NA, length(xseq), N)
-set.seed(123456)
-n.tr <- nrow(lid.tr)
-for(i in 1:N) {
-  ii <- sample(n.tr, replace=TRUE)
-  a.b <- smooth.spline(x = lid.tr$range[ii], y = lid.tr$logratio[ii], cv = TRUE, all.knots = TRUE)
-  myps[,i] <- predict(a.b, x=lid.te$range)$y
-}
-pr.ba <- rowMeans(myps)# , na.rm=TRUE)
-mean( (lid.te$logratio - pr.ba)^2 )
-# pr.se <- rowMeans(myse)# , na.rm=TRUE)
-```
+<!-- Using smoothing splines? -->
 
 
-
-
-<!-- pr.ofse <- predict(a, newdata=list(range=xseq)) -->
-<!-- plot(logratio~range, data=lidar, pch=19, col='gray', cex=2.5) -->
-<!-- points(logratio~range, data=lid.tr, pch=19, col='gray30', cex=.75) -->
-<!-- points(logratio~range, data=lid.te, pch=19, col='blue', cex=.75) -->
-<!-- lines(pr.ofse ~ xseq, lwd=4, col='red') -->
-<!-- lines(pr.se ~ xseq, lwd=4, col='magenta') -->
+<!-- ```{r bagsmooth, fig.width=5, fig.height=5, message=FALSE, warning=FALSE} -->
+<!-- a <- smooth.spline(x = lid.tr$range, y = lid.tr$logratio, cv = TRUE, all.knots = TRUE) -->
+<!-- pr.of <- predict(a, x=lid.te$range)$y -->
+<!-- mean( (lid.te$logratio - pr.of)^2 ) -->
 <!-- ``` -->
+<!-- Using ensemble of 10: -->
+<!-- ```{r bagsmooth2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE, echo=FALSE} -->
+<!-- N <- 10 # 5 500 1500 -->
+<!-- myps <- matrix(NA, nrow(lid.te), N) -->
+<!-- set.seed(123456) -->
+<!-- n.tr <- nrow(lid.tr) -->
+<!-- for(i in 1:N) { -->
+<!--   ii <- sample(n.tr, replace=TRUE) -->
+<!--   a.b <- smooth.spline(x = lid.tr$range[ii], y = lid.tr$logratio[ii], cv = TRUE, all.knots = TRUE) -->
+<!--   myps[,i] <- predict(a.b, x=lid.te$range)$y -->
+<!-- } -->
+<!-- pr.ba <- rowMeans(myps)# , na.rm=TRUE) -->
+<!-- mean( (lid.te$logratio - pr.ba)^2 ) -->
+<!-- ``` -->
+
 
 
