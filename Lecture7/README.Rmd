@@ -355,9 +355,22 @@ on the predictions obtained by using a full linear regression model.
 
 ## Less desirable properties of LASSO
 
-* Not "variable selection"-consistent.
-* Not oracle.
-* Tends to only pick one variable (randomly) from groups of correlated ones.
+As important as the LASSO estimator has been, its properties may sometimes 
+not be fully satisfactory. In particular:
+
+* The LASSO selects the right variables only under very restrictive conditions (reference) (in other words, it is generally not "variable selection"-consistent).
+* The LASSO sampling distribution is not the same as the one we would obtain with the standard least squares estimator if we knew which features to include and which ones to exclude from the model (in orther words, the LASSO does not have an "oracle" property). 
+* When groups of correlated explanatory variables are present the LASSO tends to include only one variable (randomly) from the group, relegate the others to the end of the sequence (reference). 
+
+For precise statements and theoretical results regarding the three points above, see
+
+
+> Zou, H. (2006). The Adaptive Lasso and Its Oracle Properties.  *Journal of the American Statistical Association*, **101**(476), 1418-1429. DOI: [10.1198/016214506000000735](http://doi.org/10.1198/016214506000000735)
+
+and
+
+> Zou, H. and Hastie, T. (2005). Regularization and variable selection via the elastic net. *Journal of the Royal Statistical Society: Series B (Statistical Methodology)*, **67**(2), 301-320. DOI: [10.1111/j.1467-9868.2005.00503.x](http://dx.doi.org/10.1111/j.1467-9868.2005.00503.x)
+
 
 ## Elastic net
 
