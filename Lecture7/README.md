@@ -1,7 +1,7 @@
 STAT406 - Lecture 7 notes
 ================
 Matias Salibian-Barrera
-2017-10-08
+2017-10-09
 
 #### LICENSE
 
@@ -340,9 +340,9 @@ Less desirable properties of LASSO
 
 As important as the LASSO estimator has been, its properties may sometimes not be fully satisfactory. In particular:
 
--   The LASSO selects the right variables only under very restrictive conditions (reference) (in other words, it is generally not "variable selection"-consistent).
+-   The LASSO selects the right variables only under very restrictive conditions (in other words, it is generally not "variable selection"-consistent).
 -   The LASSO sampling distribution is not the same as the one we would obtain with the standard least squares estimator if we knew which features to include and which ones to exclude from the model (in orther words, the LASSO does not have an "oracle" property).
--   When groups of correlated explanatory variables are present the LASSO tends to include only one variable (randomly) from the group, relegate the others to the end of the sequence (reference).
+-   When groups of correlated explanatory variables are present the LASSO tends to include only one variable (randomly) from the group, relegate the others to the end of the sequence.
 
 For precise statements and theoretical results regarding the three points above, see
 
