@@ -1,7 +1,7 @@
 STAT406 - Lecture 11 notes
 ================
 Matias Salibian-Barrera
-2017-10-06
+2017-10-09
 
 #### LICENSE
 
@@ -156,7 +156,7 @@ Similar conclusion: increasing *N* helps, but the improvement becomes smaller, w
 
 ### Bagging a regression spline
 
-Does not provide that much of an advantage for linear predictors (why?) Nevertheless, let us try it on the `lidar` data, which, as before is randomly split into a training and test set:
+Bagging does not provide much of an advantage when applied to linear predictors (can you explain why?) Nevertheless, let us try it on the `lidar` data, which, as we did before, we randomly split into a training and test set:
 
 ``` r
 data(lidar, package='SemiPar')

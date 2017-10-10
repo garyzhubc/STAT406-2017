@@ -182,9 +182,6 @@ pr.bagg <- rowMeans(myps)
 with(dat.te, mean( (medv - pr.bagg)^2 ) )
 ```
 
-
-
-
 Should we consider higher values of $N$? How about other
 training / test splits? Should we use CV instead? 
 
@@ -214,10 +211,9 @@ becomes smaller, while the computational cost keeps increasing.
 
 ### Bagging a regression spline
 
-Does not provide that much of an advantage for linear
-predictors (why?) Nevertheless, let us try it on the `lidar` data, 
-which, as before is randomly split
-into a training and test set:
+Bagging does not provide much of an advantage when applied to linear
+predictors (can you explain why?) Nevertheless, let us try it on the `lidar` data, 
+which, as we did before, we randomly split into a training and test set:
 ```{r bagsplines, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
 data(lidar, package='SemiPar')
 set.seed(123456)
