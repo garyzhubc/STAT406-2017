@@ -1,7 +1,7 @@
 STAT406 - Lecture 11 notes
 ================
 Matias Salibian-Barrera
-2017-10-10
+2017-10-11
 
 #### LICENSE
 
@@ -35,7 +35,7 @@ bos.to <- rpart(medv ~ ., data=dat.tr, method='anova',
 plot(bos.to, compress=TRUE) # type='proportional')
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/prune-1.png)
+![](README_files/figure-markdown_github/prune-1.png)
 
 Not surprisingly, the predictions of this large tree are not very good:
 
@@ -311,7 +311,7 @@ plot(bos.t3, uniform=FALSE, margin=0.05)
 text(bos.t3, pretty=TRUE)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/prune4.5-1.png)
+![](README_files/figure-markdown_github/prune4.5-1.png)
 
 Finally, we can verify that the predictions of the pruned tree on the test set are better than before:
 
@@ -342,7 +342,7 @@ plot(bos.t4, uniform=FALSE, margin=0.05)
 text(bos.t4, pretty=TRUE)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/prune10-1.png)
+![](README_files/figure-markdown_github/prune10-1.png)
 
 Below is the original tree:
 
@@ -351,7 +351,7 @@ plot(bos.t, uniform=FALSE, margin=0.05)
 text(bos.t, pretty=TRUE)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/prune6-1.png)
+![](README_files/figure-markdown_github/prune6-1.png)
 
 Instability of regression trees
 -------------------------------
@@ -371,7 +371,7 @@ plot(bos.t1, uniform=FALSE, margin=0.05)
 text(bos.t1, pretty=TRUE, cex=.8)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/inst1-1.png)
+![](README_files/figure-markdown_github/inst1-1.png)
 
 ``` r
 dat.t2 <- Boston[ ii, ]
@@ -380,7 +380,7 @@ plot(bos.t2, uniform=FALSE, margin=0.05)
 text(bos.t2, pretty=TRUE, cex=.8)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/inst2-1.png)
+![](README_files/figure-markdown_github/inst2-1.png)
 
 Although we would expect both random halves of the same (moderately large) training set to beat least qualitatively similar, Note that the two trees are rather different. To compare with a more stable predictor, we fit a linear regression model to each half, and look at the two sets of estimated coefficients side by side:
 
