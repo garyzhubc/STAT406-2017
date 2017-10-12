@@ -119,6 +119,12 @@ library(splines)
 a <- lm(logratio ~ bs(x=range, df=10, degree=3), data=lid.tr) 
 oo <- order(lid.tr$range)
 pr.of <- predict(a, newdata=lid.te)
+```
+
+    ## Warning in bs(x = range, degree = 3L, knots = structure(c(430, 475, 513, :
+    ## some 'x' values beyond boundary knots may cause ill-conditioned bases
+
+``` r
 mean( (lid.te$logratio - pr.of)^2 )
 ```
 
@@ -142,12 +148,35 @@ mean( (lid.te$logratio - pr.ba)^2 )
 
     ## [1] 0.008040338
 
+Linear Discriminant Analysis
+----------------------------
+
+``` r
+library(MASS)
+data(vaso, package='robustbase')
+a.lda <- lda(Y ~ Volume + Rate, data=vaso)
+
+# build a grid of points of (Volume, Rate),
+# and obtain predictions for each of them
+# 40,000 in total
+xvol <- seq(0, 4, length=200)
+xrat <- seq(0, 4, length=200)
+xx <- expand.grid(xvol, xrat)
+names(xx) <- c('Volume', 'Rate')
+
+pr.lda <- predict(a.lda, newdata=xx)$posterior[,2]
+image(xrat, xvol, matrix(pr.lda, 200, 200), col=terrain.colors(100),
+      ylab='Volume', xlab='Rate', main='LDA')
+points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
+       col=c('red', 'blue')[Y+1])
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/lda1-1.png)
+
 Logistic regression (Review)
 ----------------------------
 
 ``` r
-data(vaso, package='robustbase')
-
 plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5, col=c('red', 'blue')[Y+1],
      xlim=c(0, 4), ylim=c(0,4))
 ```
@@ -157,19 +186,12 @@ plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5, col=c('red', 'blue')[Y+1],
 ``` r
 a <- glm(Y ~ ., data=vaso, family=binomial)
 
-# build a grid of points of (Volume, Rate),
-# and obtain predictions for each of them 
-# 40,000 in total
-xvol <- seq(0, 4, length=200)
-xrat <- seq(0, 4, length=200)
-xx <- expand.grid(xvol, xrat)
-names(xx) <- c('Volume', 'Rate')
 pr <- predict(a, newdata=xx, type='response')
 
 # display them
 image(xrat, xvol, matrix(pr, 200, 200), col=terrain.colors(100),
       ylab='Volume', xlab='Rate', main='Logistic')
-points(Volume ~ Rate, data=vaso, pch=19, cex=1.5, 
+points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
        col=c('red', 'blue')[Y+1])
 ```
 
@@ -179,19 +201,3 @@ points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
 # Y = 1 corresponds to blue points
 # higher probabilities are displayed with lighter colors
 ```
-
-Linear Discriminant Analysis
-----------------------------
-
-``` r
-library(MASS)
-
-a.lda <- lda(Y ~ Volume + Rate, data=vaso)
-pr.lda <- predict(a.lda, newdata=xx)$posterior[,2]
-image(xrat, xvol, matrix(pr.lda, 200, 200), col=terrain.colors(100),
-      ylab='Volume', xlab='Rate', main='LDA')
-points(Volume ~ Rate, data=vaso, pch=19, cex=1.5, 
-       col=c('red', 'blue')[Y+1])
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/lda1-1.png)
