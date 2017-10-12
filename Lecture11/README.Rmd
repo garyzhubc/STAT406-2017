@@ -131,7 +131,7 @@ fitted trees. As a simple illustration we randomly split the
 `Boston` data used before into two halves and fit a regression
 tree to each portion. We then display both trees.
 
-```{r inst1, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+```{r inst1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # Instability of trees...
 library(rpart)
 data(Boston, package='MASS')
@@ -144,7 +144,7 @@ plot(bos.t1, uniform=FALSE, margin=0.01)
 text(bos.t1, pretty=TRUE, cex=.8)
 ```
 
-```{r inst2, fig.width=5, fig.height=5, message=FALSE, warning=FALSE}
+```{r inst2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 dat.t2 <- Boston[ ii, ]
 bos.t2 <- rpart(medv ~ ., data=dat.t2, method='anova')
 plot(bos.t2, uniform=FALSE, margin=0.01)
