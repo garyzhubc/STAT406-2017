@@ -1,7 +1,7 @@
 STAT406 - Lecture 12 notes
 ================
 Matias Salibian-Barrera
-2017-10-14
+2017-10-15
 
 #### LICENSE
 
@@ -165,7 +165,7 @@ plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
 
 ![](README_files/figure-markdown_github-ascii_identifiers/lda1-1.png)
 
-We now train the LDA classifier:
+To train the LDA classifier we use the function `lda` as follows (note the *model-like* syntax to indicate the response and explanatory variables):
 
 ``` r
 library(MASS)
@@ -199,30 +199,22 @@ This approach can be used with any number of classes. Any limitations?
 Logistic regression (Review)
 ----------------------------
 
-Gaussian features implies linear boundaries between classes. What if we just assume linear boundaries between classes? As we saw in class, in this case we can estimate the boundaries using maximum likelihood. In particular, for the 2-class case this corresponds to logistic regression.
+If we model the distribution of the features within each class using a multivariate Gaussian distribution, then it is easy to see that the boundaries between classes are linear (functions of the features) (*check!*) Furthermore, the log of the odds ratio between classes is a linear function. It is interesting to note that one can start with this last assumption (instead of the full Gaussian model) and arrive at a fully parametric model for the conditional distibution of the classes given the features (see the class slides). The parameters can be estimated using maximum likelihood. For two classes this is the logistic regression model, which you may have seen in previous courses.
 
-``` r
-plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5, col=c('red', 'blue')[Y+1],
-     xlim=c(0, 4), ylim=c(0,4))
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/logistic1-1.png)
+We illustrate this on the `vaso` data as before. Since this is a 2-class problem, we just need to fit a logistic regression model. The function `glm` in `R` does it for us, we specify that we want to fit such a model using the argument `family=binomial`. Once we obtain parameter estimators (in the `glm` object `a` below), we use the `predict` method to obtain predicted conditional probabilities on the same grid we used before:
 
 ``` r
 a <- glm(Y ~ ., data=vaso, family=binomial)
-
 pr <- predict(a, newdata=xx, type='response')
+```
 
-# display them
+We now plot the data and the *surface* of predicted probabilities for blue points (higher probabilites are displayed with lighter colors).
+
+``` r
 image(xrat, xvol, matrix(pr, 200, 200), col=terrain.colors(100),
       ylab='Volume', xlab='Rate', main='Logistic')
 points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
        col=c('red', 'blue')[Y+1])
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/logistic1-2.png)
-
-``` r
-# Y = 1 corresponds to blue points
-# higher probabilities are displayed with lighter colors
-```
+![](README_files/figure-markdown_github-ascii_identifiers/logistic2-1.png)
