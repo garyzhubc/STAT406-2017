@@ -208,11 +208,64 @@ mean( (lid.te$logratio - pr.ba)^2 )
 
 ## Linear Discriminant Analysis
 
-```{r lda1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-library(MASS)
-data(vaso, package='robustbase')
-a.lda <- lda(Y ~ Volume + Rate, data=vaso)
+As we discussed in class, what is commonly referred to as *classification* 
+can be thought of as prediction, when the responses are classes and we
+use a particular loss function (the *0-1 loss* we discussed in class). Most
+(if not all) classification methods we will cover in this course are 
+simply different approaches to estimate the conditional probability of
+each class, conditional on the value of the explanatory variables. In 
+symbols: $P( \mathbf{G} = \mathbf{g} | \mathbf{X} = \mathbf{x}_0)$.
+The obvious parallel in what we have done before this Term,
+is that many (all?) regression methods are 
+different ways of estimating the conditional mean of the response 
+variable, conditional on the value of the features (explanatory
+variables). 
 
+Probably the "second easiest to explain" approach (what is "*the* easiest 
+to explain" then?) to estimate the above probability is to model the distribution of 
+the explanatory variables *within* each class. This will then uniquely determine the 
+probabilities we need to estimate, as discussed above and in class. 
+In particular, one the simplest models we can use is a normal (Gaussian) one. 
+As we saw in class, if we assume that the distribution of the features
+for each class is Gaussian with a common covariance matrix across clases, then
+it easy to show (*and I strongly suggest that you do it*) that the optimal
+classifier (using the 0-1 loss function m.entioned above) is a linear
+function of the explanatory variables. The coefficients of this linear
+function depend on the parameters of the assumed Gaussian distributions. The
+latter can be estimated using the training set and plugging them in provides
+a natural estimator of the optimal classifier. 
+
+The function `lda` in 
+the `MASS` library implements this simple classifier. We illustrate it
+here on the rather simple and well-known vaso constriction data, available in the 
+`robustbase` package. More details, as usual, can be found on its
+help page. The response variable takes two values (represented below
+as **blue** and **red**), and there are only two
+explanatory variables (which allows us to visualize our methods and results). 
+
+```{r lda1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+data(vaso, package='robustbase')
+plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5, 
+       col=c('red', 'blue')[Y+1])
+```
+
+We now train the LDA classifier:
+
+```{r lda1.1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+library(MASS)
+a.lda <- lda(Y ~ Volume + Rate, data=vaso)
+```
+
+Now, given any value of the explanatory variables `(Volume, Rate)` we
+can use the method `predict` on the object returned by `lda()` to 
+estimate the conditional probabilities of **blue** and **red**. 
+Next we visualize which regions of the feature space will be predicted to 
+contain **blue** points (and then obviously which areas will be 
+predicted to correspond to **red** responses). To do this we 
+build a relatively fine grid of posible `(Volume, Rate)` values
+and plot the corresponding predictions:
+
+```{r lda1.2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # build a grid of points of (Volume, Rate),
 # and obtain predictions for each of them
 # 40,000 in total
@@ -228,8 +281,22 @@ points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
        col=c('red', 'blue')[Y+1])
 ```
 
+This model-based approach to classification can be relaxed slightly if
+we assume instead that the features have a Gaussian distribution within each
+class, but that the covariance matrix may be different across 
+classes. The corresponding optimal classifier is now a quadratic
+function of the predictors (**prove it!**). The function `qda` 
+in the `MASS` library implements this classifier.  
+
+This approach can be used with any number of classes. Any limitations? 
 
 ## Logistic regression (Review)
+
+Gaussian features implies linear boundaries between classes. 
+What if we just assume linear boundaries between classes? As we 
+saw in class, in this case we can estimate the boundaries using maximum
+likelihood. In particular, for the 2-class case this corresponds to logistic
+regression. 
 
 ```{r logistic1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5, col=c('red', 'blue')[Y+1],
