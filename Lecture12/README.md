@@ -1,7 +1,7 @@
 STAT406 - Lecture 12 notes
 ================
 Matias Salibian-Barrera
-2017-10-15
+2017-10-16
 
 #### LICENSE
 
@@ -35,7 +35,7 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set. This is not the best (most efficient) way of implementing *bagging*, but the main purpose here is to understand **what** we are doing. Also note that an alternative (better in terms of reusability of the ensamble, but maybe still not the most efficient option) would be to store the *N* trees directly. This would also allow for more elegant and easy to read code. Once again, this approach will be sacrificed in the altar of clarity of presentation and pedagogy (but do try it yourself!)
+I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set. This is not the best (most efficient) way of implementing *bagging*, but the main purpose here is to understand **what** we are doing. Also note that an alternative (better in terms of reusability of the ensamble, but maybe still not the most efficient option) would be to store the *N* trees directly. This would also allow for more elegant and easy to read code. Once again, this approach will be sacrificed in the altar of clarity of presentation and pedagogy (but I do illustrate it below!)
 
 First create an array where we will store all the predictions:
 
@@ -98,6 +98,62 @@ Another split:
     ## [1] 1000.00000   17.93342
 
 Similar conclusion: increasing *N* helps, but the improvement becomes smaller, while the computational cost keeps increasing.
+
+#### More efficient, useful and elegant implementation
+
+I will now illustrate a possibly more efficient to use bagging, namely to store the *N* trees (rather than their predictions on a given data set). In this way I can re-use the ensamble in any future data set, without having to re-train the elements of the *bag*. Since the idea is the same, I will just do it for when we tried a bag of 100 trees. To simplify the comparison between this way of implementing baggin and the one I used above, I will re-create the first training / test split
+
+``` r
+set.seed(123456)
+n <- nrow(Boston)
+ii <- sample(n, floor(n/4))
+dat.te <- Boston[ ii, ]
+dat.tr <- Boston[ -ii, ]
+```
+
+Now I create a `list` of 100 (empty) elements, each entry in this list will later store a tree:
+
+``` r
+N <- 100
+mybag <- vector('list', N)
+```
+
+Now, we train the *N* trees as before, and store them in the `list` (without computing any predictions):
+
+``` r
+set.seed(123456)
+for(j in 1:N) {
+  ii <- sample(n.tr, replace=TRUE)
+  mybag[[j]] <- rpart(medv ~ ., data=dat.tr[ii, ], method='anova', control=con)
+}
+```
+
+In order to obtain the predictions of each tree in my bag on the test set, I could either:
+
+-   loop over them, and average the *N* vectors of predictions; or
+-   use `sapply` (check the help page if you are not familiar with the `apply` functions in `R`).
+
+The later is much more elegant and compact, and both give exactly the same results. If we use the **first approach** we obtain the following estimated MSPE using the test set:
+
+``` r
+pr.bagg2 <- rep(0, nrow(dat.te))
+for(j in 1:N)
+  pr.bagg2 <- pr.bagg2 + predict(mybag[[j]], newdata=dat.te) / N
+with(dat.te, mean( (medv - pr.bagg2)^2 ) )
+```
+
+    ## [1] 12.71124
+
+(compare it with the results we obtained before). Using the **second approach**:
+
+``` r
+pr.bagg3 <- rowMeans(sapply(mybag, predict, newdata=dat.te))
+with(dat.te, mean( (medv - pr.bagg3)^2 ) )
+```
+
+    ## [1] 12.71124
+
+Both results are of course identical.
 
 ### Bagging a regression spline
 
