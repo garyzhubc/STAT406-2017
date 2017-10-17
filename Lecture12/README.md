@@ -35,7 +35,7 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set. This is not the best (most efficient) way of implementing *bagging*, but the main purpose here is to understand **what** we are doing. Also note that an alternative (better in terms of reusability of the ensamble, but maybe still not the most efficient option) would be to store the *N* trees directly. This would also allow for more elegant and easy to read code. Once again, this approach will be sacrificed in the altar of clarity of presentation and pedagogy (but I do illustrate it below!)
+I will now train *N* = 5 trees and average their predictions. Note that, in order to illustrate the process more clearly, I will compute and store the *N* × *n*<sub>*e*</sub> predictions, where *n*<sub>*e*</sub> denotes the number of observations in the test set. This is not the best (most efficient) way of implementing *bagging*, but the main purpose here is to understand **what** we are doing. Also note that an alternative (better in terms of reusability of the ensemble, but maybe still not the most efficient option) would be to store the *N* trees directly. This would also allow for more elegant and easy to read code. Once again, this approach will be sacrificed in the altar of clarity of presentation and pedagogy (but I do illustrate it below!)
 
 First create an array where we will store all the predictions:
 
@@ -88,20 +88,18 @@ or *N* = 1000 trees?
 
     ## [1] 12.566
 
-Should we consider higher values of *N*? How about other training / test splits? Should we use CV instead?
-
-Another split:
+Note that, at least for this test set, increasing the number of bagged trees seems to improve the MSPE. However, the gain appears to decrease, so it may not be worth the computational effort to use a larger *bag* / ensemble. Furthermore, one may also want to investigate whether this is an artifact of this specific training / test partition, or if similar patterns of MSPE are observed for other random training / test splits. Below we try a different test/training split and repeat the bagging experiment above:
 
     ## [1]  5.00000 20.32676
     ## [1] 10.00000 20.52832
     ## [1] 100.00000  18.24876
     ## [1] 1000.00000   17.93342
 
-Similar conclusion: increasing *N* helps, but the improvement becomes smaller, while the computational cost keeps increasing.
+The pattern is in fact similar to the one we observed before: increasing the size of the ensemble *N* helps, but the improvement becomes smaller as *N* increases. A very good exercise is to explore what happens with the MSPE of the bagged ensemble when the MSPE is estimated using cross-validation (instead of using a test set). I leave this as an exercise for the reader.
 
 #### More efficient, useful and elegant implementation
 
-I will now illustrate a possibly more efficient to use bagging, namely to store the *N* trees (rather than their predictions on a given data set). In this way I can re-use the ensamble in any future data set, without having to re-train the elements of the *bag*. Since the idea is the same, I will just do it for when we tried a bag of 100 trees. To simplify the comparison between this way of implementing baggin and the one I used above, I will re-create the first training / test split
+I will now illustrate a possibly more efficient way to implement bagging, namely storing the *N* trees (rather than their predictions on a given data set). In this way one can re-use the ensemble (on any future data set) without having to re-train the elements of the *bag*. Since the idea is the same, I will just do it for ensemble of *N* = 100 trees. To simplify the comparison between this implementation of bagging and the one used above, we first re-create the original training / test split
 
 ``` r
 set.seed(123456)
@@ -111,14 +109,14 @@ dat.te <- Boston[ ii, ]
 dat.tr <- Boston[ -ii, ]
 ```
 
-Now I create a `list` of 100 (empty) elements, each entry in this list will later store a tree:
+Now, let's create a `list` of 100 (empty) elements, each element of this list will store a regression tree:
 
 ``` r
 N <- 100
 mybag <- vector('list', N)
 ```
 
-Now, we train the *N* trees as before, and store them in the `list` (without computing any predictions):
+Now, we train the *N* trees as before, but store them in the `list` (without computing any predictions):
 
 ``` r
 set.seed(123456)
@@ -128,12 +126,12 @@ for(j in 1:N) {
 }
 ```
 
-In order to obtain the predictions of each tree in my bag on the test set, I could either:
+Given a new data set, in order to obtain the corresponding predictions for each tree in the ensemble, one could either:
 
--   loop over them, and average the *N* vectors of predictions; or
+-   loop over the *N* trees, averaging the corresponding *N* vectors of predictions; or
 -   use `sapply` (check the help page if you are not familiar with the `apply` functions in `R`).
 
-The later is much more elegant and compact, and both give exactly the same results. If we use the **first approach** we obtain the following estimated MSPE using the test set:
+The later option results in code that is much more elegant, efficient (allowing for future uses of the ensemble), and compact. Of course both give exactly the same results. Below we illustrate both strategies. If we use the **first approach** we obtain the following estimated MSPE using the test set:
 
 ``` r
 pr.bagg2 <- rep(0, nrow(dat.te))
