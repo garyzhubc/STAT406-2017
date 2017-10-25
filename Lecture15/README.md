@@ -1,7 +1,7 @@
 STAT406 - Lecture 15 notes
 ================
 Matias Salibian-Barrera
-2017-10-24
+2017-10-25
 
 LICENSE
 -------
@@ -49,13 +49,13 @@ contour(xrat, xvol, matrix(pr.qda, 200, 200), col='gray30', levels=.5,
 ### Zip code digits
 
 ``` r
-x.train <- read.table('zip.train', header=FALSE)
-x.test <- read.table('zip.test', header=FALSE)
+data(zip.train, package='ElemStatLearn') #read.table('zip.train', header=FALSE)
+data(zip.test, package='ElemStatLearn') #read.table('zip.test', header=FALSE)
 
-x.tr <- x.train[ x.train$V1 %in% c(0, 1, 8), ]
-x.te <- x.test[ x.test$V1 %in% c(0, 1, 8), ]
+x.tr <- zip.train[ zip.train[, 1] %in% c(0, 1, 8), ]
+x.te <- zip.test[ zip.test[, 1] %in% c(0, 1, 8), ]
 
-table(x.tr$V1)
+table(x.tr[, 1])
 ```
 
     ## 
@@ -96,19 +96,24 @@ for(j in 1:9) {
 
 ``` r
 par(mfrow=c(1,1))
+```
 
+Plot the "average 8" in the training set
 
-# plot the average 8 in the training set
+``` r
 myImagePlot(t(matrix(colMeans(a[a[,1]==8,-1]), 16, 16)))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/zip1-2.png)
+![](README_files/figure-markdown_github-ascii_identifiers/zipav-1.png)
 
 Can we classify?
 
 ``` r
 # a <- lda(V1 ~ ., data=x.tr)
-a <- lda(V1 ~ . - V257, data=x.tr)
+x.tr <- data.frame(x.tr)
+x.te <- data.frame(x.te)
+names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+a <- lda(V1 ~ . - V257, data=x.tr) #x.tr[,1] ~ x[, 2:256])
 pr <- predict(a, newdata=x.te)$class
 table(pr, x.te$V1)
 ```
@@ -164,10 +169,16 @@ table(pr.log, x.te$V1)
     ##      8   5   3 143
 
 ``` r
-# a.qda <- qda(V1 ~ . - V257, data=x.tr)
+a.qda <- try(  qda(V1 ~ . - V257, data=x.tr) )
 
 # rank deficiency?
 x1 <- x.tr[ x.tr$V1 == 0, ]
+dim(x1)
+```
+
+    ## [1] 1194  257
+
+``` r
 qr(x1)$rank
 ```
 
@@ -212,11 +223,17 @@ table(pr.qda, vaso$Y)
 For the zip code data
 
 ``` r
-x.train <- read.table('zip.train', header=FALSE)
-x.test <- read.table('zip.test', header=FALSE)
+data(zip.train, package='ElemStatLearn') 
+data(zip.test, package='ElemStatLearn')
 
-x.tr <- x.train[ x.train$V1 %in% c(3, 8), ]
-x.te <- x.test[ x.test$V1 %in% c(3, 8), ]
+
+x.tr <- zip.train[ zip.train[, 1] %in% c(3, 8), ]
+x.te <- zip.test[ zip.test[, 1] %in% c(3, 8), ]
+
+x.tr <- data.frame(x.tr)
+x.te <- data.frame(x.te)
+names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+
 
 a <- lda(V1 ~ . - V257, data=x.tr)
 # a.qda <- qda(V1 ~ . - V257, data=x.tr)

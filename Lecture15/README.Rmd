@@ -119,7 +119,10 @@ Can we classify?
 
 ```{r zip2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 # a <- lda(V1 ~ ., data=x.tr)
-a <- lda(V1 ~ . - V257, data=x.tr)
+x.tr <- data.frame(x.tr)
+x.te <- data.frame(x.te)
+names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+a <- lda(V1 ~ . - V257, data=x.tr) #x.tr[,1] ~ x[, 2:256])
 pr <- predict(a, newdata=x.te)$class
 table(pr, x.te$V1)
 
@@ -129,10 +132,11 @@ pr.log <- predict(a.log, newdata=x.te)
 table(pr.log, x.te$V1)
 
 
-# a.qda <- qda(V1 ~ . - V257, data=x.tr)
+a.qda <- try(  qda(V1 ~ . - V257, data=x.tr) )
 
 # rank deficiency?
 x1 <- x.tr[ x.tr$V1 == 0, ]
+dim(x1)
 qr(x1)$rank
 ```
 
@@ -160,11 +164,17 @@ table(pr.qda, vaso$Y)
 For the zip code data
 
 ```{r zip3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-x.train <- read.table('zip.train', header=FALSE)
-x.test <- read.table('zip.test', header=FALSE)
+data(zip.train, package='ElemStatLearn') 
+data(zip.test, package='ElemStatLearn')
 
-x.tr <- x.train[ x.train$V1 %in% c(3, 8), ]
-x.te <- x.test[ x.test$V1 %in% c(3, 8), ]
+
+x.tr <- zip.train[ zip.train[, 1] %in% c(3, 8), ]
+x.te <- zip.test[ zip.test[, 1] %in% c(3, 8), ]
+
+x.tr <- data.frame(x.tr)
+x.te <- data.frame(x.te)
+names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+
 
 a <- lda(V1 ~ . - V257, data=x.tr)
 # a.qda <- qda(V1 ~ . - V257, data=x.tr)
