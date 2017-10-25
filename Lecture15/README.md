@@ -433,6 +433,150 @@ Just as in the continuous regression case, when the number of available explanat
 
 Classification trees are constructed in much the same was as regression trees. We will construct a partition of the feature space (in "rectangular" areas), and within each region we will predict the class to be the most common class among the training points that are in that region. It is reasonable then to try to find a partition of the feature space so that in each area there is only one class (or at least, such that one class clearly dominates the others in that region). Hence, to build a classification tree we need a quantitative measure of the homogeneity of the classes present in a node. Given such a numerical measure, we can build the tree by selecting, at each step, the optimal split in the sense of yielding the most homogeneous child leaves possible (i.e. by maximizing at each step the chosen homogeneity measure). The two most common homogeneity measures are the Gini Index and the deviance (refer to the discussion in class). Although the resulting trees are generally different depending on which loss function is used, we will later see that this difference is not critical in practice.
 
+As usual, in order to be able to visualize what is going on, we will illustrate the training and use of classification trees on a simple toy example. This example contains data on admissions to graduate school. There are 2 explanatory variables (GPA and GMAT scores), and the response has 3 levels: Admitted, No decision, Not admitted. The purpose here is to build a classifier to decide if a student will be admitted to graduate school based on her/his GMAT and GPA scores.
+
+We first read the data, convert the response into a proper `factor` variable, and visualize the training set:
+
+``` r
+mm <- read.table('T11-6.DAT', header=FALSE)
+mm$V3 <- as.factor(mm$V3)
+# re-scale one feature, for better plots
+mm[,2] <- mm[,2] / 150
+plot(mm[,1:2], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]], 
+xlab='GPA', 'GMAT', xlim=c(2,5), ylim=c(2,5))
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees1-1.png)
+
+Next we build a classification tree using the Gini index as splitting criterion.
+
+``` r
+library(rpart)
+a.t <- rpart(V3~V1+V2, data=mm, method='class', parms=list(split='gini'))
+plot(a.t, margin=0.05)
+text(a.t, use.n=TRUE)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees2-1.png)
+
+If we use the deviance as splitting criterion instead, we obtain the following classification tree (also using the default stopping criteria):
+
+``` r
+a.t <- rpart(V3~V1+V2, data=mm, method='class', parms=list(split='information'))
+plot(a.t, margin=0.05)
+text(a.t, use.n=TRUE)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees3-1.png)
+
+The predicted conditional probabilities for each class on the range of values of the explanatory variables present on the training set can be visualized exactly as before:
+
+``` r
+aa <- seq(2, 5, length=200)
+bb <- seq(2, 5, length=200)
+dd <- expand.grid(aa, bb)
+names(dd) <- names(mm)[1:2]
+p.t <- predict(a.t, newdata=dd, type='prob')
+```
+
+We display the estimated conditional probabilities for each class:
+
+``` r
+filled.contour(aa, bb, matrix(p.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees5-1.png)
+
+``` r
+filled.contour(aa, bb, matrix(p.t[,2], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees5-2.png)
+
+``` r
+filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees5-3.png)
+
+If we had built a tree by pruning an overfitting one, the predictions would have been less simple:
+
+``` r
+set.seed(123)
+a.t <- rpart(V3~V1+V2, data=mm, method='class', control=rpart.control(minsplit=3, cp=1e-8, xval=10),
+             parms=list(split='information'))
+b <- a.t$cptable[which.min(a.t$cptable[,"xerror"]),"CP"]
+a.t <- prune(a.t, cp=b)
+p.t <- predict(a.t, newdata=dd, type='prob')
+filled.contour(aa, bb, matrix(p.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees7-1.png)
+
+``` r
+filled.contour(aa, bb, matrix(p.t[,2], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees7-2.png)
+
+``` r
+filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/trees7-3.png)
+
+<!-- # Unstability of trees -->
+<!-- # modify data... -->
+<!-- mm2 <- mm -->
+<!-- mm2[1,3] <- 2 -->
+<!-- mm2[7,3] <- 2 -->
+<!-- # Show them, highlight changes -->
+<!-- plot(mm2[,1:2], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]],  -->
+<!--      xlab='GPA', 'GMAT', xlim=c(2,5), ylim=c(2,5)) -->
+<!-- points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),3]]) -->
+<!-- # default trees on original and modified data -->
+<!-- a.t <- rpart(V3~V1+V2, data=mm, method='class', parms=list(split='information')) -->
+<!-- a2.t <- rpart(V3~V1+V2, data=mm2, method='class', parms=list(split='information')) -->
+<!-- # corresponding predictions on the grid -->
+<!-- p.t <- predict(a.t, newdata=dd, type='prob') -->
+<!-- p2.t <- predict(a2.t, newdata=dd, type='prob') -->
+<!-- # reds -->
+<!-- filled.contour(aa, bb, matrix(p.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT', -->
+<!-- plot.axes={axis(1); axis(2); -->
+<!-- points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])}) -->
+<!-- filled.contour(aa, bb, matrix(p2.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',  -->
+<!-- plot.axes={axis(1); axis(2); points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]); -->
+<!-- points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),3]]) -->
+<!-- }) -->
+<!-- # greens -->
+<!-- filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT', -->
+<!-- plot.axes={axis(1); axis(2); -->
+<!-- points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])}) -->
+<!-- filled.contour(aa, bb, matrix(p2.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',  -->
+<!-- plot.axes={axis(1); axis(2); points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]); -->
+<!-- points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),3]]) -->
+<!-- }) -->
+<!-- # predictions by color -->
+<!-- mpt <- apply(p.t, 1, which.max) -->
+<!-- mp2t <- apply(p2.t, 1, which.max) -->
+<!-- image(aa, bb, matrix(as.numeric(mpt), 200, 200), col=c('pink', 'lightblue','lightgreen'), xlab='GPA', ylab='GMAT') -->
+<!-- points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]]) -->
+<!-- image(aa, bb, matrix(as.numeric(mp2t), 200, 200), col=c('pink', 'lightblue','lightgreen'), xlab='GPA', ylab='GMAT') -->
+<!-- points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]) -->
+<!-- points(mm[c(1,7),-3], pch='O', cex=1.2, col=c("red", "blue", "green")[mm[c(1,7),3]]) -->
+<!-- # Bagging!! -->
 #### Pruning
 
 #### Challenges
