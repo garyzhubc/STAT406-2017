@@ -67,13 +67,13 @@ the probability of red).
 ### Zip code digits
 
 ```{r zip1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-x.train <- read.table('zip.train', header=FALSE)
-x.test <- read.table('zip.test', header=FALSE)
+data(zip.train, package='ElemStatLearn') #read.table('zip.train', header=FALSE)
+data(zip.test, package='ElemStatLearn') #read.table('zip.test', header=FALSE)
 
-x.tr <- x.train[ x.train$V1 %in% c(0, 1, 8), ]
-x.te <- x.test[ x.test$V1 %in% c(0, 1, 8), ]
+x.tr <- zip.train[ zip.train[, 1] %in% c(0, 1, 8), ]
+x.te <- zip.test[ zip.test[, 1] %in% c(0, 1, 8), ]
 
-table(x.tr$V1)
+table(x.tr[, 1])
 
 
 
@@ -106,9 +106,12 @@ for(j in 1:9) {
   myImagePlot(t(matrix(unlist(a[sa[j],-1]), 16, 16)))
 }
 par(mfrow=c(1,1))
+```
+
+Plot the "average 8" in the training set
 
 
-# plot the average 8 in the training set
+```{r zipav, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 myImagePlot(t(matrix(colMeans(a[a[,1]==8,-1]), 16, 16)))
 ```
 
