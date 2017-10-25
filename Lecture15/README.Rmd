@@ -273,130 +273,105 @@ table(te.lda, x.te$V1)
 <!-- plot(1-spec, sens, type='b', ylim=c(0,1), xlim=c(0,1)) -->
 
 
-## Nearest neighbours
+## K-Nearest Neighbours (K-NN)
 
-Probably simplest model-free estimator for conditional class probabilities (given 
-values for the features). *Peer-pressure*. Akin to kernel regression, also suffers
-from the *curse of dimensionality*. Factor or binary features need to be treated with
-care.
+Perhaps the intuitively simplest model-free estimator for conditional class probabilities 
+for a given set of feature values **X** is the one based on nearest neighbours
+(as discussed in class). It is similar (in *spirit*) to the kernel regression
+estimator in the continuous-response regression setting. More specifically,
+it can be thought of as a variable-bandwidth kernel estimator. For a 
+point **X** in the feature space we look at the proportion of observations
+in each class among **X**'s K-th closest neighbours. That is, of course, equivalent
+to looking at all points $(Y_i, \mathbf{X}_i)$ in the training set such that 
+$\left\| \mathbf{X}_i - \mathbf{X} \right\| \le h_k$, where $h_k$ is the 
+distance from **X** to the K-th closest neighbour in the training set.
+Refer to the discussion in class for more details. 
 
-<!-- # Nearest neighbours -->
+Here we will illustrate K-NN classifiers on the toy `vaso` example (to be able to
+visualize the results more easily), and also on the hand written digits data. 
+We will use the function `knn` in package `class`. This function takes a 
+training set, and also a *test* set (i.e. a different data set containing the
+observations to be predicted). In the example below we first create (as 
+we have done before) a 200 x 200 grid of points and display the resulting
+predicted probabilities (or the corresponding class with highest conditional
+probability). 
 
-<!-- library(class) -->
+We first we use a trivial 1-NN classifier: the estimated conditional probabilities
+for each class at a point **X**, will simply be 0 or 1 depending on the class of the closest
+neighbour to **X** in the training set. 
+```{r knn1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+library(class)
+data(vaso, package='robustbase')
+x1 <- seq(0, 4, length=200)
+x2 <- seq(0, 4, length=200)
+xx <- expand.grid(x1, x2)
+u1 <- knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=1)
+u1 <- as.numeric(u1)
+image(x1, x2, matrix(u1, 200, 200), col=terrain.colors(100),
+      ylab='Volume', xlab='Rate', main='1-NN')
+points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
+       col=c('red', 'blue')[Y+1])
+```
 
-<!-- data(vaso, package='robustbase') -->
-<!-- plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--      col=c('red', 'blue')[Y+1], xlim=c(0, 4), ylim=c(0,4)) -->
-<!-- x1 <- seq(0, 4, length=200) -->
-<!-- x2 <- seq(0, 4, length=200) -->
-<!-- xx <- expand.grid(x1, x2) -->
-<!-- u1 <- knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=1) -->
-<!-- # names(vaso) = [1] "Volume" "Rate"   "Y"  -->
-<!-- # but we plot "Volume" on the y-axis -->
-<!-- u1 <- as.numeric(u1) -->
-<!-- image(x1, x2, matrix(u1, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate', main='1-NN') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
+We repeat the analysis with a 5-NN classifier. Now the estimated 
+conditional probabilities 
+for each **X** in the grid can be 0, 0.20, 0.40, 0.60, 0.80 or 1 (why?)
+The function `knn` returns the estimated probabilities in the 
+`'prob'` attribute of the returned object, so we need to use the
+function `attr` to extract it (as usual, the R help pages are 
+a good source of information if you have any questions about the 
+code below): 
 
-<!-- pdf('vaso-1nn.pdf', bg='transparent') -->
-<!-- image(x1, x2, matrix(u1, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-<!-- dev.off() -->
-
-<!-- u5 <- as.numeric(knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=5)) -->
-<!-- image(x1, x2, matrix(u5, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate', main='5-NN') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-
-
-<!-- pdf('vaso-5nn-pred.pdf', bg='transparent') -->
-<!-- image(x1, x2, matrix(u5, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-<!-- dev.off() -->
-
-<!-- u5 <- attr(knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=5, prob=TRUE),  -->
-<!--            'prob') -->
-<!-- image(x1, x2, matrix(u5, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate', main='5-NN') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-
-<!-- pdf('vaso-5nn-votes.pdf', bg='transparent') -->
-<!-- image(x1, x2, matrix(u5, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-<!-- dev.off() -->
+```{r knn5, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+u5 <- attr(knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=5, prob=TRUE),
+           'prob')
+image(x1, x2, matrix(u5, 200, 200), col=terrain.colors(100),
+      ylab='Volume', xlab='Rate', main='5-NN')
+points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
+       col=c('red', 'blue')[Y+1])
+```
 
 
-<!-- u10 <- attr(knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=10, prob=TRUE),  -->
-<!--             'prob') -->
-<!-- pdf('vaso-10nn-votes.pdf', bg='transparent') -->
-<!-- image(x1, x2, matrix(u10, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-<!-- dev.off() -->
+We now turn to the digits data. Just to be safe we re-create the 
+training and test set for the digits 1, 3 and 8 and look at the
+misclassification tables on the test set. 
 
-<!-- u10 <- as.numeric(knn(train=vaso[, c(2, 1)], cl=vaso[,3], test=xx, k=10)) -->
-<!-- pdf('vaso-10nn-pred.pdf', bg='transparent') -->
-<!-- image(x1, x2, matrix(u10, 200, 200), col=terrain.colors(100), -->
-<!--       ylab='Volume', xlab='Rate') -->
-<!-- points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--        col=c('red', 'blue')[Y+1]) -->
-<!-- dev.off() -->
+```{r knndig1, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+data(zip.train, package='ElemStatLearn') 
+data(zip.test, package='ElemStatLearn')
+x.tr <- data.frame( zip.train[ zip.train[, 1] %in% c(3, 8), ] )
+x.te <- data.frame( zip.test[ zip.test[, 1] %in% c(3, 8), ] )
+names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+u1 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=1)
+table(u1, x.te$V1)
+mean( u1 != x.te$V1 )
 
+u5 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=5)
+table(u5, x.te$V1)
+mean( u5 != x.te$V1 )
 
-<!-- # zip code data -->
+u10 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=10)
+table(u10, x.te$V1)
+mean( u10 != x.te$V1 )
 
-<!-- x.tr <- x.train[ x.train$V1 %in% c(0, 1, 8), ] -->
-<!-- x.te <- x.test[ x.test$V1 %in% c(0, 1, 8), ] -->
+u50 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=50)
+table(u50, x.te$V1)
+mean( u50 != x.te$V1 )
+```
 
-<!-- u1 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=1) -->
-<!-- table(u1, x.te$V1) -->
-<!-- mean( u1 != x.te$V1 ) -->
+#### Questions for you:
 
-<!-- u5 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=5) -->
-<!-- table(u5, x.te$V1) -->
-<!-- mean( u5 != x.te$V1 ) -->
-
-<!-- u10 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=10) -->
-<!-- table(u10, x.te$V1) -->
-<!-- mean( u10 != x.te$V1 ) -->
-
-<!-- u50 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=50) -->
-<!-- table(u50, x.te$V1) -->
-<!-- mean( u50 != x.te$V1 ) -->
-
-<!-- # x0 <- rbind(as.matrix(vaso[,-3]), c(0.75, 1.4)) -->
-<!-- # dd <- dist(x0) -->
-<!-- #  -->
-<!-- # # n <- attr(do, "Size"), then for i < j <= n,  -->
-<!-- # # the dissimilarity between (row) i and j is  -->
-<!-- # # do[n*(i-1) - i*(i-1)/2 + j-i] -->
-<!-- # n <- attr(dd, "Size") -->
-<!-- # ii <- 1:(n-1) -->
-<!-- # closest <- which.min(dd[n*(ii-1)-ii*(ii-1)/2+n-ii]) -->
-<!-- #  -->
-<!-- # points(vaso[closest, 1], vaso[closest,2], pch=19, col='gray', cex=1.5) -->
+* The number *K* of nearest neighbours is a tuning constant that needs to
+be chosen objectively. How would you do it? 
 
 
+#### Challenges for K-NN classifiers
 
-
-
-
-
-
-<!-- #### END ############### -->
-<!-- #### END ############### -->
-<!-- #### END ############### -->
-<!-- #### END ############### -->
+* It is easy to see that they suffer from the *curse of dimensionality*.
+* Factor or binary features need to be treated with care.
+* Euclidean distances do not reflect *shape* of features in each class (i.e. the
+conditional distribution of **X** in each class). Class-wise pre-standardization 
+(whitening) might be useful. 
 
 
 
