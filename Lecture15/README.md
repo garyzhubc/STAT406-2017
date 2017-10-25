@@ -44,7 +44,7 @@ contour(xrat, xvol, matrix(pr.qda, 200, 200), col='gray30', levels=.5,
         drawlabels=FALSE, lwd=3, add=TRUE)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/qda2-1.png)
+![](README_files/figure-markdown_github/qda2-1.png)
 
 We used the function `contour` above to draw the boundary between classes (the set of points where the probability of blue is equal to the probability of red).
 
@@ -101,39 +101,34 @@ for(j in 1:9) {
 }
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/ziplot9-1.png)
+![](README_files/figure-markdown_github/ziplot9-1.png)
 
 ``` r
 par(mfrow=c(1,1))
 ```
 
-Plot the "average 8" in the training set
+We can also show the "average 8" in the training set:
 
 ``` r
 myImagePlot(t(matrix(colMeans(a[a[,1]==8,-1]), 16, 16)))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/zipav-1.png)
+![](README_files/figure-markdown_github/zipav-1.png)
 
-Can we classify?
+We will now use LDA, QDA and a multinomial logistic model. The latter is the natural extension of logistic regression to more than 2 classes. You can easily derive it yourself by assuming the response variable has a multinomial distribution and modeling each conditional probability as a (different) logistic function of the vector **X** of features. Note that if there are *K* classes you only need to model *K-1* of these conditional class probabilities. The derivation is left as an easy exercise for you.
+
+Note that the data is stored in a matrix, but the use of `lda()`, `qda()`, etc. is clearer when you have your data in a `data frame` (as you can then refer to features by their names and use the `data` argument). So, we first transform our matrix into a data frame, and name the resulting variables *V1*, *V2*, ..., *V257*:
 
 ``` r
-# a <- lda(V1 ~ ., data=x.tr)
 x.tr <- data.frame(x.tr)
 x.te <- data.frame(x.te)
 names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
-a <- lda(V1 ~ . - V257, data=x.tr) #x.tr[,1] ~ x[, 2:256])
-pr <- predict(a, newdata=x.te)$class
-table(pr, x.te$V1)
 ```
 
-    ##    
-    ## pr    0   1   8
-    ##   0 353   2   9
-    ##   1   0 258   0
-    ##   8   6   4 157
+Now we use `lda` and `multinom` (from package `nnet`) to train an LDA and a multinomial classifier to these 3-class data:
 
 ``` r
+a <- lda(V1 ~ . - V257, data=x.tr) #x.tr[,1] ~ x[, 2:256])
 library(nnet)
 a.log <- multinom(V1 ~ . - V257, data=x.tr, maxit=5000)
 ```
@@ -166,6 +161,21 @@ a.log <- multinom(V1 ~ . - V257, data=x.tr, maxit=5000)
     ## final  value 0.000090 
     ## converged
 
+Note how slow is the convergence of `multinom`. This is not unusual, and it has to do with how neural networks are trained (!). Refer to the corresponding help page for more information. We will probably discuss this further later in the course.
+
+For now we obtain the predictions on the test set and build a matrix of classification errors for each classifier:
+
+``` r
+pr.lda <- predict(a, newdata=x.te)$class
+table(pr.lda, x.te$V1)
+```
+
+    ##       
+    ## pr.lda   0   1   8
+    ##      0 353   2   9
+    ##      1   0 258   0
+    ##      8   6   4 157
+
 ``` r
 pr.log <- predict(a.log, newdata=x.te)
 table(pr.log, x.te$V1)
@@ -177,10 +187,30 @@ table(pr.log, x.te$V1)
     ##      1  12 258  10
     ##      8   5   3 143
 
+We now attempt to train a QDA classifier:
+
 ``` r
 a.qda <- try(  qda(V1 ~ . - V257, data=x.tr) )
+class(a.qda)
+```
 
-# rank deficiency?
+    ## [1] "try-error"
+
+This classifier cannot be trained on these data. The problem is that the training set for at least one class is rank deficient (which can be found by looking at the error message stored in the returned object `a.qda`
+
+``` r
+a.qda
+```
+
+    ## [1] "Error in qda.default(x, grouping, ...) : rank deficiency in group 0\n"
+    ## attr(,"class")
+    ## [1] "try-error"
+    ## attr(,"condition")
+    ## <simpleError in qda.default(x, grouping, ...): rank deficiency in group 0>
+
+Indeed, we have:
+
+``` r
 x1 <- x.tr[ x.tr$V1 == 0, ]
 dim(x1)
 ```
@@ -192,6 +222,11 @@ qr(x1)$rank
 ```
 
     ## [1] 254
+
+The questions for you are:
+
+-   why is this rank deficiency a problem for QDA, but not for LDA, or a multinomial model?
+-   can we do anything to train a (possibly different) QDA classifier to these data?
 
 #### Sensitivity & Specificity
 
@@ -296,7 +331,7 @@ spec <- spec / sum(as.numeric(as.factor(x.te$V1)) == 2)
 plot(1-spec, sens, type='b', ylim=c(0,1), xlim=c(0,1))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/zip3-1.png)
+![](README_files/figure-markdown_github/zip3-1.png)
 
 <!-- x.tr <- x.train[ x.train$V1 %in% c(9, 6), ] -->
 <!-- x.te <- x.test[ x.test$V1 %in% c(9, 6), ] -->

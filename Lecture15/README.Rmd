@@ -17,7 +17,7 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-15.pdf).
+The lecture slides are [here](STAT406-17-lecture-15-preliminary.pdf).
 
 
 ## LDA & QDA
@@ -133,36 +133,76 @@ for(j in 1:9) {
 par(mfrow=c(1,1))
 ```
 
-Plot the "average 8" in the training set
+We can also show the "average 8" in the training set:
 
 ```{r zipav, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 myImagePlot(t(matrix(colMeans(a[a[,1]==8,-1]), 16, 16)))
 ```
 
-Can we classify?
+We will now use LDA, QDA and a multinomial logistic model. The 
+latter is the natural extension of logistic regression to more than
+2 classes. You can easily derive it yourself by assuming the response
+variable has a multinomial distribution and modeling each 
+conditional probability as a (different) logistic function of the
+vector **X** of features. Note that if there are *K* classes you only need
+to model *K-1* of these conditional class probabilities. The derivation
+is left as an easy exercise for you. 
 
-```{r zip2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
-# a <- lda(V1 ~ ., data=x.tr)
+Note that the data is stored in a matrix, but the use of 
+`lda()`, `qda()`, etc. is clearer when you have your data
+in a `data frame` (as you can then refer to features by their
+names and use the `data` argument). So, we first transform
+our matrix into a data frame, and name the resulting variables
+*V1*, *V2*, ..., *V257*:
+```{r zipnames, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 x.tr <- data.frame(x.tr)
 x.te <- data.frame(x.te)
 names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+```
+Now we use `lda` and `multinom` (from package `nnet`) to train 
+an LDA and a multinomial classifier to these 3-class data:
+```{r zip2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 a <- lda(V1 ~ . - V257, data=x.tr) #x.tr[,1] ~ x[, 2:256])
-pr <- predict(a, newdata=x.te)$class
-table(pr, x.te$V1)
-
 library(nnet)
 a.log <- multinom(V1 ~ . - V257, data=x.tr, maxit=5000)
+```
+Note how slow is the convergence of `multinom`. This is not unusual,
+and it has to do with how neural networks are trained (!). Refer to 
+the corresponding help page for more information. We will probably
+discuss this further later in the course. 
+
+For now we obtain the predictions on the test set and build a 
+matrix of classification errors for each classifier:
+```{r zipmisclass, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+pr.lda <- predict(a, newdata=x.te)$class
+table(pr.lda, x.te$V1)
+
 pr.log <- predict(a.log, newdata=x.te)
 table(pr.log, x.te$V1)
-
-
+```
+We now attempt to train a QDA classifier:
+```{r zipqdafails, fig.width=6, fig.height=6}
 a.qda <- try(  qda(V1 ~ . - V257, data=x.tr) )
-
-# rank deficiency?
+class(a.qda)
+```
+This classifier cannot be trained on these data. The problem is that
+the training set for at least one class is rank deficient (which can
+be found by looking at the error message stored in the returned
+object `a.qda`
+```{r zipqdaerrormsg, fig.width=6, fig.height=6}
+a.qda
+```
+Indeed, we have:
+```{r ziprank, fig.width=6, fig.height=6}
 x1 <- x.tr[ x.tr$V1 == 0, ]
 dim(x1)
 qr(x1)$rank
 ```
+The questions for you are:
+
+* why is this rank deficiency a problem for QDA, but not for LDA, or a multinomial model?
+* can we do anything to train a (possibly different) QDA classifier to these data?
+
 
 #### Sensitivity & Specificity
 
