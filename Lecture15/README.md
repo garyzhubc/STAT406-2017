@@ -11,10 +11,10 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-15.pdf).
+The lecture slides are [here](STAT406-17-lecture-15-preliminary.pdf).
 
-LDA & QDA
----------
+QDA
+---
 
 Similarly to the way we derived the LDA classifier in class, if one relaxes the assumption that the conditional distribution of the vector of features **X** in each class has the same covariance matrix (*shape*) (but still assumes that these distributions are Gaussian), then it is (again) easy to find a closed form for the conditional probability of each class (conditional on a vector of features **X**). As in the LDA case, these conditional class probabilities (aka *posterior probabilities*) depend on the parameters of the assumed model for the conditional distributions of **X** in each class. So, again, we estimate those parameters from the training set (usin the observations in each group) and plug them in to compute the conditional class probabilities.
 
@@ -54,7 +54,7 @@ With the help of an example we discussed in class the sensitivity of QDA to the 
 
 It is interesting to note (as discussed in class) that logistic regression was not affected by the "good outliers" we included in the data. Again, this is not surprising (furthermore, I expect you to be able to explain what is happening in this particular example). Note, furthermore, that both QDA (and LDA) and logistic regression are classifiers that require the estimation of parameters (maybe we can call them *parametric classifiers*?), and in all cases so far we used maximum likelihood estimates for them. However their sensitivity to this kind of outliers is very different. Discuss!
 
-#### More than 2 classes -- The handwritten digit recognition data
+### More than 2 classes -- The handwritten digit recognition data
 
 As you may have noted, all the classification methods we have seen so far can be used in applications with an arbitrary number of classes. We will now illustrate them on the well-known Handwritten Digit Recognition Data (as usual, see `help(zip.train, package='ElemStatLearn')`). We first load the data, and extract the images corresponding to digits 0, 1 and 8. These should be challenging enough to discriminate given their shape.
 
@@ -228,15 +228,22 @@ The questions for you are:
 -   why is this rank deficiency a problem for QDA, but not for LDA, or a multinomial model?
 -   can we do anything to train a (possibly different) QDA classifier to these data?
 
-#### Sensitivity & Specificity
+#### (Optional section) Sensitivity & Specificity
+
+**This section is still under revision, read at your own risk.**
+
+Any binary decision-making process has two important features, generally called senstivity and specificity. Intuitively these measure:
+
+-   how often it makes correct decisions (how many *cats* are correctly classified as *cats*?) (sensitivity); and
+-   how often it makes correct positive calls (how many objects classified as *cats* are indeed *cats*?) (equivalentely, how many *not cats* are **not called cats**?) (specificity).
+
+We refer back to the `vaso` data. We train both an LDA and a QDA classifier. We can derive the associated sensitivity and specificity from the misclassification table. Note that since there is no independent test set these figures may be misleading.
 
 ``` r
 a <- lda(Y ~ . , data=vaso)
 a.qda <- qda(Y ~ . , data=vaso)
-
 pr.lda <- as.numeric(predict(a)$class)
 pr.qda <- as.numeric(predict(a.qda)$class)
-
 table(pr.lda, vaso$Y)
 ```
 
@@ -254,46 +261,24 @@ table(pr.qda, vaso$Y)
     ##      1 16  4
     ##      2  3 16
 
-``` r
-# sensitivity 
-# LDA: 16/20 = 4/5
-# QDA: 16/20 
+Hence we can estimate the sensitivities of LDA and QDA as 17/19 and 16/19 respectively. Their specificities are both 16/20.
 
-# specificity
-# LDA: 17/19
-# QDA: 16/19
-```
-
-For the zip code data
+<!-- # sensitivity  -->
+<!-- # LDA: 16/20 = 4/5 -->
+<!-- # QDA: 16/20  -->
+<!-- # specificity -->
+<!-- # LDA: 17/19 -->
+<!-- # QDA: 16/19 -->
+For the zip code data:
 
 ``` r
 data(zip.train, package='ElemStatLearn') 
 data(zip.test, package='ElemStatLearn')
-
-
-x.tr <- zip.train[ zip.train[, 1] %in% c(3, 8), ]
-x.te <- zip.test[ zip.test[, 1] %in% c(3, 8), ]
-
-x.tr <- data.frame(x.tr)
-x.te <- data.frame(x.te)
+x.tr <- data.frame( zip.train[ zip.train[, 1] %in% c(3, 8), ] )
+x.te <- data.frame( zip.test[ zip.test[, 1] %in% c(3, 8), ] )
 names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
-
-
 a <- lda(V1 ~ . - V257, data=x.tr)
-# a.qda <- qda(V1 ~ . - V257, data=x.tr)
-
-pr.lda <- as.numeric(predict(a)$class)
 te.lda <- as.numeric(predict(a, newdata=x.te)$class)
-
-table(pr.lda, x.tr$V1)
-```
-
-    ##       
-    ## pr.lda   3   8
-    ##      1 654   2
-    ##      2   4 540
-
-``` r
 table(te.lda, x.te$V1)
 ```
 
@@ -302,83 +287,23 @@ table(te.lda, x.te$V1)
     ##      1 155   6
     ##      2  11 160
 
-``` r
-# sensitivity - training
-# 1191/ 1194 = 99.7%
-
-# specificity - training
-# 534 / 542 = 98.5%
-
-# sensitivity - test
-# 350/ 359 = 97.4%
-
-# specificity - test
-# 160 / 166 = 96.4%
-
-# build ROC
-
-te.lda <- predict(a, newdata=x.te)$posterior[,1]
-sens <- spec <- rep(0, 50)
-als <- seq(0, 1, length=51)
-for(i in 1:50) {
-  npr.1 <- (te.lda > als[i])
-  npr.2 <- !npr.1
-  sens[i] <- sum( (as.numeric(as.factor(x.te$V1)) == 1) & npr.1 )
-  spec[i] <- sum( (as.numeric(as.factor(x.te$V1)) == 2) & npr.2 )
-}
-sens <- sens / sum(as.numeric(as.factor(x.te$V1)) == 1)
-spec <- spec / sum(as.numeric(as.factor(x.te$V1)) == 2)
-plot(1-spec, sens, type='b', ylim=c(0,1), xlim=c(0,1))
-```
-
-![](README_files/figure-markdown_github/zip3-1.png)
-
-<!-- x.tr <- x.train[ x.train$V1 %in% c(9, 6), ] -->
-<!-- x.te <- x.test[ x.test$V1 %in% c(9, 6), ] -->
-<!-- x.tr$V1 <- as.factor(x.tr$V1) -->
-<!-- x.te$V1 <- as.factor(x.te$V1) -->
-<!-- a <- glm(Y ~ ., data=vaso, family=binomial) -->
-<!-- te.glm <- predict(a, type='response') -->
-<!-- plot(te.glm) -->
-<!-- sens <- spec <- rep(0, 500) -->
-<!-- als <- seq(0, 1, length=501) -->
-<!-- for(i in 1:500) { -->
-<!--   npr.1 <- (te.glm > als[i]) -->
+<!-- # sensitivity - test -->
+<!-- # 350/ 359 = 97.4% -->
+<!-- # specificity - test -->
+<!-- # 160 / 166 = 96.4% -->
+<!-- # build the ROC curve -->
+<!-- te.lda <- predict(a, newdata=x.te)$posterior[,1] -->
+<!-- sens <- spec <- rep(0, 50) -->
+<!-- als <- seq(0, 1, length=51) -->
+<!-- for(i in 1:50) { -->
+<!--   npr.1 <- (te.lda > als[i]) -->
 <!--   npr.2 <- !npr.1 -->
-<!--   sens[i] <- sum( (vaso$Y == 0) & npr.2 ) -->
-<!--   spec[i] <- sum( (vaso$Y == 1) & npr.1 ) -->
+<!--   sens[i] <- sum( (as.numeric(as.factor(x.te$V1)) == 1) & npr.1 ) -->
+<!--   spec[i] <- sum( (as.numeric(as.factor(x.te$V1)) == 2) & npr.2 ) -->
 <!-- } -->
-<!-- sens <- sens / sum( vaso$Y == 0 ) # red -->
-<!-- spec <- spec / sum( vaso$Y == 1 ) # blue -->
-<!-- pdf(file='vaso-roc.pdf', bg='transparent') -->
-<!-- plot(1-spec, sens, type='l', ylim=c(0,1), xlim=c(0,1), -->
-<!--      lwd=4, col='gray30', xlab='1-Specificity',  -->
-<!--      ylab='Sensitivity', cex.lab=1.5, cex.axis=1.5) -->
-<!-- dev.off() -->
-<!-- xvol <- seq(0, 4, length=200) -->
-<!-- xrat <- seq(0, 4, length=200) -->
-<!-- xx <- expand.grid(xvol, xrat) -->
-<!-- names(xx) <- c('Volume', 'Rate') -->
-<!-- a <- glm(Y ~ ., data=vaso, family=binomial) -->
-<!-- pr.glm <- predict(a, newdata=xx, type='response') -->
-<!-- beta <- coef(a) -->
-<!-- als <- c(.5, 1, 5, 9.5)/10 -->
-<!-- rr <- seq(0,4, length=10) -->
-<!-- for(j in 1:4) { -->
-<!--   pdf(file=paste('vaso-sens-spec-',als[j]*100,'.pdf',sep=''),  -->
-<!--       bg='transparent') -->
-<!--   image(xrat, xvol, matrix(pr.glm, 200, 200), col=terrain.colors(100), -->
-<!--         ylab='Volume', xlab='Rate', cex.lab=1.5, cex.axis=1.5) -->
-<!--   points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--          col=c('red', 'blue')[Y+1]) -->
-<!--   #   plot(Volume ~ Rate, data=vaso, pch=19, cex=1.5,  -->
-<!--   #        col=c('red', 'blue')[Y+1], xlim=c(0, 4), ylim=c(0,4), -->
-<!--   #        cex.lab=1.5, cex.axis=1.5) -->
-<!--   c0 <- log(als[j]/(1-als[j])) -->
-<!--   vv <- (c0 - beta[1] - beta[2]*rr)/beta[3] -->
-<!--   lines(vv~rr, lwd=6, col='gray40') -->
-<!--   dev.off() -->
-<!-- } -->
+<!-- sens <- sens / sum(as.numeric(as.factor(x.te$V1)) == 1) -->
+<!-- spec <- spec / sum(as.numeric(as.factor(x.te$V1)) == 2) -->
+<!-- plot(1-spec, sens, type='b', ylim=c(0,1), xlim=c(0,1)) -->
 Nearest neighbours
 ------------------
 
