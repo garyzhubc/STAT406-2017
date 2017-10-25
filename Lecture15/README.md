@@ -44,7 +44,7 @@ contour(xrat, xvol, matrix(pr.qda, 200, 200), col='gray30', levels=.5,
         drawlabels=FALSE, lwd=3, add=TRUE)
 ```
 
-![](README_files/figure-markdown_github/qda2-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/qda2-1.png)
 
 We used the function `contour` above to draw the boundary between classes (the set of points where the probability of blue is equal to the probability of red).
 
@@ -101,7 +101,7 @@ for(j in 1:9) {
 }
 ```
 
-![](README_files/figure-markdown_github/ziplot9-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/ziplot9-1.png)
 
 ``` r
 par(mfrow=c(1,1))
@@ -113,7 +113,7 @@ We can also show the "average 8" in the training set:
 myImagePlot(t(matrix(colMeans(a[a[,1]==8,-1]), 16, 16)))
 ```
 
-![](README_files/figure-markdown_github/zipav-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/zipav-1.png)
 
 We will now use LDA, QDA and a multinomial logistic model. The latter is the natural extension of logistic regression to more than 2 classes. You can easily derive it yourself by assuming the response variable has a multinomial distribution and modeling each conditional probability as a (different) logistic function of the vector **X** of features. Note that if there are *K* classes you only need to model *K-1* of these conditional class probabilities. The derivation is left as an easy exercise for you.
 
@@ -327,7 +327,7 @@ points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
        col=c('red', 'blue')[Y+1])
 ```
 
-![](README_files/figure-markdown_github/knn1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/knn1-1.png)
 
 We repeat the analysis with a 5-NN classifier. Now the estimated conditional probabilities for each **X** in the grid can be 0, 0.20, 0.40, 0.60, 0.80 or 1 (why?) The function `knn` returns the estimated probabilities in the `'prob'` attribute of the returned object, so we need to use the function `attr` to extract it (as usual, the R help pages are a good source of information if you have any questions about the code below):
 
@@ -340,7 +340,7 @@ points(Volume ~ Rate, data=vaso, pch=19, cex=1.5,
        col=c('red', 'blue')[Y+1])
 ```
 
-![](README_files/figure-markdown_github/knn5-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/knn5-1.png)
 
 We now turn to the digits data. Just to be safe we re-create the training and test set for the digits 1, 3 and 8 and look at the misclassification tables on the test set.
 
@@ -350,6 +350,11 @@ data(zip.test, package='ElemStatLearn')
 x.tr <- data.frame( zip.train[ zip.train[, 1] %in% c(3, 8), ] )
 x.te <- data.frame( zip.test[ zip.test[, 1] %in% c(3, 8), ] )
 names( x.te ) <- names( x.tr  ) <- paste('V', 1:257, sep='')
+```
+
+We now train 1-, 5-, 10- and 50-NN classifiers and evaluate them on the test set. We report the misclassification rate on the test set, along with the corresponding tables:
+
+``` r
 u1 <- knn(train=x.tr[,-1], cl=x.tr[,1], test=x.te[, -1], k=1)
 table(u1, x.te$V1)
 ```
@@ -413,9 +418,7 @@ mean( u50 != x.te$V1 )
 
     ## [1] 0.07228916
 
-#### Questions for you:
-
--   The number *K* of nearest neighbours is a tuning constant that needs to be chosen objectively. How would you do it?
+Note how the performance of the K-NN classifier in this case stops improving when K is 10 or more. Since the number *K* of nearest neighbours is in fact a tuning constant that needs to be chosen by the user, how would do it in an objective manner? What would you do if you didn't have a test set available?
 
 #### Challenges for K-NN classifiers
 
@@ -426,4 +429,12 @@ mean( u50 != x.te$V1 )
 Classification Trees
 --------------------
 
-Classification trees. Instead of RSS we use a measure of (in)homogeneity of classes within leaves, partition to maximize the reduction in inhomogeneity.
+Just as in the continuous regression case, when the number of available explanatory variables is moderate or large, methods like nearest neighbours quickly become unfeasible, or their performance is not satisfactory. Classification trees provide a good alternative: they are still model-free (we do not need to assume anything about the true conditional probabilities of each class for a given vector of features **X**), but they are constrained to have a fairly specifc form. Intuitively (and informally) we could say (if nobody was listening) that this restriction provides some form of regularization or penalization.
+
+Classification trees are constructed in much the same was as regression trees. We will construct a partition of the feature space (in "rectangular" areas), and within each region we will predict the class to be the most common class among the training points that are in that region. It is reasonable then to try to find a partition of the feature space so that in each area there is only one class (or at least, such that one class clearly dominates the others in that region). Hence, to build a classification tree we need a quantitative measure of the homogeneity of the classes present in a node. Given such a numerical measure, we can build the tree by selecting, at each step, the optimal split in the sense of yielding the most homogeneous child leaves possible (i.e. by maximizing at each step the chosen homogeneity measure). The two most common homogeneity measures are the Gini Index and the deviance (refer to the discussion in class). Although the resulting trees are generally different depending on which loss function is used, we will later see that this difference is not critical in practice.
+
+#### Pruning
+
+#### Challenges
+
+-   stability (lack of thereof)
