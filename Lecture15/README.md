@@ -44,17 +44,25 @@ contour(xrat, xvol, matrix(pr.qda, 200, 200), col='gray30', levels=.5,
         drawlabels=FALSE, lwd=3, add=TRUE)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/qda2-1.png) We used the function `contour` above to draw the boundary between classes (the set of points where the probability of blue is equal to the probability of red).
+![](README_files/figure-markdown_github-ascii_identifiers/qda2-1.png)
 
-### Zip code digits
+We used the function `contour` above to draw the boundary between classes (the set of points where the probability of blue is equal to the probability of red).
+
+#### Sensitivity to the Gaussian assumption
+
+With the help of an example we discussed in class the sensitivity of QDA to the assumed specific conditional distribution of the features within each class. It is very easy to see that LDA may also be affected by similar problems. This is not at all surprising--in many cases optimal methods obtained under certain conditions are very sensitive to the vailidity of the assumptions used in ther derivation.
+
+It is interesting to note (as discussed in class) that logistic regression was not affected by the "good outliers" we included in the data. Again, this is not surprising (furthermore, I expect you to be able to explain what is happening in this particular example). Note, furthermore, that both QDA (and LDA) and logistic regression are classifiers that require the estimation of parameters (maybe we can call them *parametric classifiers*?), and in all cases so far we used maximum likelihood estimates for them. However their sensitivity to this kind of outliers is very different. Discuss!
+
+#### More than 2 classes -- The handwritten digit recognition data
+
+As you may have noted, all the classification methods we have seen so far can be used in applications with an arbitrary number of classes. We will now illustrate them on the well-known Handwritten Digit Recognition Data (as usual, see `help(zip.train, package='ElemStatLearn')`). We first load the data, and extract the images corresponding to digits 0, 1 and 8. These should be challenging enough to discriminate given their shape.
 
 ``` r
-data(zip.train, package='ElemStatLearn') #read.table('zip.train', header=FALSE)
-data(zip.test, package='ElemStatLearn') #read.table('zip.test', header=FALSE)
-
+data(zip.train, package='ElemStatLearn')
+data(zip.test, package='ElemStatLearn')
 x.tr <- zip.train[ zip.train[, 1] %in% c(0, 1, 8), ]
 x.te <- zip.test[ zip.test[, 1] %in% c(0, 1, 8), ]
-
 table(x.tr[, 1])
 ```
 
@@ -62,9 +70,9 @@ table(x.tr[, 1])
     ##    0    1    8 
     ## 1194 1005  542
 
-``` r
-# Display images
+To display these 16x16 images we adapt a simple function to plot matrices:
 
+``` r
 # ----- Define a function for plotting a matrix ----- #
 # modified from: http://www.phaget4.org/R/image_matrix.html
 # ----- Define a function for plotting a matrix ----- #
@@ -79,12 +87,13 @@ myImagePlot <- function(x, ...){
   image(1:ncol(x), 1:nrow(x), t(x), col=ColorRamp, xlab="",
         ylab="", axes=FALSE, zlim=c(min,max))
 }
+```
 
+We choose 9 images at random and display them in a 3x3 array of images:
 
+``` r
 a <- x.tr
-
-# Plot 9 random chosen images (hand-written 3's)
-set.seed(31)
+set.seed(987)
 sa <- sample(dim(a)[1], 9)
 par(mfrow=c(3,3))
 for(j in 1:9) {
@@ -92,7 +101,7 @@ for(j in 1:9) {
 }
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/zip1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/ziplot9-1.png)
 
 ``` r
 par(mfrow=c(1,1))
