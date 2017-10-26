@@ -472,8 +472,14 @@ filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='
                })
 ```
 
-If we had built a tree by pruning an overfitting one, the predictions would have
-been less simple:
+
+
+#### Pruning
+
+Just like regression trees, classification trees generally perform better if they are built 
+by pruning an overfitting one. This is done in the same way as it is done for classification
+trees. When we do it on the graduate school admissions data we indeed obtain estimated
+conditional probabilities that appear to be more sensible (less "simple"): 
 
 ```{r trees7, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 set.seed(123)
@@ -492,6 +498,12 @@ filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='
                panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
                })
 ```
+
+
+
+#### Challenges
+
+* stability (lack of thereof)
 
 
 
@@ -550,12 +562,3 @@ filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='
 
 <!-- # Bagging!! -->
 
-
-
-
-
-#### Pruning
-
-#### Challenges
-
-* stability (lack of thereof)
