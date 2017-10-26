@@ -17,7 +17,7 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-15-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-15.pdf).
 
 
 ## QDA
@@ -501,9 +501,91 @@ filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='
 
 
 
-#### Challenges
+<!-- ### Another example -->
 
-* stability (lack of thereof)
+
+<!-- # http://archive.ics.uci.edu/ml/datasets/ISOLET -->
+
+<!-- #Data Set Information: -->
+<!-- # -->
+<!-- #This data set was generated as follows. 150 subjects spoke the name  -->
+<!-- #of each letter of the alphabet twice. Hence, we have 52 training examples  -->
+<!-- #from each speaker. The speakers are grouped into sets of 30 speakers  -->
+<!-- #each, and are referred to as isolet1, isolet2, isolet3, isolet4, and  -->
+<!-- #isolet5. The data appears in isolet1+2+3+4.data in sequential order,  -->
+<!-- #first the speakers from isolet1, then isolet2, and so on. The test set,  -->
+<!-- #isolet5, is a separate file. -->
+<!-- # -->
+<!-- #You will note that 3 examples are missing. I believe they were dropped  -->
+<!-- #due to difficulties in recording. -->
+<!-- #     The features are described in the paper by Cole and Fanty cited -->
+<!-- #     above.  The features include spectral coefficients; contour -->
+<!-- #     features, sonorant features, pre-sonorant features, and -->
+<!-- #     post-sonorant features.  Exact order of appearance of the -->
+<!-- #     features is not known. -->
+<!-- #   (a) Fanty, M., Cole, R. (1991).  Spoken letter recognition.  In -->
+<!-- #       Lippman, R. P., Moody, J., and Touretzky, D. S. (Eds). -->
+<!-- #       Advances in Neural Information Processing Systems 3.  San -->
+<!-- #       Mateo, CA: Morgan Kaufmann. -->
+
+
+<!-- x <- read.table('isolet-train.data', sep=',') -->
+<!-- xt <- read.table('isolet-test.data', sep=',') -->
+
+<!-- # 7, 10 -->
+<!-- # 13, 14 -->
+<!-- # 3 and 26 "C" and "Z" -->
+
+<!-- xa <- x[ x$V618 == 3, ] -->
+<!-- xb <- x[ x$V618 == 26, ] -->
+
+<!-- xx <- rbind(xa, xb) -->
+<!-- xx$V618 <- as.factor(xx$V618) -->
+
+<!-- xta <- xt[ xt$V618 == 3, ] -->
+<!-- xtb <- xt[ xt$V618 == 26, ] -->
+<!-- dd <- rbind(xta, xtb) -->
+<!-- truth <- as.factor(c(xt1[,618], xt8[,618])) -->
+
+
+<!-- library(tree) -->
+<!-- d.r <- tree(V618 ~., data=xx, split='deviance') -->
+
+<!-- pdf('letters-tree-deviance.pdf') -->
+<!-- plot(d.r) -->
+<!-- text(d.r, pretty=10, label='yprob', cex=1.1) -->
+<!-- dev.off() -->
+
+
+<!-- d.pr <- predict(d.r, newdata=dd, type='class') -->
+<!-- table(truth, d.pr) -->
+
+<!-- u1 <- knn(train=xx[,-618], test=dd[,-618], cl=xx[,618], k = 1) -->
+<!-- table(truth, u1) -->
+
+<!-- u5 <- knn(train=xx[,-618], test=dd[,-618], cl=xx[,618], k = 5) -->
+<!-- table(truth, u5) -->
+
+<!-- xx$V619 <- as.numeric(xx$V618==3) -->
+<!-- d.glm <- glm(V619 ~ . - V618, data=xx, family=binomial) -->
+
+<!-- dd$V618 <- as.factor(dd$V618) -->
+<!-- pr.glm <- predict(d.glm, newdata=dd, type='response') -->
+
+<!-- pr.glm <- as.numeric(pr.glm > 0.5) -->
+<!-- table(truth, pr.glm) -->
+
+
+<!-- library(MASS) -->
+
+<!-- xx <- rbind(xa, xb) -->
+<!-- xx$V618 <- as.factor(xx$V618) -->
+<!-- d.lda <- lda(V618 ~ ., data=xx) -->
+<!-- pr.lda <- predict(d.lda, newdata=dd)$class -->
+<!-- table(truth, pr.lda) -->
+
+
+
 
 
 
