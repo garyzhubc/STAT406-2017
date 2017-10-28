@@ -1,7 +1,7 @@
 STAT406 - Lecture 15 notes
 ================
 Matias Salibian-Barrera
-2017-10-26
+2017-10-28
 
 LICENSE
 -------
@@ -425,6 +425,10 @@ Note how the performance of the K-NN classifier in this case stops improving whe
 -   It is easy to see that they suffer from the *curse of dimensionality*.
 -   Factor or binary features need to be treated with care.
 -   Euclidean distances do not reflect *shape* of features in each class (i.e. the conditional distribution of **X** in each class). Class-wise pre-standardization (whitening) might be useful.
+
+To illustrate the last point, consider this toy synthetic example we discussed in class:
+
+![](README_files/figure-markdown_github-ascii_identifiers/knntrouble-1.png)
 
 Classification Trees
 --------------------
