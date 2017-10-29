@@ -1,7 +1,7 @@
 STAT406 - Lecture 16 notes
 ================
 Matias Salibian-Barrera
-2017-10-26
+2017-10-29
 
 LICENSE
 -------
@@ -56,15 +56,16 @@ p2.t <- predict(a2.t, newdata=dd, type='prob')
 
 # reds
 filled.contour(aa, bb, matrix(p.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-plot.axes={axis(1); axis(2);
-points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
+plot.axes={axis(1); axis(2)}, 
+panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/inst2.5-1.png)
 
 ``` r
 filled.contour(aa, bb, matrix(p2.t[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-plot.axes={axis(1); axis(2); points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
+plot.axes={axis(1); axis(2)},
+panel.last={points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
 points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),3]])
 })
 ```
@@ -74,15 +75,15 @@ points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),
 ``` r
 # greens
 filled.contour(aa, bb, matrix(p.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-plot.axes={axis(1); axis(2);
-points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
+plot.axes={axis(1); axis(2)}, panel.last={ points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/inst2.5-3.png)
 
 ``` r
 filled.contour(aa, bb, matrix(p2.t[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-plot.axes={axis(1); axis(2); points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
+plot.axes={axis(1); axis(2)},
+pane.last={points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
 points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),3]])
 })
 ```
@@ -101,7 +102,7 @@ points(mm[c(1,7),-3], pch='O', cex=1.1, col=c("red", "blue", "green")[mm[c(1,7),
 Bagging
 -------
 
-We now show the effect of bagging. We average the predicted conditional probabilities, and we *bagg* prunned trees.
+We now show the possitive effect of bagging. We average the predicted conditional probabilities, and we *bagg* prunned trees. Note that the predicted probabilities obtained with bagged trees do not differ much from each other when the *bags* were built with the original and perturbed data sets.
 
 ``` r
 my.c <- rpart.control(minsplit=5, cp=1e-8, xval=10)
@@ -125,8 +126,8 @@ pp <- apply(pp0, c(1, 2), mean)
 
 # reds
 filled.contour(aa, bb, matrix(pp[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2);
-                 points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
+               plot.axes={axis(1); axis(2)},
+                 panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bag1-1.png)
@@ -134,8 +135,8 @@ filled.contour(aa, bb, matrix(pp[,1], 200, 200), col=terrain.colors(20), xlab='G
 ``` r
 # blues
 filled.contour(aa, bb, matrix(pp[,2], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2);
-                 points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
+               plot.axes={axis(1); axis(2)}, 
+                 panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bag1-2.png)
@@ -143,8 +144,8 @@ filled.contour(aa, bb, matrix(pp[,2], 200, 200), col=terrain.colors(20), xlab='G
 ``` r
 # greens
 filled.contour(aa, bb, matrix(pp[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2); 
-                 points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
+               plot.axes={axis(1); axis(2)}, 
+                 panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])})
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/bag1-3.png)
@@ -156,56 +157,7 @@ filled.contour(aa, bb, matrix(pp[,3], 200, 200), col=terrain.colors(20), xlab='G
 <!-- dev.off() -->
 And with the modified data
 
-``` r
-mm2 <- mm
-mm2[1,3] <- 2
-mm2[7,3] <- 2
-
-NB <- 1000
-ts <- vector('list', NB)
-set.seed(123)
-n <- nrow(mm)
-for(j in 1:NB) {
-  ii <- sample(1:n, replace=TRUE)
-  ts[[j]] <- rpart(V3~V1+V2, data=mm2[ii,], method='class', parms=list(split='information'), control=my.c)
-  b <- ts[[j]]$cptable[which.min(ts[[j]]$cptable[,"xerror"]),"CP"]
-  ts[[j]] <- prune(ts[[j]], cp=b)
-}
-
-pp0 <- vapply(ts, FUN=predict, FUN.VALUE=matrix(0, 200*200, 3), newdata=dd, type='prob')
-pp3 <- apply(pp0, c(1, 2), mean)
-
-# reds
-filled.contour(aa, bb, matrix(pp3[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2);
-                 points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
-                 points(mm[c(1,7),-3], pch='O', cex=1.2, col=c("red", "blue", "green")[mm[c(1,7),3]])
-               })
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/bag2-1.png)
-
-``` r
-# blues
-filled.contour(aa, bb, matrix(pp3[,2], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2);
-                 points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
-                 points(mm[c(1,7),-3], pch='O', cex=1.2, col=c("red", "blue", "green")[mm[c(1,7),3]])
-               })
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/bag2-2.png)
-
-``` r
-# greens
-filled.contour(aa, bb, matrix(pp3[,3], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
-               plot.axes={axis(1); axis(2);
-                 points(mm2[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm2[,3]]);
-                 points(mm[c(1,7),-3], pch='O', cex=1.2, col=c("red", "blue", "green")[mm[c(1,7),3]])
-               })
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/bag2-3.png)
+![](README_files/figure-markdown_github-ascii_identifiers/bag2-1.png)![](README_files/figure-markdown_github-ascii_identifiers/bag2-2.png)![](README_files/figure-markdown_github-ascii_identifiers/bag2-3.png)
 
 <!-- pp4 <- apply(pp3, 1, which.max) -->
 <!-- pdf('gpa-bagg-pred2-rpart.pdf') -->
@@ -215,6 +167,24 @@ filled.contour(aa, bb, matrix(pp3[,3], 200, 200), col=terrain.colors(20), xlab='
 <!-- dev.off() -->
 Random Forests
 ==============
+
+Even though using a *bagged* ensemble of trees helps to improve the stability of resulting predictor, it can be improved further. The main idea is to reduce the (conditional) potential correlation among bagged trees, as discussed in class.
+
+``` r
+library(randomForest)
+a.rf <- randomForest(V3~V1+V2, data=mm, ntree=500) #, method='class', parms=list(split='information'))
+pp.rf <- predict(a.rf, newdata=dd, type='prob')
+filled.contour(aa, bb, matrix(pp.rf[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
+               plot.axes={axis(1); axis(2)},
+                 panel.last={points(mm[,-3], pch=19, cex=1.5, col=c("red", "blue", "green")[mm[,3]])
+               })
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf1-1.png)
+
+And the predicted conditional probabilities for the rest of the classes:
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf2-1.png)![](README_files/figure-markdown_github-ascii_identifiers/rf2-2.png)
 
 <!-- ### Another example -->
 <!-- # http://archive.ics.uci.edu/ml/datasets/ISOLET -->
