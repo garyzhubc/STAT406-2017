@@ -132,8 +132,6 @@ n <- nrow(mm)
 for(j in 1:NB) {
   ii <- sample(1:n, replace=TRUE)
   ts[[j]] <- rpart(V3~V1+V2, data=mm[ii,], method='class', parms=list(split='information'), control=my.c)
-  # b <- ts[[j]]$cptable[which.min(ts[[j]]$cptable[,"xerror"]),"CP"]
-  # ts[[j]] <- prune(ts[[j]], cp=b)
 }
 
 aa <- seq(2, 5, length=200)
