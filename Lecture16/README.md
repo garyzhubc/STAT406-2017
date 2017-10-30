@@ -1,7 +1,7 @@
 STAT406 - Lecture 16 notes
 ================
 Matias Salibian-Barrera
-2017-10-29
+2017-10-30
 
 LICENSE
 -------
@@ -168,11 +168,16 @@ And with the modified data
 Random Forests
 ==============
 
-Even though using a *bagged* ensemble of trees helps to improve the stability of resulting predictor, it can be improved further. The main idea is to reduce the (conditional) potential correlation among bagged trees, as discussed in class.
+Even though using a *bagged* ensemble of trees helps to improve the stability of resulting predictor, it can be improved further. The main idea is to reduce the (conditional) potential correlation among bagged trees, as discussed in class. In `R` we use the funtion `randomForest` from the package with the same name. The syntax is the same as that of `rpart`, but the tuning parameters for each of the *trees* in the *forest* are different from \`rpart. Refer to the help page if you need to modify them.
 
 ``` r
 library(randomForest)
-a.rf <- randomForest(V3~V1+V2, data=mm, ntree=500) #, method='class', parms=list(split='information'))
+a.rf <- randomForest(V3~V1+V2, data=mm, ntree=500) 
+```
+
+Predictions can be obtained using the `predict` method, as usual. To visualize the Random Forest, we compute the corresponding predicted conditional class probabilities on the relatively fine grid used before. The predicted conditional probabilities for class *red* are shown in the plot below (how are these computed, exactly?)
+
+``` r
 pp.rf <- predict(a.rf, newdata=dd, type='prob')
 filled.contour(aa, bb, matrix(pp.rf[,1], 200, 200), col=terrain.colors(20), xlab='GPA', ylab='GMAT',
                plot.axes={axis(1); axis(2)},
@@ -180,9 +185,9 @@ filled.contour(aa, bb, matrix(pp.rf[,1], 200, 200), col=terrain.colors(20), xlab
                })
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/rf1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/rf1.1-1.png)
 
-And the predicted conditional probabilities for the rest of the classes:
+And the predicted conditional probabilities for the rest of the classes are:
 
 ![](README_files/figure-markdown_github-ascii_identifiers/rf2-1.png)![](README_files/figure-markdown_github-ascii_identifiers/rf2-2.png)
 
@@ -351,7 +356,7 @@ table(p.t, xte$V618)
     ##   1 57  0
     ##   2  3 60
 
-Finally, note that if you train a single classification tree with the default values for the stopping criterion tuning parameters, the tree also uses only 3 features, but its classification error rate on the test set is almost double of the pruned one:
+Finally, note that if you train a single classification tree with the default values for the stopping criterion tuning parameters, the tree also uses only 3 features, but its classification error rate on the test set is larger than that of the pruned one:
 
 ``` r
 set.seed(987)
