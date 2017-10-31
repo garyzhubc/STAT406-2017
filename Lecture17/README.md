@@ -1,0 +1,192 @@
+STAT406 - Lecture 17 notes
+================
+Matias Salibian-Barrera
+2017-10-31
+
+LICENSE
+-------
+
+These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 International" license. See the **human-readable version** [here](https://creativecommons.org/licenses/by-sa/4.0/) and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/legalcode).
+
+Lecture slides
+--------------
+
+The lecture slides are [here](STAT406-17-lecture-17-preliminary.pdf).
+
+Random Forests (continued)
+==========================
+
+Consider again the ISOLET data, available here: <http://archive.ics.uci.edu/ml/datasets/ISOLET>. Here we only use a subset corresponding to the observations for the letters **C** and **Z**.
+
+We first load the training and test data sets, and force the response variable to be categorical, so that the `R` implementations of the different predictors we will use below will build classifiers and not their regression counterparts:
+
+``` r
+xtr <- read.table('../Lecture16/isolet-train-c-z.data', sep=',')
+xte <- read.table('../Lecture16/isolet-test-c-z.data', sep=',') 
+xtr$V618 <- as.factor(xtr$V618)
+xte$V618 <- as.factor(xte$V618)
+```
+
+We first train a Random Forest, using all the default parameters, and check its performance on the test set:
+
+``` r
+library(randomForest)
+set.seed(123)
+a.rf <- randomForest(V618 ~ ., data=xtr, ntree=500) 
+p.rf <- predict(a.rf, newdata=xte, type='response')
+table(p.rf, xte$V618)
+```
+
+    ##     
+    ## p.rf  3 26
+    ##   3  60  1
+    ##   26  0 59
+
+Note that the Random Forest only makes one mistake out of 120 observations in the test set. The OOB error rate estimate is slightly over 2%, and we see that 500 trees is a reasonable forest size:
+
+``` r
+plot(a.rf, lwd=3, lty=1)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf.oob-1.png)
+
+``` r
+a.rf
+```
+
+    ## 
+    ## Call:
+    ##  randomForest(formula = V618 ~ ., data = xtr, ntree = 500) 
+    ##                Type of random forest: classification
+    ##                      Number of trees: 500
+    ## No. of variables tried at each split: 24
+    ## 
+    ##         OOB estimate of  error rate: 2.08%
+    ## Confusion matrix:
+    ##      3  26 class.error
+    ## 3  235   5  0.02083333
+    ## 26   5 235  0.02083333
+
+To explore which variables were used in the forest, and also, their importance rank we use the function `varImpPlot`:
+
+``` r
+varImpPlot(a.rf, n.var=20)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf.isolet3-1.png)
+
+We now compare the Random Forest with some of the other classifiers we saw in class, using their classification error rate on the test set as our comparison measure. We first start with K-NN:
+
+``` r
+library(class)
+u1 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 1)
+table(u1, xte$V618)
+```
+
+    ##     
+    ## u1    3 26
+    ##   3  57  9
+    ##   26  3 51
+
+``` r
+u5 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 5)
+table(u5, xte$V618)
+```
+
+    ##     
+    ## u5    3 26
+    ##   3  58  5
+    ##   26  2 55
+
+``` r
+u10 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 10)
+table(u10, xte$V618)
+```
+
+    ##     
+    ## u10   3 26
+    ##   3  58  6
+    ##   26  2 54
+
+``` r
+u20 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 20)
+table(u20, xte$V618)
+```
+
+    ##     
+    ## u20   3 26
+    ##   3  58  5
+    ##   26  2 55
+
+``` r
+u50 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 50)
+table(u50, xte$V618)
+```
+
+    ##     
+    ## u50   3 26
+    ##   3  59  6
+    ##   26  1 54
+
+To use logistic regression we first create a new variable that is 1 for the letter **C** and 0 for the letter **Z**, and use it as our response variable.
+
+``` r
+xtr$V619 <- as.numeric(xtr$V618==3)
+d.glm <- glm(V619 ~ . - V618, data=xtr, family=binomial)
+pr.glm <- as.numeric( predict(d.glm, newdata=xte, type='response') >  0.5 )
+table(pr.glm, xte$V618)
+```
+
+    ##       
+    ## pr.glm  3 26
+    ##      0 25 33
+    ##      1 35 27
+
+Question for the reader: why do you think this classifier's performance is so disappointing?
+
+It is interesting to see how a simple LDA classifier does:
+
+``` r
+library(MASS)
+xtr$V619 <- NULL
+d.lda <- lda(V618 ~ . , data=xtr)
+pr.lda <- predict(d.lda, newdata=xte)$class
+table(pr.lda, xte$V618)
+```
+
+    ##       
+    ## pr.lda  3 26
+    ##     3  58  3
+    ##     26  2 57
+
+Finally, note that a carefully built classification tree performs remarkably well, only using 3 features:
+
+``` r
+library(rpart)
+my.c <- rpart.control(minsplit=5, cp=1e-8, xval=10)
+set.seed(987)
+a.tree <- rpart(V618 ~ ., data=xtr, method='class', parms=list(split='information'), control=my.c)
+cp <- a.tree$cptable[which.min(a.tree$cptable[,"xerror"]),"CP"]
+a.tp <- prune(a.tree, cp=cp)
+p.t <- predict(a.tp, newdata=xte, type='vector')
+table(p.t, xte$V618)
+```
+
+    ##    
+    ## p.t  3 26
+    ##   1 57  0
+    ##   2  3 60
+
+Finally, note that if you train a single classification tree with the default values for the stopping criterion tuning parameters, the tree also uses only 3 features, but its classification error rate on the test set is larger than that of the pruned one:
+
+``` r
+set.seed(987)
+a2.tree <- rpart(V618 ~ ., data=xtr, method='class', parms=list(split='information'))
+p2.t <- predict(a2.tree, newdata=xte, type='vector')
+table(p2.t, xte$V618)
+```
+
+    ##     
+    ## p2.t  3 26
+    ##    1 57  2
+    ##    2  3 58
