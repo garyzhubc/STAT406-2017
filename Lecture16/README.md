@@ -1,7 +1,7 @@
 STAT406 - Lecture 16 notes
 ================
 Matias Salibian-Barrera
-2017-10-30
+2017-10-31
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-16-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-16.pdf).
 
 #### Instability of trees
 
@@ -185,14 +185,14 @@ And with the modified data
 Random Forests
 ==============
 
-Even though using a *bagged* ensemble of trees helps to improve the stability of resulting predictor, it can be improved further. The main idea is to reduce the (conditional) potential correlation among bagged trees, as discussed in class. In `R` we use the funtion `randomForest` from the package with the same name. The syntax is the same as that of `rpart`, but the tuning parameters for each of the *trees* in the *forest* are different from \`rpart. Refer to the help page if you need to modify them.
+Even though using a *bagged* ensemble of trees helps to improve the stability of resulting predictor, it can be improved further. The main idea is to reduce the (conditional) potential correlation among bagged trees, as discussed in class. In `R` we use the funtion `randomForest` from the package with the same name. The syntax is the same as that of `rpart`, but the tuning parameters for each of the *trees* in the *forest* are different from `rpart`. Refer to the help page if you need to modify them.
 
 ``` r
 library(randomForest)
 a.rf <- randomForest(V3~V1+V2, data=mm, ntree=500) 
 ```
 
-Predictions can be obtained using the `predict` method, as usual. To visualize the Random Forest, we compute the corresponding predicted conditional class probabilities on the relatively fine grid used before. The predicted conditional probabilities for class *red* are shown in the plot below (how are these computed, exactly?)
+Predictions can be obtained using the `predict` method, as usual, when you specify the `newdata` argument. To visualize the Random Forest, we compute the corresponding predicted conditional class probabilities on the relatively fine grid used before. The predicted conditional probabilities for class *red* are shown in the plot below (how are these computed, exactly?)
 
 ``` r
 pp.rf <- predict(a.rf, newdata=dd, type='prob')
@@ -228,7 +228,7 @@ We first train a Random Forest, using all the default parameters, and check its 
 ``` r
 library(randomForest)
 set.seed(123)
-a.rf <- randomForest(V618 ~ ., data=xtr, ntree=500) #, method='class', parms=list(split='information'))
+a.rf <- randomForest(V618 ~ ., data=xtr, ntree=500) 
 p.rf <- predict(a.rf, newdata=xte, type='response')
 table(p.rf, xte$V618)
 ```
@@ -238,13 +238,7 @@ table(p.rf, xte$V618)
     ##   3  60  1
     ##   26  0 59
 
-Note that the Random Forest only makes one mistake out of 120 observations in the test set. The OOB error rate estimate is slightly over 2%, and we see that 500 trees is a reasonable forest size:
-
-``` r
-plot(a.rf, lwd=3, lty=1)
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/rf.oob-1.png)
+Note that the Random Forest only makes one mistake out of 120 observations in the test set. The OOB error rate estimate is slightly over 2%, and we see that 500 trees is a reasonable forest size, in the sense thate the OOB error rate estimate is stable.
 
 ``` r
 a.rf
@@ -263,126 +257,8 @@ a.rf
     ## 3  235   5  0.02083333
     ## 26   5 235  0.02083333
 
-To explore which variables were used in the forest, and also, their importance rank we use the function `varImpPlot`:
-
 ``` r
-varImpPlot(a.rf, n.var=20)
+plot(a.rf, lwd=3, lty=1)
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/rf.isolet3-1.png)
-
-We now compare the Random Forest with some of the other classifiers we saw in class, using their classification error rate on the test set as our comparison measure. We first start with K-NN:
-
-``` r
-library(class)
-u1 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 1)
-table(u1, xte$V618)
-```
-
-    ##     
-    ## u1    3 26
-    ##   3  57  9
-    ##   26  3 51
-
-``` r
-u5 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 5)
-table(u5, xte$V618)
-```
-
-    ##     
-    ## u5    3 26
-    ##   3  58  5
-    ##   26  2 55
-
-``` r
-u10 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 10)
-table(u10, xte$V618)
-```
-
-    ##     
-    ## u10   3 26
-    ##   3  58  6
-    ##   26  2 54
-
-``` r
-u20 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 20)
-table(u20, xte$V618)
-```
-
-    ##     
-    ## u20   3 26
-    ##   3  58  5
-    ##   26  2 55
-
-``` r
-u50 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 50)
-table(u50, xte$V618)
-```
-
-    ##     
-    ## u50   3 26
-    ##   3  59  6
-    ##   26  1 54
-
-To use logistic regression we first create a new variable that is 1 for the letter **C** and 0 for the letter **Z**, and use it as our response variable.
-
-``` r
-xtr$V619 <- as.numeric(xtr$V618==3)
-d.glm <- glm(V619 ~ . - V618, data=xtr, family=binomial)
-pr.glm <- as.numeric( predict(d.glm, newdata=xte, type='response') >  0.5 )
-table(pr.glm, xte$V618)
-```
-
-    ##       
-    ## pr.glm  3 26
-    ##      0 25 33
-    ##      1 35 27
-
-Question for the reader: why do you think this classifier's performance is so disappointing?
-
-It is interesting to see how a simple LDA classifier does:
-
-``` r
-library(MASS)
-xtr$V619 <- NULL
-d.lda <- lda(V618 ~ . , data=xtr)
-pr.lda <- predict(d.lda, newdata=xte)$class
-table(pr.lda, xte$V618)
-```
-
-    ##       
-    ## pr.lda  3 26
-    ##     3  58  3
-    ##     26  2 57
-
-Finally, note that a carefully built classification tree performs remarkably well, only using 3 features:
-
-``` r
-library(rpart)
-my.c <- rpart.control(minsplit=5, cp=1e-8, xval=10)
-set.seed(987)
-a.tree <- rpart(V618 ~ ., data=xtr, method='class', parms=list(split='information'), control=my.c)
-cp <- a.tree$cptable[which.min(a.tree$cptable[,"xerror"]),"CP"]
-a.tp <- prune(a.tree, cp=cp)
-p.t <- predict(a.tp, newdata=xte, type='vector')
-table(p.t, xte$V618)
-```
-
-    ##    
-    ## p.t  3 26
-    ##   1 57  0
-    ##   2  3 60
-
-Finally, note that if you train a single classification tree with the default values for the stopping criterion tuning parameters, the tree also uses only 3 features, but its classification error rate on the test set is larger than that of the pruned one:
-
-``` r
-set.seed(987)
-a2.tree <- rpart(V618 ~ ., data=xtr, method='class', parms=list(split='information'))
-p2.t <- predict(a2.tree, newdata=xte, type='vector')
-table(p2.t, xte$V618)
-```
-
-    ##     
-    ## p2.t  3 26
-    ##    1 57  2
-    ##    2  3 58
+![](README_files/figure-markdown_github-ascii_identifiers/rf.oob-1.png)
