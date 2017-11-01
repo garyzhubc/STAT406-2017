@@ -1,7 +1,7 @@
 STAT406 - Lecture 17 notes
 ================
 Matias Salibian-Barrera
-2017-10-31
+2017-11-01
 
 LICENSE
 -------
@@ -27,7 +27,7 @@ xtr$V618 <- as.factor(xtr$V618)
 xte$V618 <- as.factor(xte$V618)
 ```
 
-We first train a Random Forest, using all the default parameters, and check its performance on the test set:
+To train a Random Forest we use the function `randomForest` in the package of the same name. The code underlying this package was originally written by Leo Breiman. We train a RF leaving all paramaters at their default values, and check its performance on the test set:
 
 ``` r
 library(randomForest)
@@ -67,13 +67,67 @@ a.rf
     ## 3  235   5  0.02083333
     ## 26   5 235  0.02083333
 
-To explore which variables were used in the forest, and also, their importance rank we use the function `varImpPlot`:
+#### Using a test set instead of OBB
+
+Given that in this case we do have a test set, we can use it to monitor the error rate (instead of using the OOB error estimates):
+
+``` r
+x.train <- model.matrix(V618 ~ ., data=xtr)
+y.train <- xtr$V618
+x.test <- model.matrix(V618 ~ ., data=xte)
+y.test <- xte$V618
+set.seed(123)
+a.rf <- randomForest(x=x.train, y=y.train, xtest=x.test, ytest=y.test, ntree=500) 
+test.err <- a.rf$test$err.rate
+ma <- max(c(test.err))
+plot(test.err[, 2], lwd=2, lty=1, col='red', type='l', ylim=c(0, max(c(0, ma))))
+lines(test.err[, 3], lwd=2, lty=1, col='green')
+lines(test.err[, 1], lwd=2, lty=1, col='black')
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf.isolet.test-1.png)
+
+According to the help page for the `plot` method for objects of class `randomForest`, the following plot should show both error rates (OOB plus those on the test set):
+
+``` r
+plot(a.rf, lwd=2)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/rf.isolet.test.plot-1.png)
+
+``` r
+a.rf
+```
+
+    ## 
+    ## Call:
+    ##  randomForest(x = x.train, y = y.train, xtest = x.test, ytest = y.test,      ntree = 500) 
+    ##                Type of random forest: classification
+    ##                      Number of trees: 500
+    ## No. of variables tried at each split: 24
+    ## 
+    ##         OOB estimate of  error rate: 2.5%
+    ## Confusion matrix:
+    ##      3  26 class.error
+    ## 3  235   5  0.02083333
+    ## 26   7 233  0.02916667
+    ##                 Test set error rate: 0.83%
+    ## Confusion matrix:
+    ##     3 26 class.error
+    ## 3  60  0  0.00000000
+    ## 26  1 59  0.01666667
+
+#### Feature sequencing / Variable ranking
+
+To explore which variables were used in the forest, and also, their importance rank as discussed in class, we can use the function `varImpPlot`:
 
 ``` r
 varImpPlot(a.rf, n.var=20)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/rf.isolet3-1.png)
+
+#### Comparing RF with other classifiers
 
 We now compare the Random Forest with some of the other classifiers we saw in class, using their classification error rate on the test set as our comparison measure. We first start with K-NN:
 
@@ -95,8 +149,8 @@ table(u5, xte$V618)
 
     ##     
     ## u5    3 26
-    ##   3  58  5
-    ##   26  2 55
+    ##   3  58  6
+    ##   26  2 54
 
 ``` r
 u10 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 10)
@@ -105,8 +159,8 @@ table(u10, xte$V618)
 
     ##     
     ## u10   3 26
-    ##   3  58  6
-    ##   26  2 54
+    ##   3  58  5
+    ##   26  2 55
 
 ``` r
 u20 <- knn(train=xtr[, -618], test=xte[, -618], cl=xtr[, 618], k = 20)
@@ -125,8 +179,8 @@ table(u50, xte$V618)
 
     ##     
     ## u50   3 26
-    ##   3  59  6
-    ##   26  1 54
+    ##   3  58  6
+    ##   26  2 54
 
 To use logistic regression we first create a new variable that is 1 for the letter **C** and 0 for the letter **Z**, and use it as our response variable.
 

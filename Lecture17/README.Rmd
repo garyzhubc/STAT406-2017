@@ -39,7 +39,10 @@ xte <- read.table('../Lecture16/isolet-test-c-z.data', sep=',')
 xtr$V618 <- as.factor(xtr$V618)
 xte$V618 <- as.factor(xte$V618)
 ```
-We first train a Random Forest, using all the default parameters, and check 
+To train a Random Forest we use the function `randomForest` in the
+package of the same name. The code underlying this package was originally 
+written by Leo Breiman. We train a RF leaving all
+paramaters at their default values, and check 
 its performance on the test set:
 ```{r rf.isolet2, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 library(randomForest)
@@ -57,11 +60,44 @@ plot(a.rf, lwd=3, lty=1)
 a.rf
 ```
 
+#### Using a test set instead of OBB
+
+Given that in this case we do have a test set, we can use it 
+to monitor the error rate (instead of using the OOB error estimates):
+
+```{r rf.isolet.test, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+x.train <- model.matrix(V618 ~ ., data=xtr)
+y.train <- xtr$V618
+x.test <- model.matrix(V618 ~ ., data=xte)
+y.test <- xte$V618
+set.seed(123)
+a.rf <- randomForest(x=x.train, y=y.train, xtest=x.test, ytest=y.test, ntree=500) 
+test.err <- a.rf$test$err.rate
+ma <- max(c(test.err))
+plot(test.err[, 2], lwd=2, lty=1, col='red', type='l', ylim=c(0, max(c(0, ma))))
+lines(test.err[, 3], lwd=2, lty=1, col='green')
+lines(test.err[, 1], lwd=2, lty=1, col='black')
+```
+
+According to the help page for the `plot` method for objects of class
+`randomForest`, the following plot should show both error rates (OOB plus
+those on the test set):
+
+```{r rf.isolet.test.plot, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+plot(a.rf, lwd=2)
+a.rf
+```
+
+#### Feature sequencing / Variable ranking
+
 To explore which variables were used in the forest,
-and also, their importance rank we use the function `varImpPlot`:
+and also, their importance rank as discussed in
+class, we can use the function `varImpPlot`:
 ```{r rf.isolet3, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
 varImpPlot(a.rf, n.var=20)
 ```
+
+#### Comparing RF with other classifiers
 
 We now compare the Random Forest with some of the other classifiers we saw in class,
 using their classification error rate on the test set as our comparison measure. 
