@@ -19,20 +19,59 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 The lecture slides are [here](STAT406-17-lecture-18-preliminary.pdf).
 
-
-
 # Boosting (a Statistical Learning perspective)
 
-#### Ensembles we have used so far
+In these notes we will discuss boosting starting from one its first
+incarnations (adaboost.m1). Our goal here is two-fold: introduce boosting
+as a **different** way of building an **ensemble** of *weak classifiers*, and 
+also to show how a statistical analysis of the method offers valuable
+insight and also opens a wide range of extensions and new methodologies. 
+We follow the presentation in Chapter 10 of [HTF09]. 
 
 #### A different ensemble
 
+So far in this course we have seen ensembles of classifiers 
+(or regression estimators) based on the idea of bagging: combininig
+the predictions of a number of predictors trained on bootstrap 
+samples taken from the original training set. By construction
+all the predictors in the ensemble are treated *equally* (e.g. 
+their predictions receive the same weight when they are 
+combined). Another characteristic of these ensembles is 
+the predictors in them could be trained in parallel
+(they are independent from each other). 
+
+#### A different ensemble
+
+Boosting algorithms go back to the late 90s. One of the first ones
+to appear in the Machine Learning literature is probably *Adaboost.M1*
+introduced in 
+
+> Freund, Y. and Schapire, R. (1997). A decision-theoretic generalization of
+> online learning and an application to boosting, *Journal of Computer
+> and System Sciences*, **55**:119-139.
+
+We discussed the specifics of the algorithm in class. An important
+difference with other ensembles is that for *Adaboost.M1* the elements
+of the ensemble are trained *sequentially* in such a way that 
+to compute the i-th predictor $T_i$ we need to have the 
+previous one $T_{i-1}$ available. Furthemore, their associated
+weights in the final combination of predictions are generally
+different for each member of the ensemble. 
+
 #### What is Adaboost really doing? 
 
-#### Does it *always* work? 
+We have seen in class that Adaboost can be thought of as 
+fitting an *additive model* in a stepwise (greedy) way,
+using an exponential loss. Knowing what optimization problem the boosting algorithms 
+are solving lets us find out what is the classifier
+that boosting is approximating. 
+This insight allows us to 
+understand when the algorithm is expected to work well,
+and also when it can be expected to not work well
+(refer to the corresponding lab activity). In particular,
+it provides one way to choose the complexity of the 
+*weak lerners* used to construct the ensemble. 
 
-#### The complexity of the classifiers in the ensemble 
-
-
+## Gradient boosting
 
 
