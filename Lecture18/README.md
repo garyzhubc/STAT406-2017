@@ -1,7 +1,7 @@
 STAT406 - Lecture 18 notes
 ================
 Matias Salibian-Barrera
-2017-11-05
+2017-11-06
 
 LICENSE
 -------
@@ -11,57 +11,81 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-18-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-18.pdf).
 
 Boosting (a Statistical Learning perspective)
 =============================================
 
-In these notes we will discuss boosting starting from one its first incarnations (adaboost.m1). Our goal here is two-fold: introduce boosting as a **different** way of building an **ensemble** of *weak classifiers*, and also to show how a statistical analysis of the method offers valuable insight and also opens a wide range of extensions and new methodologies. We follow the presentation in Chapter 10 of \[HTF09\].
+In these notes we will discuss boosting. Our starting point is one its first incarnations (the Adaboost.M1 algorithm). Our goal here is two-fold: introduce boosting as a **different** way of building an **ensemble** of *weak classifiers*, and also to show how a statistical analysis of the method offers valuable insight and opens a wide range of extensions and new methodologies. We follow the presentation in Chapter 10 of \[HTF09\].
 
-#### A different ensemble
+A different kind of ensembles
+-----------------------------
 
 So far in this course we have seen ensembles of classifiers (or regression estimators) based on the idea of bagging: combininig the predictions of a number of predictors trained on bootstrap samples taken from the original training set. By construction all the predictors in the ensemble are treated *equally* (e.g. their predictions receive the same weight when they are combined). Another characteristic of these ensembles is the predictors in them could be trained in parallel (they are independent from each other).
-
-#### A different ensemble
 
 Boosting algorithms go back to the late 90s. One of the first ones to appear in the Machine Learning literature is probably *Adaboost.M1* introduced in
 
 > Freund, Y. and Schapire, R. (1997). A decision-theoretic generalization of online learning and an application to boosting, *Journal of Computer and System Sciences*, **55**:119-139.
 
-We discussed the specifics of the algorithm in class. An important difference with other ensembles is that for *Adaboost.M1* the elements of the ensemble are trained *sequentially* in such a way that to compute the i-th predictor *T*<sub>*i*</sub> we need to have the previous one *T*<sub>*i* − 1</sub> available. Furthemore, their associated weights in the final combination of predictions are generally different for each member of the ensemble.
+We discussed the specifics of the algorithm in class. An important difference with the other ensembles we discussed in class (**can you name them?**) is that for *Adaboost.M1* the elements of the ensemble are trained **sequentially** in such a way that to compute the i-th predictor *T*<sub>*i*</sub> we need to have the previous one *T*<sub>*i* − 1</sub> available. Furthemore, the weights in the final combination of predictions are generally different for each member of the ensemble.
 
-The zip code digits example. Look at 7 vs 9. Basic classifiers two-split trees. Error rate evolution on the training set.
+Here we will use the implementation available in the `adabag` package, specifically the function `boosting`. This function can be rather slow, but it is a straight implementation of the Adaboost algorithm, and it returns many useful objects (e.g. each of the individual weak lerners, etc.) As usual, I suggest that you invest a few minutes reading the help pages and also *exploring* the returned objects by hand.
+
+Note that Adaboost was originally proposed for 2-class problems. To illustrate its use, we look at the zip code digits example. We consider the problem of building a classifier to determine whether an image is a *1* or a *9*. We use 1-split classification trees as our *weak lerners* in the ensemble. Since `boosting` uses the `rpart` implementation of classification and regression trees, we use the function `rpart.control` to specify the type of *weak lerners* we want.
+
+We first load the full training set, and extract the *7*'s and *9*'s. Since the original data file does not have feature names, we create them as "V1", "V2", etc.
 
 ``` r
 data(zip.train, package='ElemStatLearn')
 x.tr <- data.frame(zip.train)
 names( x.tr  ) <- paste('V', 1:257, sep='')
-x.tr <- x.tr[ x.tr$V1 %in% c(7, 9), ]
+x.tr <- x.tr[ x.tr$V1 %in% c(1, 9), ]
+```
+
+To force `rpart` (and thus `boosting`) to train a classification ensemble (as opposed to a regression one) we force the response variable to be categorical.
+
+``` r
 x.tr$V1 <- as.factor(x.tr$V1)
+```
+
+Now we load the `adabag` package, use `rpart.control` to force it to use 1- or 2-split trees, and train the boosting ensemble:
+
+``` r
 library(adabag)
 onesplit <- rpart.control(cp=-1, maxdepth=1, minsplit=0, xval=0)
 bo1 <- boosting(V1 ~ ., data=x.tr, boos=FALSE, mfinal=500, control=onesplit)
-# table(x.tr$V1, predict(bo1, newdata=x.tr)$class)
+```
+
+We can explore the evolution of the error rate on the training set (the equivalent of the MSE for classifiers) using the function `errorevol`:
+
+``` r
 plot(errorevol(bo1, newdata=x.tr))
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/boos1-1.png)
+![](README_files/figure-markdown_github-ascii_identifiers/boos1.plot-1.png)
 
-Check performance on test set. Including error rate evolution on test set.
+Note that after approximately 10 iterations the error rate on the training set drops to zero and stays there. A few questions for you:
+
+-   Has the algorithm converged after approximately 10 iterations?
+-   Are the predictors trained after the (approximately) 10th iteration irrelevant?
+
+As we know pretty well by now, a more reliable measure of the expected performance of the ensemble can be obtained using a test set (or cross-validation) (**what about OOB?**)
+
+First load the full test set, extract the cases corresponding to the digits we are using here, and check the performance of the predictor, including the plot of the error rate as a function of the number of elements in the ensemble:
 
 ``` r
 data(zip.test, package='ElemStatLearn')
 x.te <- data.frame(zip.test)
 names( x.te ) <- paste('V', 1:257, sep='')
-x.te <- x.te[ x.te$V1 %in% c(7, 9), ]
+x.te <- x.te[ x.te$V1 %in% c(1, 9), ]
 x.te$V1 <- as.factor(x.te$V1)
 table(x.te$V1, predict(bo1, newdata=x.te)$class)
 ```
 
     ##    
-    ##       7   9
-    ##   7 140   7
-    ##   9   4 173
+    ##       1   9
+    ##   1 260   4
+    ##   9   1 176
 
 ``` r
 plot(errorevol(bo1, newdata=x.te))
@@ -69,33 +93,31 @@ plot(errorevol(bo1, newdata=x.te))
 
 ![](README_files/figure-markdown_github-ascii_identifiers/boos2-1.png)
 
-Now compare with a Random Forest (same number of elements in the ensemble). Look at evolution of the forest. What are the two different collections of "fitted values" on the training set? Check performance on test set.
+Just to make sure boosting is doing a good job, we compare it with another ensemble classifier: a Random Forest. We use the same number of elements in both ensembles (500), even though boosting used 500 *stumps* (1-split trees) and the *random forest trees* are (purposedly) very large (deep). We first train the random forest and look at the error evolution as displayed by the `plot` method for objects of class `randomForest`:
 
 ``` r
 library(randomForest)
-a <- randomForest(V1 ~ . , data=x.tr, ntree=500)
+set.seed(987)
+a <- randomForest(V1 ~ . , data=x.tr) # , ntree=500)
 plot(a)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/boos.comp-1.png)
+
+Now we evaluate the performance of the Random Forest on the training set by obtaining *fitted values* ("predictions" for the training set) and looking at the "confusion table":
 
 ``` r
 table(x.tr$V1, predict(a, newdata=x.tr, type='response'))
 ```
 
     ##    
-    ##       7   9
-    ##   7 645   0
-    ##   9   0 644
+    ##        1    9
+    ##   1 1005    0
+    ##   9    0  644
 
-``` r
-table(x.tr$V1, predict(a, type='response'))
-```
+**Does this confusion table match the information from the error plot above?** Can you describe (and explain!) the apparent problem?
 
-    ##    
-    ##       7   9
-    ##   7 625  20
-    ##   9   7 637
+As we all know too well, of course, the classification error rate *on the test set* is a better measure of predicition performance:
 
 ``` r
 pr.rf <- predict(a, newdata=x.te, type='response')
@@ -103,9 +125,13 @@ table(x.te$V1, pr.rf)
 ```
 
     ##    pr.rf
-    ##       7   9
-    ##   7 141   6
-    ##   9   0 177
+    ##       1   9
+    ##   1 259   5
+    ##   9   1 176
+
+We see that in this case the random forest does marginally worse than the boosting ensemble, even though the ensemble elements using in boosting are extremely simple trees.
+
+### Another example
 
 <!-- xtr <- read.table('c:/Users/Matias/Desktop/STAT406/2017-18/lecture16/isolet-train.data', header=FALSE, sep=',') -->
 <!-- xte <- read.table('c:/Users/Matias/Desktop/STAT406/2017-18/lecture16/isolet-test.data', header=FALSE, sep=',') -->
@@ -117,15 +143,54 @@ table(x.te$V1, pr.rf)
 <!-- xte.mn <- xte[ xte$V618 %in% c(13, 14), ] -->
 <!-- write.table(xtr.mn, file='isolet-train-m-n.data', row.names=FALSE, col.names=TRUE, sep=',', quote=FALSE) -->
 <!-- write.table(xte.mn, file='isolet-test-m-n.data', row.names=FALSE, col.names=TRUE, sep=',', quote=FALSE) -->
-Another example: ISOLET. Letters A vs H.
+Consider the ISOLET data introduced earlier. Here we will consider building a classifier to discriminate between the letters *A* and *H* based on the features extracted from their sound recordings. The steps of the analysis are the same as before:
+
+First we load the training set
 
 ``` r
 xtr <- read.table('isolet-train-a-h.data', sep=',', header=TRUE)
-xte <- read.table('isolet-test-a-h.data', sep=',', header=TRUE) 
+```
+
+Next, we force the response to be a categorical variable:
+
+``` r
 xtr$V618 <- as.factor(xtr$V618)
+```
+
+Now train a boosting ensamble and evaluate it on the test set (which needs to be loaded as well):
+
+``` r
+onesplit <- rpart.control(cp=-1, maxdepth=1, minsplit=0, xval=0)
+bo1 <- boosting(V618 ~ ., data=xtr, boos=FALSE, mfinal=200, control=onesplit)
+xte <- read.table('isolet-test-a-h.data', sep=',', header=TRUE) 
 xte$V618 <- as.factor(xte$V618)
+table(xte$V618, predict(bo1, newdata=xte)$class)
+```
+
+    ##    
+    ##      1  8
+    ##   1 59  1
+    ##   8  0 60
+
+We can also look at the error evolution on the test set to decide whether a smaller ensemble would be satisfactory:
+
+``` r
+plot(errorevol(bo1, newdata=xte))
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/boos4.4-1.png)
+
+Finally, we compare these results with those obtained with a Random Forest:
+
+``` r
 set.seed(123)
-a.rf <- randomForest(V618 ~ ., data=xtr, ntree=500) 
+a.rf <- randomForest(V618 ~ ., data=xtr, ntree=200) 
+plot(a.rf)
+```
+
+![](README_files/figure-markdown_github-ascii_identifiers/boos4.5-1.png)
+
+``` r
 p.rf <- predict(a.rf, newdata=xte, type='response')
 table(xte$V618, p.rf)
 ```
@@ -135,33 +200,16 @@ table(xte$V618, p.rf)
     ##   1 58  2
     ##   8  0 60
 
-``` r
-onesplit <- rpart.control(cp=-1, maxdepth=1, minsplit=0, xval=0)
-bo1 <- boosting(V618 ~ ., data=xtr, boos=FALSE, mfinal=500, control=onesplit)
-# twosplits <- rpart.control(cp=-1, maxdepth=2, minsplit=0, xval=0)
-# bo2 <- boosting(V618 ~ ., data=xtr, boos=FALSE, mfinal=500, control=twosplits)
-table(xte$V618, predict(bo1, newdata=xte)$class)
-```
-
-    ##    
-    ##      1  8
-    ##   1 59  1
-    ##   8  0 60
-
-``` r
-# table(xte$V618, predict(bo2, newdata=xte)$class)
-plot(errorevol(bo1, newdata=xte))
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/boos4-1.png)
-
-``` r
-# plot(errorevol(bo2, newdata=xte))
-```
-
-#### What is Adaboost really doing?
+<!-- # twosplits <- rpart.control(cp=-1, maxdepth=2, minsplit=0, xval=0) -->
+<!-- # bo2 <- boosting(V618 ~ ., data=xtr, boos=FALSE, mfinal=500, control=twosplits) -->
+<!-- # table(xte$V618, predict(bo2, newdata=xte)$class) -->
+<!-- # plot(errorevol(bo2, newdata=xte)) -->
+What is Adaboost doing, *really*?
+---------------------------------
 
 We have seen in class that Adaboost can be thought of as fitting an *additive model* in a stepwise (greedy) way, using an exponential loss. Knowing what optimization problem the boosting algorithms are solving lets us find out what is the classifier that boosting is approximating. This insight allows us to understand when the algorithm is expected to work well, and also when it can be expected to not work well (refer to the corresponding lab activity). In particular, it provides one way to choose the complexity of the *weak lerners* used to construct the ensemble.
+
+An illustrative example coming soon.
 
 Gradient boosting
 -----------------
