@@ -93,7 +93,9 @@ plot(errorevol(bo1, newdata=x.te))
 
 ![](README_files/figure-markdown_github-ascii_identifiers/boos2-1.png)
 
-Just to make sure boosting is doing a good job, we compare it with another ensemble classifier: a Random Forest. We use the same number of elements in both ensembles (500), even though boosting used 500 *stumps* (1-split trees) and the *random forest trees* are (purposedly) very large (deep). We first train the random forest and look at the error evolution as displayed by the `plot` method for objects of class `randomForest`:
+Just to make sure boosting is doing a good job, we compare it with another ensemble classifier: a Random Forest. We use the same number of elements in both ensembles (500), even though their complexity is very different -- while boosting used *stumps* (1-split trees), the *random forest trees* are (purposedly) very large (deep).
+
+We first train the random forest and look at the error rates as displayed by the `plot` method for objects of class `randomForest`:
 
 ``` r
 library(randomForest)
@@ -104,7 +106,7 @@ plot(a)
 
 ![](README_files/figure-markdown_github-ascii_identifiers/boos.comp-1.png)
 
-Now we evaluate the performance of the Random Forest on the training set by obtaining *fitted values* ("predictions" for the training set) and looking at the "confusion table":
+Now we evaluate the performance of the Random Forest on the training set by obtaining *fitted values* ("predictions" for the observations in the training set) and looking at the corresponding "confusion table":
 
 ``` r
 table(x.tr$V1, predict(a, newdata=x.tr, type='response'))
@@ -115,7 +117,7 @@ table(x.tr$V1, predict(a, newdata=x.tr, type='response'))
     ##   1 1005    0
     ##   9    0  644
 
-**Does this confusion table match the information from the error plot above?** Can you describe (and explain!) the apparent problem?
+An interesting question to ask yourself at this point is: **Does this "confusion table" match the information from the error plot above?** Can you describe (and explain!) the apparent problem?
 
 As we all know too well, of course, the classification error rate *on the test set* is a better measure of predicition performance:
 
@@ -207,7 +209,10 @@ table(xte$V618, p.rf)
 What is Adaboost doing, *really*?
 ---------------------------------
 
-We have seen in class that Adaboost can be thought of as fitting an *additive model* in a stepwise (greedy) way, using an exponential loss. Knowing what optimization problem the boosting algorithms are solving lets us find out what is the classifier that boosting is approximating. This insight allows us to understand when the algorithm is expected to work well, and also when it can be expected to not work well (refer to the corresponding lab activity). In particular, it provides one way to choose the complexity of the *weak lerners* used to construct the ensemble.
+We have seen in class that Adaboost can be thought of as fitting an *additive model* in a stepwise (greedy) way, using an exponential loss. It is then easy to prove that Adaboost.M1 is computing an approximation to the *optimal classifier* G( x ) = log\[ P( Y = 1 | X = x ) / P( Y = -1 | X = x ) \] / 2. More specifically, Adaboost.M1 is fitting an additive model to that function, in other words is attempting to find functions *f*<sub>1</sub>, *f*<sub>2</sub>, ..., *f*<sub>*N*</sub> such that *G*(*x*)=∑<sub>*i*</sub>*f*<sub>*i*</sub>(*x*).
+
+Knowing what function the boosting algorithm is approximating (albeit in a greedy and suboptimal way), allows us to
+understand when the algorithm is expected to work well, and also when it may not work well. In particular, it provides one way to choose the complexity of the *weak lerners* used to construct the ensemble. For an example you can refer to the corresponding lab activity.
 
 An illustrative example coming soon.
 
