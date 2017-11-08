@@ -1,7 +1,7 @@
 STAT406 - Lecture 19 notes
 ================
 Matias Salibian-Barrera
-2017-11-07
+2017-11-08
 
 LICENSE
 -------
@@ -98,3 +98,16 @@ As mentioned above, you, dear reader, are encouraged to finish this analysis by 
 
 Gradient boosting
 -----------------
+
+Discussed during the lecture.
+
+Neural Networks
+---------------
+
+Additional resources for discussion (refer to the lecture for context):
+
+-   <https://arxiv.org/abs/1412.6572>
+-   <https://arxiv.org/abs/1312.6199>
+-   <https://www.axios.com/ai-pioneer-advocates-starting-over-2485537027.html>
+-   <https://medium.com/intuitionmachine/the-deeply-suspicious-nature-of-backpropagation-9bed5e2b085e>
+-
