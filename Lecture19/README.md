@@ -1,7 +1,7 @@
 STAT406 - Lecture 19 notes
 ================
 Matias Salibian-Barrera
-2017-11-08
+2017-11-09
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-19-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-19.pdf).
 
 What is Adaboost doing, *really*?
 ---------------------------------
@@ -96,11 +96,8 @@ plot(errorevol(bo3, newdata=spam.te))
 
 As mentioned above, you, dear reader, are encouraged to finish this analysis by doing a complete 3-fold CV run in order to compare boosting with random forests on these data.
 
-Gradient boosting
------------------
-
-Discussed during the lecture.
-
+<!-- ## Gradient boosting -->
+<!-- Discussed during the lecture.  -->
 Neural Networks
 ---------------
 

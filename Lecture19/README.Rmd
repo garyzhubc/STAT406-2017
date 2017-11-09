@@ -17,7 +17,7 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-19-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-19.pdf).
 
 ## What is Adaboost doing, *really*? 
 
@@ -111,9 +111,9 @@ As mentioned above, you, dear reader, are encouraged to finish this analysis
 by doing a complete 3-fold CV run in order to compare boosting with random 
 forests on these data. 
 
-## Gradient boosting
+<!-- ## Gradient boosting -->
 
-Discussed during the lecture. 
+<!-- Discussed during the lecture.  -->
 
 ## Neural Networks
 
