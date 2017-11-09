@@ -117,11 +117,20 @@ Discussed during the lecture.
 
 ## Neural Networks
 
-Additional resources for discussion (refer to the lecture for context):
+Discussed during the lecture. 
+
+#### An example with a simple neural network
+
+This example using the ISOLET data illustrates the use of simple
+neural networks, and also highlights some issues of which it may 
+be important to be aware. 
+
+
+#### Additional resources for discussion (refer to the lecture for context)
 
 * [https://arxiv.org/abs/1412.6572](https://arxiv.org/abs/1412.6572)
 * [https://arxiv.org/abs/1312.6199](https://arxiv.org/abs/1312.6199)
 * [https://www.axios.com/ai-pioneer-advocates-starting-over-2485537027.html](https://www.axios.com/ai-pioneer-advocates-starting-over-2485537027.html)
 * [https://medium.com/intuitionmachine/the-deeply-suspicious-nature-of-backpropagation-9bed5e2b085e](https://medium.com/intuitionmachine/the-deeply-suspicious-nature-of-backpropagation-9bed5e2b085e)
-* 
+
 
