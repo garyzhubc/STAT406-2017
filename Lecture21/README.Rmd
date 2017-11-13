@@ -69,7 +69,7 @@ tmp <- cmdscale(dd, k = 2)
 ```
 This is the data with which we will work: 
 
-```{r scatter, fig.width=7, fig.height=7, echo=FALSE}
+```{r scatter, echo=FALSE}
 plot(tmp, pch=19, col='gray50', cex=2, xlab='', ylab='')
 ```
 
@@ -369,7 +369,7 @@ plot(2:10, ss[-1], xlab='K', ylab='W_k', type='b', lwd=2, pch=19)
 Not even forcing `k-means` to identify 3 clusters helps when
 there are noise features:
 
-```{R force.noise.kmeans, fig.width=7, fig.height=7}
+```{R force.noise.kmeans}
 pairs(x.4[,1:3], col=m4.l[[3]]$cluster, pch=19)
 pairs(x.5[,1:3], col=m5.l[[3]]$cluster, pch=19)
 ```
