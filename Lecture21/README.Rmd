@@ -6,7 +6,7 @@ output: github_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=7, echo=FALSE, 
+knitr::opts_chunk$set(echo = TRUE, fig.width=7, fig.height=7,  
                       warning=FALSE, message=FALSE) #, eval = FALSE)
 ```
 
@@ -30,6 +30,7 @@ We will use a 2-dimensional representation of the
 UN votes data. This lower-dimensional representation
 is obtained using multidimensional scaling, a topic
 we will cover later in the module.
+
 ```{R initial, fig.width=7, fig.height=7, echo=FALSE, warning=FALSE, message=FALSE}
 X <- read.table(file='../Lecture20/unvotes.csv', sep=',', row.names=1, header=TRUE)
 # Compute pairwise distances and use MDS
@@ -37,6 +38,7 @@ dd <- dist(t(X))
 tmp <- cmdscale(dd, k = 2)
 ```
 This is the data with which we will work: 
+
 ```{r scatter, fig.width=7, fig.height=7, echo=FALSE}
 plot(tmp, pch=19, col='gray50', cex=2, xlab='', ylab='')
 ```
