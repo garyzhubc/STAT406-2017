@@ -16,13 +16,26 @@ The lecture slides are [here](STAT406-17-lecture-21-preliminary.pdf).
 Model based clustering
 ----------------------
 
+Model-based clustering methods depend on a probabilistic (generative?) model that postulates that the distribution of the observed features (over the whole population), typically as a mixture of several different distributions. Given a sample of *n* vectors of features *X\_1*, *X\_2*, ..., *X\_n*, the clustering problem then becomes the estimation of the *n* unobserved labels that indicate to which sub-population (cluster, group) each *X\_i* belongs. In addition, one generally has to estimate the parameters that specify the distribution of *X* in each assumed group.
+
+Given that this method is based on a full specificification of the distribution of the observed vector of features, it is not surprising that the parameters are estimated using maximum likelihood. The difficulty is that there are *n* unobserved variables (the group labels) that also need to be estimated. One can also think about this as having *n* missing observations, and use the EM algorithm to perform maximum likelihood estimation with missing observations.
+
 EM algorithm
 ------------
+
+The specifics of the EM algorithm were introduced and discussed in class. Although the algorithm may seem clear at first sight, it is fairly subtle, and mistakes and misunderstandings are very (**very**) common. Many applications of the EM algorithm found on-line are either wrong, or wrongly derived. See Lecture 22 for a more detailed discussion and a different (and also very useful) application of the algorithm.
 
 Bivariate Gaussian mixture model via EM "by hand"
 -------------------------------------------------
 
-We will use a 2-dimensional representation of the UN votes data. This lower-dimensional representation is obtained using multidimensional scaling, a topic we will cover later in the module.
+We will use a 2-dimensional representation of the UN votes data. This lower-dimensional representation is obtained using multidimensional scaling, a topic we will cover later in the course. For formulas and specific steps of the algorithm please refer to your class notes.
+
+``` r
+X <- read.table(file='../Lecture20/unvotes.csv', sep=',', row.names=1, header=TRUE)
+# Compute pairwise distances and use MDS
+dd <- dist(t(X))
+tmp <- cmdscale(dd, k = 2)
+```
 
 This is the data with which we will work:
 
