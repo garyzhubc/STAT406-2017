@@ -1,7 +1,7 @@
 STAT406 - Lecture 20 notes
 ================
 Matias Salibian-Barrera
-2017-11-11
+2017-11-14
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-20-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-20.pdf).
 
 Unsupervised learning
 =====================
