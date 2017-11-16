@@ -1,7 +1,7 @@
 STAT406 - Lecture 21 notes
 ================
 Matias Salibian-Barrera
-2017-11-13
+2017-11-16
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-21-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-21.pdf).
 
 Model based clustering
 ----------------------
