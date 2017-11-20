@@ -23,11 +23,40 @@ The lecture slides are [here](STAT406-17-lecture-23-preliminary.pdf).
 
 ## Hierarchical clustering.
 
-An agglomerative approach. 
+Hierarchical clustering refers to a class of algorithms that work in a 
+different way from the ones we have seen so far. Both k-means and model-based
+clustering try to find a pre-specified number of clusters *simultaneously*. 
+Hierarchical methods are *agglomerative*--they start with *n* clusters 
+(one singleton cluster for each observation in the data set), and form a
+hierarchical 
+sequence of clusters of sizes *n-1*, *n-2*, ..., *3*, *2*, and a final "cluster"
+composed of all the observations. The user then needs to decide where to 
+*cut* the sequence, in other words, how many clusters to identify. 
+Algorithms in this class are also called
+agglomerative, for obvious reasons. 
 
-* Distances / dissimilarities
-* Criteria for merging of clusters
-* Identifying clusters, dendograms
+The general algorithm can be described as follows:
+
+1. Set *K = n* (the number of observations in the data), and Start with *n* clusters;
+2. Merge 2 clusters to form *K-1* clusters;
+3. Set `K = K - 1` (i.e. `K--`, i.e. decrease *K* by one)
+4. If `K > 1` repeat from step 2 above. 
+
+The different versions (*flavours*) of this method are obtained 
+by varying the criteria to decide which 2 clusters to merge at each 
+run of step 2 above, and also which distance (or dissimilarity) measure
+is used.
+
+There are a few different tools to decide how many clusters may be present
+in the data following a hierarchical clustering algorithm. The most 
+commonly used is a graphical representation of the sequence of 
+clusters, called a dendogram. 
+
+Please refer to your class notes for details on the different
+merging criteria and the interpretation of a dendogram. Below
+we will illustrate the use of these algorithms on a few
+examples. 
+
 
 
 #### Breweries example
