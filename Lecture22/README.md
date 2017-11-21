@@ -1,7 +1,7 @@
 STAT406 - Lecture 22 notes
 ================
 Matias Salibian-Barrera
-2017-11-20
+2017-11-21
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-22-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-22.pdf).
 
 Imputation via EM (a detailed example "by hand")
 ------------------------------------------------
