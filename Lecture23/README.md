@@ -33,46 +33,44 @@ Please refer to your class notes for details on the different merging criteria a
 
 #### Breweries example
 
-Beer drinkers were asked to rate 9 breweries on 26 attributes. The attributes were, e.g., Brewery has rich tradition; or Brewery makes very good Pils beer. Relative to each attribute, the informant had to assign each brewery a score on a 6-point scale ranging from 1=not true at all to 6=very true.
+Beer drinkers were asked to rate 9 breweries on 26 attributes. The attributes were, e.g., Brewery has rich tradition; or Brewery makes very good Pils beer. Relative to each attribute, the informant had to assign each brewery a score on a 6-point scale ranging from 1=not true at all to 6=very true. We read the data, and compute the pairwise *L\_1* distances between the 9 breweries:
 
 ``` r
-library(cluster)
 x <- read.table("../Lecture20/breweries.dat", header = FALSE)
 x <- t(x)
 d <- dist(x, method = "manhattan")
-# hierarchical
-plot(cl <- hclust(d, method = "ward.D2"), main = "", xlab = "", sub = "", hang = -1)
-rect.hclust(cl, k = 4, border = "red")
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/breweries-1.png)
+One implementation of hierarchical clustering methods in `R` is in the function `hclust` in package `cluster`. We first use Ward's information criterion (corrected to use squared distances). The `plot` method for objects of class `hclust` produces the associated dendogram. The function `rect.hclust` computes the height at which one shuld *cut* the dendogram to obtain a desired number *k* of clusters. Below we show the result for *K = 3* clusters:
 
 ``` r
-# read the data
-a <- read.table("../Lecture20/breweries.dat", header = FALSE)
-# data are transposed, we need to transpose it to make each row an
-# observation
-a <- t(a)
-# compute pairwise distances among the 9 breweries use the L1 distance
-br.dis <- dist(a, method = "manhattan")  # L1
+# hierarchical
+library(cluster)
+plot(cl <- hclust(d, method = "ward.D2"), main = "", xlab = "", sub = "", hang = -1)
+rect.hclust(cl, k = 3, border = "red")
+```
 
-# or
-br.dis <- dist(a)  # L2
+![](README_files/figure-markdown_github-ascii_identifiers/breweries.2-1.png)
 
+Now we repeat the analysis but using Euclidean distances and *single linkage*, and show *K = 3* clusters:
 
+``` r
+br.dis <- dist(x)  # L2
 # compute hierarchical clustering using single linkage
 br.hc <- hclust(br.dis, method = "single")
-
 # show the dendogram
 plot(br.hc)
-
 # identify 3 clusters
 br.hc.3 <- rect.hclust(br.hc, k = 3)
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/breweries2-1.png)
 
+Note how these 3 clusters are somewhat different from the ones found before. However, the *(V1, V4, V7)* cluster is present in both partitions, and also the triplet *(V3, V6, V8)* stays together as well. You are welcome to explore other variants of this algorithm on this example.
+
 #### Languages example
+
+The details of this example were discussed in class. Here we present the results of single linkage, complete linkage and Ward's criterion. Which distance / dissimilarity measure is used?
 
 ``` r
 dd <- read.table("languages.dat", header = FALSE)
@@ -102,37 +100,35 @@ rect.hclust(cl, k = 4, border = "red")
 
 ![](README_files/figure-markdown_github-ascii_identifiers/languages-3.png)
 
-``` r
-# read the pairwise dissimilarities (there's no data!)
-a.la <- read.table("languages.dat", header = FALSE)
-
-# since only the lower triangular matrix is available we need to copy it on
-# the upper half
-a.la <- a.la + t(a.la)
-
-# create a vector of language names, to be used later
-la.nms <- c("E", "N", "Da", "Du", "G", "Fr", "S", "I", "P", "H", "Fi")
-
-# compute hierarchical clustering using single linkage
-la.hc <- hclust(as.dist(a.la), method = "single")
-
-# show the dendogram, use labels in object la.nms
-plot(la.hc, labels = la.nms)
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/languages2-1.png)
-
-``` r
-# compute hierarchical clustering using complete linkage
-la.hc <- hclust(as.dist(a.la), method = "complete")
-
-# show the dendogram, use labels in object la.nms
-plot(la.hc, labels = la.nms)
-```
-
-![](README_files/figure-markdown_github-ascii_identifiers/languages2-2.png)
-
+<!-- # ```{r languages2} -->
+<!-- # # read the pairwise dissimilarities -->
+<!-- # # (there's no data!) -->
+<!-- # a.la <- read.table('languages.dat', header=FALSE) -->
+<!-- #  -->
+<!-- # # since only the lower triangular matrix is available -->
+<!-- # # we need to copy it on the upper half -->
+<!-- # a.la <- a.la + t(a.la) -->
+<!-- #  -->
+<!-- # # create a vector of language names, to be used later -->
+<!-- # la.nms <- c('E', 'N', 'Da', 'Du', 'G', 'Fr', 'S', 'I', -->
+<!-- # 'P', 'H', 'Fi') -->
+<!-- #  -->
+<!-- # # compute hierarchical clustering using single linkage -->
+<!-- # la.hc <- hclust(as.dist(a.la), method='single') -->
+<!-- #  -->
+<!-- # # show the dendogram, use labels in object la.nms -->
+<!-- # plot(la.hc, labels=la.nms) -->
+<!-- #  -->
+<!-- # # compute hierarchical clustering using complete linkage -->
+<!-- # la.hc <- hclust(as.dist(a.la), method='complete') -->
+<!-- #  -->
+<!-- # # show the dendogram, use labels in object la.nms -->
+<!-- # plot(la.hc, labels=la.nms) -->
+<!-- # ``` -->
+<!-- #  -->
 #### Cancer example
+
+Here we revisit the Cancer example discussed before. We use Euclidean distances and Ward's information criterion. Below we show the clusters identified when we stop the algorithm at *K = 8*.
 
 ``` r
 data(nci, package = "ElemStatLearn")
@@ -144,6 +140,8 @@ rect.hclust(cl, k = 8, border = "red")
 ```
 
 ![](README_files/figure-markdown_github-ascii_identifiers/cancer-1.png)
+
+For completeness, below we show the results obtained by the other linkage criteria, including Ward's (without using squared distances).
 
 ``` r
 # compute pairwise distances
@@ -177,9 +175,6 @@ plot(nci.hc.a, labels = nci.nms, cex = 0.5)
 
 ``` r
 plot(nci.hc.w, labels = nci.nms, cex = 0.5)
-
-plot(nci.hc.w, labels = nci.nms, cex = 0.5)
-
 # identify 8 clusters
 rect.hclust(nci.hc.w, k = 8)
 ```
