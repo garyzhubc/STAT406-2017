@@ -243,36 +243,99 @@ for (j in 1:dim(repre)[1]) {
 par(mfrow = c(1, 1))
 ```
 
-Repeat with 3 ppal components now!:
+<!-- Repeat with 3 ppal components now!: -->
+<!-- ```{r digits.3pca} -->
+<!-- qv1 <- quantile(v1, c(.05, .25, .5, .75, .95)) -->
+<!-- qv2 <- quantile(v2, c(.05, .25, .5, .75, .95)) -->
+<!-- qv3 <- quantile(v3, c(.05, .5, .95)) -->
+<!-- qv <- expand.grid(qv1, qv2, qv3) -->
+<!-- vs <- cbind(v1, v2, v3) -->
+<!-- # closest v's -->
+<!-- cvs <- array(0, dim=dim(qv)) -->
+<!-- for(j in 1:dim(qv)[1]) { -->
+<!-- cvs[j,] <- vs[ which.min( apply(vs, 1, dist, b=qv[j,]) ), ] -->
+<!-- } -->
+<!-- app <- t( si.svd$v[,1:3] %*% t( cvs ) ) -->
+<!-- repre <- matrix(0, dim(qv)[1], dim(app)[2]) -->
+<!-- for(j in 1:dim(qv)[1]) { -->
+<!-- repre[j,] <- ac[ which.min( apply(ac, 1, dist, b=app[j,]) ), ] -->
+<!-- } -->
+<!-- repre <- scale(repre, center = -colMeans(a), scale=FALSE) -->
+<!-- par(mai = c(1, 1, 1, 1)/5, xaxs = "i", yaxs = "i") -->
+<!-- par(mfrow=c(5,5)) -->
+<!-- for(j in 1:dim(repre)[1]) { -->
+<!-- myImagePlot(t(matrix(unlist(repre[j,]), 16, 16))) -->
+<!-- } -->
+<!-- ``` -->
+#### Alternating regression to compute principal components
+
+For details see [this document](pca-alternating-regression.pdf).
+
+A function implementing this method to compute the first principal component is:
 
 ``` r
-qv1 <- quantile(v1, c(0.05, 0.25, 0.5, 0.75, 0.95))
-qv2 <- quantile(v2, c(0.05, 0.25, 0.5, 0.75, 0.95))
-qv3 <- quantile(v3, c(0.05, 0.5, 0.95))
-qv <- expand.grid(qv1, qv2, qv3)
-
-vs <- cbind(v1, v2, v3)
-# closest v's
-cvs <- array(0, dim = dim(qv))
-for (j in 1:dim(qv)[1]) {
-    cvs[j, ] <- vs[which.min(apply(vs, 1, dist, b = qv[j, ])), ]
-}
-
-app <- t(si.svd$v[, 1:3] %*% t(cvs))
-
-
-repre <- matrix(0, dim(qv)[1], dim(app)[2])
-
-for (j in 1:dim(qv)[1]) {
-    repre[j, ] <- ac[which.min(apply(ac, 1, dist, b = app[j, ])), ]
-}
-
-repre <- scale(repre, center = -colMeans(a), scale = FALSE)
-par(mai = c(1, 1, 1, 1)/5, xaxs = "i", yaxs = "i")
-par(mfrow = c(5, 5))
-for (j in 1:dim(repre)[1]) {
-    myImagePlot(t(matrix(unlist(repre[j, ]), 16, 16)))
+alter.pca.k1 <- function(x, max.it = 500, eps = 1e-10) {
+    n2 <- function(a) sum(a^2)
+    p <- dim(x)[2]
+    x <- scale(x, scale = FALSE)
+    it <- 0
+    old.a <- c(1, rep(0, p - 1))
+    err <- 10 * eps
+    while (((it <- it + 1) < max.it) & (abs(err) > eps)) {
+        b <- as.vector(x %*% old.a)/n2(old.a)
+        a <- as.vector(t(x) %*% b)/n2(b)
+        a <- a/sqrt(n2(a))
+        err <- sqrt(n2(a - old.a))
+        old.a <- a
+    }
+    conv <- (it < max.it)
+    return(list(a = a, b = b, conv = conv))
 }
 ```
 
-![](README_files/figure-markdown_github-ascii_identifiers/digits.3pca-1.png)![](README_files/figure-markdown_github-ascii_identifiers/digits.3pca-2.png)![](README_files/figure-markdown_github-ascii_identifiers/digits.3pca-3.png)
+We use it on the digits data above to compute the first principal component:
+
+``` r
+tmp <- alter.pca.k1(ac)$a
+```
+
+and compare it with the one given by `svd` (note that the sign of the eigenvectors is arbitrary, so we adjust these vectors in order to have first elements with the same sign):
+
+``` r
+tmp2 <- svd(ac)$v[, 1]
+tmp <- tmp * sign(tmp2[1] * tmp[1])
+summary(abs(tmp - tmp2))
+```
+
+    ##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+    ## 4.200e-16 1.195e-12 4.012e-12 7.272e-12 1.169e-11 3.524e-11
+
+Note that both eigenvectors are essentially identical, and that the alternating regression method was approximately 3 times faster than a full SVD decomposition of the covariance matrix.
+
+To further illustrate the potential gain in speed for larger dimensions, consider the following synthetic data set with n = 2000 observation and p = 500, and compare the timing and the results:
+
+``` r
+n <- 2000
+p <- 1000
+x <- matrix(rt(n * p, df = 2), n, p)
+system.time(tmp <- alter.pca.k1(x))
+```
+
+    ##    user  system elapsed 
+    ##    0.20    0.01    0.22
+
+``` r
+a1 <- tmp$a
+system.time(e1 <- svd(cov(x))$u[, 1])
+```
+
+    ##    user  system elapsed 
+    ##    3.46    0.00    3.50
+
+``` r
+a1 <- a1 * sign(e1[1] * a1[1])
+summary(abs(e1 - a1))
+```
+
+    ##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+    ## 0.000e+00 9.350e-18 2.168e-17 6.038e-17 4.303e-17 2.342e-14
