@@ -1,7 +1,7 @@
 STAT406 - Lecture 23 notes
 ================
 Matias Salibian-Barrera
-2017-11-20
+2017-11-21
 
 LICENSE
 -------
@@ -187,7 +187,7 @@ rect.hclust(nci.hc.w, k = 8)
 <!-- ``` -->
 #### Nations example
 
-2 nations -- perceived "likeness" by Pol Sci students
+This is a smaller Political Science dataset. Twelve countries were assessed on their perceived "likeness" by Political Science students. Note that in this example there are no measurable features, we only have access to the parwise dissimilarities. Below we show the results of using hierarchical clustering with complete and average linkage merging criteria, which will produce identical clusters.
 
 ``` r
 # read the pairwise dissimilarities
