@@ -129,14 +129,14 @@ for (j in 1:9) {
 ![](README_files/figure-markdown_github-ascii_identifiers/digitsplot-1.png)
 
 ``` r
-par(mfrow = c(1, 1))
+# par(mfrow=c(1,1))
 ```
 
 <!-- # plot the average 3 -->
 <!-- myImagePlot(t(matrix(colMeans(a), 16, 16))) -->
 <!-- # Plot the first 3 on the data set -->
 <!-- myImagePlot(t(matrix(unlist(a[1,]), 16, 16))) -->
-Centre the observations, to compute the eigenvectors more efficiently
+Centre the observations, to compute the eigenvectors and eigenvalues of the covariance matrix more efficiently (without even computing the covariance matrix, in fact):
 
 ``` r
 ac <- scale(a, center = TRUE, scale = FALSE)
@@ -163,7 +163,7 @@ cumsum(si.svd$d^2)[1:20]/sum(si.svd$d^2)
     ##  [8] 0.5379182 0.5657889 0.5917097 0.6141871 0.6339804 0.6528777 0.6699518
     ## [15] 0.6851985 0.6983918 0.7111051 0.7223458 0.7331388 0.7429698
 
-Compute the projections of the centered data on each of the 1st, 2nd and 3rd eigenvectors
+Compute the projections of the centered data on each of the 1st, 2nd and 3rd eigenvectors of the covariance matrix of the data in the matrix `a`:
 
 ``` r
 v1 <- as.vector(ac %*% si.svd$v[, 1])
@@ -226,7 +226,7 @@ for (j in 1:dim(qv)[1]) {
 }
 ```
 
-These are the actual images that are closest to the points in "app" Now, add the column means and display these 25 images according to the points they represent in the red grid:
+These are the actual images that are closest to the points in the array `app` above. Now add the column means and display these 25 images according to the points they represent in the red grid:
 
 ``` r
 repre <- scale(repre, center = -colMeans(a), scale = FALSE)
@@ -240,7 +240,7 @@ for (j in 1:dim(repre)[1]) {
 ![](README_files/figure-markdown_github-ascii_identifiers/digits.p8-1.png)
 
 ``` r
-par(mfrow = c(1, 1))
+# par(mfrow=c(1,1))
 ```
 
 <!-- Repeat with 3 ppal components now!: -->
@@ -312,7 +312,7 @@ summary(abs(tmp - tmp2))
 
 Note that both eigenvectors are essentially identical, and that the alternating regression method was approximately 3 times faster than a full SVD decomposition of the covariance matrix.
 
-To further illustrate the potential gain in speed for larger dimensions, consider the following synthetic data set with n = 2000 observation and p = 500, and compare the timing and the results:
+To further illustrate the potential gain in speed for larger dimensions, consider the following synthetic data set with n = 2000 observation and p = 1000, and compare the timing and the results:
 
 ``` r
 n <- 2000
@@ -322,7 +322,7 @@ system.time(tmp <- alter.pca.k1(x))
 ```
 
     ##    user  system elapsed 
-    ##    0.20    0.01    0.22
+    ##    0.24    0.02    0.25
 
 ``` r
 a1 <- tmp$a
@@ -330,7 +330,7 @@ system.time(e1 <- svd(cov(x))$u[, 1])
 ```
 
     ##    user  system elapsed 
-    ##    3.46    0.00    3.50
+    ##    3.37    0.03    3.45
 
 ``` r
 a1 <- a1 * sign(e1[1] * a1[1])
