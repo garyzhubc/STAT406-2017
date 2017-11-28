@@ -1,7 +1,7 @@
 STAT406 - Lecture 24 notes
 ================
 Matias Salibian-Barrera
-2017-11-21
+2017-11-28
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-24-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-24.pdf).
 
 Principal Components Analysis
 -----------------------------
@@ -322,7 +322,7 @@ system.time(tmp <- alter.pca.k1(x))
 ```
 
     ##    user  system elapsed 
-    ##    0.24    0.02    0.25
+    ##    0.36    0.00    0.40
 
 ``` r
 a1 <- tmp$a
@@ -330,7 +330,7 @@ system.time(e1 <- svd(cov(x))$u[, 1])
 ```
 
     ##    user  system elapsed 
-    ##    3.37    0.03    3.45
+    ##    3.47    0.00    3.53
 
 ``` r
 a1 <- a1 * sign(e1[1] * a1[1])
