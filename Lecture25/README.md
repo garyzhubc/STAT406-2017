@@ -1,7 +1,7 @@
 STAT406 - Lecture 25 notes
 ================
 Matias Salibian-Barrera
-2017-11-22
+2017-11-30
 
 LICENSE
 -------
@@ -11,7 +11,7 @@ These notes are released under the "Creative Commons Attribution-ShareAlike 4.0 
 Lecture slides
 --------------
 
-The lecture slides are [here](STAT406-17-lecture-25-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-25-preliminary.pdf). The course review slides are [here](STAT406-17-review-lecture.pdf).
 
 Multidimensional scaling
 ------------------------

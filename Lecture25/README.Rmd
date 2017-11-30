@@ -18,7 +18,8 @@ and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/leg
 
 ## Lecture slides
 
-The lecture slides are [here](STAT406-17-lecture-25-preliminary.pdf).
+The lecture slides are [here](STAT406-17-lecture-25-preliminary.pdf). The course review slides
+are [here](STAT406-17-review-lecture.pdf).
 
 
 ## Multidimensional scaling
