@@ -1,8 +1,11 @@
 # STAT406 - "Elements of Statistical Learning"
 
-Public repository for STAT406 @ UBC - "Elements of Statistical Learning"
+Public repository for STAT406 @ UBC - "Elements of Statistical Learning".
 
-## Tentative Weekly Schedule
+
+#### LICENSE
+
+The notes in this repository are released under the "Creative Commons Attribution-ShareAlike 4.0 International" license. See the **human-readable version** [here](https://creativecommons.org/licenses/by-sa/4.0/) and the **real thing** [here](https://creativecommons.org/licenses/by-sa/4.0/legalcode).
 
 ## Weekly reading and other resources
 
@@ -43,21 +46,6 @@ and **[HTF09]** indicate two of the reference books listed below.
 * Week 13 (L24/25): Principal Components, Multidimensional Scaling
 	* Section 10.2 from [JWHT13]
 	* Section 14.5.1, 14.8, 14.9 from [HTF09]
-
-<!--
-## Course Learning Objectives
-#
-# ## Lecture Learning Objectives
-# 1. Lecture 1
-#
-# 	By the end of the lecture, students are expected to be able to:
-# 	- Distinguish between
-# 	- Explain the different
-# 	- Describe the algorithms and explain their differences
-# 	- Explain why these algorithms  
-#
-# 3. Lecture 2
--->
 
 ## Reference books
 * **[JWHT13]**: James, G., Witten, D., Hastie, T. and Tibshirani, R.
